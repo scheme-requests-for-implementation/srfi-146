@@ -20,13 +20,25 @@
 ;; CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ;; SOFTWARE.
 
-(define-library (srfi 146)
-  (include-library-declarations "146.exports.sld")
-  (import (scheme base)
-	  (scheme case-lambda)
-	  (srfi 1)
-	  (srfi 8)
-      	  (srfi 128)
-	  (srfi 145)
-	  (nieper rbtree))
-  (include "146.scm"))
+
+(export make-map map-unfold
+	map? map-contains? map-empty? map-disjoint?
+	map-ref map-ref/default map-key-comparator
+	map-set map-set! 
+	map-replace map-replace!
+	map-delete map-delete! map-delete-all map-delete-all!
+	map-intern map-intern!
+	map-update map-update! map-update/default map-update!/default
+	map-search map-search!
+	map-size map-find map-count map-any? map-every?
+	map-keys map-values map-entries
+	map-map map-map->list map-for-each map-fold
+	map-filter map-filter!
+	map-remove map-remove!
+	map-partition map-partition!
+	map-copy map->alist alist->map alist->map!
+	map=? map<? map>? map<=? map>=?
+	map-union map-intersection map-difference map-xor
+	map-union! map-intersection! map-difference! map-xor!
+	make-map-comparator
+	map-comparator)

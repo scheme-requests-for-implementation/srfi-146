@@ -20,13 +20,7 @@
 ;; CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ;; SOFTWARE.
 
-(define-library (srfi 146)
-  (include-library-declarations "146.exports.sld")
-  (import (scheme base)
-	  (scheme case-lambda)
-	  (srfi 1)
-	  (srfi 8)
-      	  (srfi 128)
-	  (srfi 145)
-	  (nieper rbtree))
-  (include "146.scm"))
+
+(define-library (srfi 146 ordered)
+  (include-library-declarations "../146.exports.sld")
+  (import (srfi 146)))
