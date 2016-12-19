@@ -256,7 +256,7 @@
 	(test-equal "map-remove"
 	  1
 	  (map-size (map-remove (lambda (key value)
-				  (<= value 1))
+				  (<= value 2))
 				map1)))
 
 	(test-equal "map-partition"
@@ -267,6 +267,41 @@
 			     map1)
 	    (map map-size result)))
 
+	(test-group "Copying and conversion"
+	  (define map1 (make-map comparator 'a 1 'b 2 'c 3))
+	  (define map2 (alist->map comparator '((a . 1) (b . 2) (c . 3))))
+	  (define map3 (alist->map! (map-copy map1) '((d . 4) '(c . 5))))
+	  
+	  (test-equal "map-copy: same size"
+	    3
+	    (map-size (map-copy map1)))
+
+	  (test-equal "map-copy: same comparator"
+	    comparator
+	    (map-key-comparator (map-copy map1)))
+
+	  (test-equal "map->alist"
+	    (cons 'b 2)
+	    (assq 'b (map->alist map1)))
+	  
+	  (test-equal "alist->map"
+	    2
+	    (map-ref map2 'b)
+	    )
+
+	  (test-equal "alist->map!: new key"
+	    4
+	    (map-ref map3 'd))
+
+	  (test-equal "alist->map!: existing key"
+	    3
+	    (map-ref map3 'c))
+	  
+	  
+	  )
+
+	
+	
 	)
 	  
       (test-end "SRFI 146"))

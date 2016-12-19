@@ -358,6 +358,35 @@
   map)
 
 (define (map->alist map)
+  (assert-type map? map)
   (map-fold (lambda (key value alist)
 	      (cons (cons key value) alist))
 	    '() map))
+
+(define (map->alist map)
+  (assert-type map? map)
+  (map-fold (lambda (key value alist)
+	      (cons (cons key value) alist))
+	    '() map))
+
+(define (alist->map comparator alist)
+  (assert-type comparator? comparator)
+  (assert-type list? alist)
+  (map-unfold null?
+	      (lambda (alist)
+		(let ((key (caar alist))
+		      (value (cdar alist)))
+		  (values key value)))
+	      cdr
+	      alist
+	      comparator))
+
+(define (alist->map! map alist)
+  (assert-type map? map)
+  (assert-type list? alist)
+  (fold (lambda (association map)
+	  (let ((key (car association))
+		(value (cdr association)))
+	    (map-set map key value)))
+	map
+	alist))
