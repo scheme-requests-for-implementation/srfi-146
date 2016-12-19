@@ -322,6 +322,34 @@
 	    '()
 	    map))
 
+(define (map-filter predicate map)
+  (assert-type procedure? predicate)
+  (assert-type map? map)
+  (map-fold (lambda (key value map)
+	      (if (predicate key value)
+		  (map-set map key value)
+		  map))
+	    (make-empty-map (map-key-comparator map))
+	    map))
+
+(define map-filter! map-filter)
+
+(define (map-remove predicate map)
+  (assert-type procedure? predicate)
+  (assert-type map? map)
+  (map-filter (lambda (key value)
+		(not (predicate key value)))
+	      map))
+
+(define map-remove! map-remove)
+
+(define (map-partition predicate map)
+  (assert-type procedure? predicate)
+  (assert-type map? map)
+  (values (map-filter predicate map)
+	  (map-remove predicate map)))
+
+(define map-partition! map-partition)
 
 ;; Copying and conversion
 

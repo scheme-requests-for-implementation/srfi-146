@@ -246,10 +246,28 @@
 	  (fold + 0 (map-map->list (lambda (key value)
 				     (* value value))
 				   map1)))
-	  
-	)
 
-      
+	(test-equal "map-filter"
+	  2
+	  (map-size (map-filter (lambda (key value)
+				  (<= value 2))
+				map1)))
+
+	(test-equal "map-remove"
+	  1
+	  (map-size (map-remove (lambda (key value)
+				  (<= value 1))
+				map1)))
+
+	(test-equal "map-partition"
+	  (list 1 2)
+	  (receive result
+	      (map-partition (lambda (key value)
+			       (eq? 'b key))
+			     map1)
+	    (map map-size result)))
+
+	)
 	  
       (test-end "SRFI 146"))
 
