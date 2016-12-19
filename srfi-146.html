@@ -92,7 +92,7 @@ explicitely deal with sets of associations.
 </p>
 
 <p>
-  Multi-sets (<i>i.e.</i> relations) are not covered by this SRFI.
+  Multi-sets (<i>i.e.</i> general relations) are not covered by this SRFI.
   They are left to a future SRFI should they prove to be essential.
 </p>
 
@@ -120,6 +120,15 @@ Maps are disjoint from other types of Scheme objects.
 <p>
   It is an error to apply any procedures defined in this SRFI whose
   names end in <code>!</code> to a map while iterating over it.
+</p>
+
+<p>
+  When part of an R7RS implementation, the library <code>(srfi
+    146)</code> should export exactly those identifiers that are
+    described in this specification with the appropriate bindings.  Should
+    this SRFI become an essential part of a future Scheme system based
+    on R7RS (<i>e.g.</i> R7RS-large), the library's name would
+    become <code>(scheme map)</code>.
 </p>
 
 <h2>Linear update</h2>
@@ -191,6 +200,49 @@ to provide a hash function, unless the equality predicate of the
 comparator
 is <code>eq?</code>, <code>eqv?</code>, <code>equal?</code>, <code>string=?</code>,
   or <code>string-ci=?</code>.
+</p>
+
+<p>
+  In order to allow portable Scheme code to distinguish whether a
+  specific implementation of this SRFI supports comparators with
+  comparison procedures or comparators with hash functions (or both),
+  it is required that an implementation supporting comparators with
+  comparison functions not only exports all identifiers in
+  the <code>(srfi 146)</code> namespace, but also in the <code>(srfi
+  146 ordered)</code> namespace.  Likewise, an implementation
+  supporting comparators with hash functions exports all identifiers
+  in the <code>(srfi 146)</code> namespace also in the <code>(srfi 146
+    hash)</code> namespace.  The same should be true for all alternatives to <code>(srfi 146)</code>,
+  <i>e.g.</i> <code>(scheme map)</code>.
+</p>
+
+<p>
+  Portable Scheme code can distinguish implementations of this SRFI using <code>cond-expand</code>:
+</p>
+
+<pre>
+  (cond-expand
+    ((library (srfi 146 hash))
+     ...) ; code that sets up comparators with hash functions
+    ((library (srfi 146 ordered))
+     ...)) ; code that sets up comparators with comparison procedures
+</pre>
+
+<p>
+  (Scheme code which would be more performant/more natural with
+  comparison procedures instead of hash functions, would change the
+  order of the two <cond-expand>-clauses.
+</p>
+
+<p>As an author using SRFI 113 faces the same problems, any
+  implementation of SRFI 146 that also implements SRFI 113 should
+  export its identifiers at least also under the <code>(srfi 113
+  ordered)</code> or <code>(srfi 113 hash)</code> namespace, depending
+  on which kind of comparators are supported.  (As SRFI 113 is also
+  known as <code>(scheme set)</code> in R7RS-large, the same
+  recommendation holds for <code>(scheme set ordered)</code>
+  and <code>(scheme set hash)</code>, should this SRFI become a part
+  of a later Scheme standard based on R7RS.)
 </p>
 
 <h2 id="index">Index</h2>
