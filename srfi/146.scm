@@ -390,3 +390,182 @@
 	    (map-set map key value)))
 	map
 	alist))
+
+;; Submaps
+
+(define map=?
+  (case-lambda
+    ((comparator map)
+     (assert-type map? map)
+     #t)
+    ((comparator map1 map2) (%map=? comparator map1 map2))
+    ((comparator map1 map2 . maps)
+     (and (%map=? comparator map1 map2)
+          (apply map=? comparator map2 maps)))))
+(define (%map=? comparator map1 map2)
+  (and (%map<=? comparator map1 map2)
+       (%map<=? comparator map2 map1)))
+
+(define map<=?
+  (case-lambda
+    ((comparator map)
+     (assert-type map? map)
+     #t)
+    ((comparator map1 map2)
+     (assert-type comparator? comparator)
+     (assert-type map? map1)
+     (assert-type map? map2)
+     (%map<=? comparator map1 map2))
+    ((comparator map1 map2 . maps)
+     (assert-type comparator? comparator)
+     (assert-type map? map1)
+     (assert-type map? map2)
+     (and (%map<=? comparator map1 map2)
+          (apply map<=? comparator map2 maps)))))
+
+(define (%map<=? comparator map1 map2)
+  (assert-type comparator? comparator)
+  (assert-type map? map1)
+  (assert-type map? map2)
+  (let ((less? (comparator-ordering-predicate (map-key-comparator map1)))
+	(equality-predicate (comparator-equality-predicate comparator))
+	(gen1 (tree-generator (map-tree map1)))
+	(gen2 (tree-generator (map-tree map2))))    
+    (let loop ((item1 (gen1))
+	       (item2 (gen2)))
+      (cond
+       ((eof-object? item1)
+	#t)
+       ((eof-object? item2)
+	#f)
+       (else
+	(let ((key1 (car item1)) (value1 (cadr item1))
+	      (key2 (car item2)) (value2 (cadr item2)))
+	  (cond
+	   ((less? key1 key2)
+	    #f)
+	   ((less? key2 key1)
+	    (loop item1 (gen2)))
+	   ((equality-predicate item1 item2)
+	    (loop (gen1) (gen2)))
+	   (else
+	    #f))))))))
+
+(define map>?
+  (case-lambda
+    ((comparator map)
+     (assert-type map? map)
+     #t)
+    ((comparator map1 map2)
+     (assert-type comparator? comparator)
+     (assert-type map? map1)
+     (assert-type map? map2)
+     (%map>? comparator map1 map2))
+    ((comparator map1 map2 . maps)
+     (assert-type comparator? comparator)
+     (assert-type map? map1)
+     (assert-type map? map2)
+     (and (%map>? comparator  map1 map2)
+          (apply map>? comparator map2 maps)))))
+
+(define (%map>? comparator map1 map2)
+  (assert-type comparator? comparator)
+  (assert-type map? map1)
+  (assert-type map? map2)
+  (not (%map<=? comparator map1 map2)))
+
+(define map<?
+  (case-lambda
+    ((comparator map)
+     (assert-type map? map)
+     #t)
+    ((comparator map1 map2)
+     (assert-type comparator? comparator)
+     (assert-type map? map1)
+     (assert-type map? map2)
+     (%map<? comparator map1 map2))
+    ((comparator map1 map2 . maps)
+     (assert-type comparator? comparator)
+     (assert-type map? map1)
+     (assert-type map? map2)
+     (and (%map<? comparator  map1 map2)
+          (apply map<? comparator map2 maps)))))
+
+(define (%map<? comparator map1 map2)
+     (assert-type comparator? comparator)
+     (assert-type map? map1)
+     (assert-type map? map2)
+     (%map>? comparator map2 map1))
+
+(define map>=?
+  (case-lambda
+    ((comparator map)
+     (assert-type map? map)
+     #t)
+    ((comparator map1 map2)
+     (assert-type comparator? comparator)
+     (assert-type map? map1)
+     (assert-type map? map2)
+     (%map>=? comparator map1 map2))
+    ((comparator map1 map2 . maps)
+     (assert-type comparator? comparator)
+     (assert-type map? map1)
+     (assert-type map? map2)
+     (and (%map>=? comparator map1 map2)
+          (apply map>=? comparator map2 maps)))))
+
+(define (%map>=? comparator map1 map2)
+  (assert-type comparator? comparator)
+  (assert-type map? map1)
+  (assert-type map? map2)
+  (not (%map<? comparator map1 map2)))
+
+
+;; Set theory operations
+
+;; map-union
+;; map-intersection
+;; ...
+
+;; Comparators
+
+(define (map-equality comparator)
+  (assert-type comparator? comparator)
+  (lambda (map1 map2)
+    (map=? comparator map1 map2)))
+
+(define (map-ordering comparator)
+  (assert-type comparator? comparator)
+  (let ((value-equality (comparator-equality-predicate comparator))
+	(value-ordering (comparator-ordering-predicate comparator)))
+    (lambda (map1 map2)
+      (let* ((key-comparator (map-key-comparator map1))
+	     (equality (comparator-equality-predicate key-comparator))
+	     (ordering (comparator-ordering-predicate key-comparator))
+	     (gen1 (tree-generator (map-tree map1)))
+	     (gen2 (tree-generator (map-tree map2))))
+	(let loop ()
+	  (let ((item1 (gen1)) (item2 (gen2)))
+	    (cond
+	     ((eof-object? item1)
+	      (not (eof-object? item2)))
+	     ((eof-object? item2)
+	      #f)
+	     (else
+	      (let ((key1 (car item1)) (value1 (cadr item1))
+		    (key2 (car item2)) (value2 (cadr item2)))
+		(cond
+		 ((equality key1 key2)
+		  (if (value-equality value1 value2)
+		      (loop)
+		      (value-ordering value1 value2)))
+		 (else
+		  (ordering key1 key2))))))))))))
+
+(define (make-map-comparator comparator)
+  (make-comparator map? (map-equality comparator) (map-ordering comparator) #f))
+
+(define map-comparator (make-map-comparator (make-default-comparator)))
+
+(comparator-register-default! map-comparator)
+

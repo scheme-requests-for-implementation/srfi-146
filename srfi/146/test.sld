@@ -295,14 +295,72 @@
 
 	  (test-equal "alist->map!: existing key"
 	    3
-	    (map-ref map3 'c))
-	  
-	  
-	  )
+	    (map-ref map3 'c)))
 
-	
-	
-	)
+	(test-group "Submaps"
+	  (define map1 (make-map comparator 'a 1 'b 2 'c 3))
+	  (define map2 (make-map comparator 'a 1 'b 2 'c 3))
+	  (define map3 (make-map comparator 'a 1 'c 3))
+	  (define map4 (make-map comparator 'a 1 'c 3 'd 4))
+	  (define map5 (make-map comparator 'a 1 'b 2 'c 6))
+
+	  (test-assert "map=?: equal maps"
+	    (map=? comparator map1 map2))
+
+	  (test-assert "map=?: unequal maps"
+	    (not (map=? comparator map1 map4)))
+
+	  (test-assert "map<?: proper subset"
+	    (map<? comparator map3 map1))
+
+	  (test-assert "map<?: improper subset"
+	    (not (map<? comparator map3 map1 map2)))
+	  
+	  (test-assert "map>?: proper superset"
+	    (map>? comparator map2 map3))
+
+	  (test-assert "map>?: improper superset"
+	    (not (map>? comparator map1 map2 map3)))
+
+	  (test-assert "map<=?: subset"
+	    (map<=? comparator map3 map2 map1))
+
+	  (test-assert "map<=?: non-matching values"
+	    (not (map<=? comparator map3 map5)))
+
+	  (test-assert "map<=?: not a subset"
+	    (not (map<=? comparator map2 map4)))
+
+	  (test-assert "map>=?: superset"
+	    (map>=? comparator map4 map3))
+
+	  (test-assert "map>=?: not a superset"
+	    (not (map>=? comparator map5 map3))))
+
+	(test-group "Set theory operations"
+	  #f)
+
+	(test-group "Comparators"
+	  (define map1 (make-map comparator 'a 1 'b 2 'c 3))
+	  (define map2 (make-map comparator 'a 1 'b 2 'c 3))
+	  (define map3 (make-map comparator 'a 1 'b 2))
+	  (define map4 (make-map comparator 'a 1 'b 2 'c 4))
+	  (define map5 (make-map comparator 'a 1 'c 3))
+	  
+	  (test-assert "=?: equal maps"
+	    (=? comparator map1 map2))
+
+	  (test-assert "=?: unequal maps"
+	    (not (=? comparator map1 map4)))
+
+	  (test-assert "<?: case 1"
+	    (<? comparator map3 map4))
+
+	  (test-assert "<?: case 2"
+	    (<? comparator map1 map4))
+
+	  (test-assert "<?: case 3"
+	    (<? comparator map1 map5))))
 	  
       (test-end "SRFI 146"))
 
