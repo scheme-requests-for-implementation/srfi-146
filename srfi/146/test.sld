@@ -165,7 +165,7 @@
 	    result))
 
 	(test-equal "map-find: not found in map"
-	  42
+	  (list 42)
 	  (receive result
 	      (map-find (lambda (key value)
 			  (eq? key 'd))
@@ -213,7 +213,44 @@
 	  (receive (keys values)
 	      (map-entries map1)
 	    (list (length keys) (fold + 0 values)))))
-	
+
+      (test-group "Mapping and folding"
+	(define map1 (make-map comparator 'a 1 'b 2 'c 3))
+	(define map2 (map-map (lambda (key value)
+				(values (symbol->string key)
+					(* 10 value)))
+			      comparator
+			      map1))
+
+	(test-equal "map-map"
+	  20
+	  (map-ref map2 "b"))
+
+	(test-equal "map-for-each"
+	  6
+	  (let ((counter 0))
+	    (map-for-each (lambda (key value)
+			    (set! counter (+ counter value)))
+			  map1)
+	    counter))
+
+	(test-equal "map-fold"
+	  6
+	  (map-fold (lambda (key value acc)
+		      (+ value acc))
+		    0
+		    map1))
+
+	(test-equal "map-map->list"
+	  (+ (* 1 1) (* 2 2) (* 3 3))
+	  (fold + 0 (map-map->list (lambda (key value)
+				     (* value value))
+				   map1)))
+	  
+	)
+
+      
+	  
       (test-end "SRFI 146"))
 
     (define comparator (make-default-comparator))))

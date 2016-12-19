@@ -28,11 +28,10 @@
     ((assert . _)
      (syntax-error "invalid assert syntax"))))
 
-(define-syntax declare
+(define-syntax assert-type
   (syntax-rules ()
-    ((declare (pred var))
+    ((assert-type pred var)
      (unless (pred var)
-       (fatal-error "argument not of expected type" (quote pred) (quote var) var)))))
+       (fatal-error "not of expected type" (quote pred) var)))))
 
 (define fatal-error error)
-

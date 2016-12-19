@@ -29,7 +29,7 @@
   (tree map-tree))
 
 (define (make-empty-map comparator)
-  (declare (comparator? comparator))
+  (assert-type comparator? comparator)
   (%make-map comparator (make-tree)))
 
 ;;; Exported procedures
@@ -37,7 +37,7 @@
 ;; Constructors
 
 (define (make-map comparator . args)
-  (declare (comparator? comparator))
+  (assert-type comparator? comparator)
   (map-unfold null?
 	      (lambda (args)
 		(values (car args)
@@ -47,10 +47,10 @@
 	      comparator))
 
 (define (map-unfold stop? mapper successor seed comparator)
-  (declare (procedure? stop?))
-  (declare (procedure? mapper))
-  (declare (procedure? successor))
-  (declare (comparator? comparator))
+  (assert-type procedure? stop?)
+  (assert-type procedure? mapper)
+  (assert-type procedure? successor)
+  (assert-type comparator? comparator)
   (let loop ((map (make-empty-map comparator))
 	     (seed seed))
     (if (stop? seed)
@@ -63,11 +63,11 @@
 ;; Predicates
 
 (define (map-empty? map)
-  (declare (map? map))
+  (assert-type map? map)
   (not (map-any? (lambda (key value) #t) map)))
 
 (define (map-contains? map key)
-  (declare (map? map))
+  (assert-type map? map)
   (call/cc
    (lambda (return)
      (map-search map
@@ -78,8 +78,8 @@
 		   (return #t))))))
 
 (define (map-disjoint? map1 map2)
-  (declare (map? map1))
-  (declare (map? map2))
+  (assert-type map? map1)
+  (assert-type map? map2)
   (call/cc
    (lambda (return)
      (map-for-each (lambda (key value)
@@ -99,9 +99,9 @@
      (map-ref map key failure (lambda (value)
 				value)))
     ((map key failure success)
-     (declare (map? map))
-     (declare (procedure? failure))
-     (declare (procedure? success))
+     (assert-type map? map)
+     (assert-type procedure? failure)
+     (assert-type procedure? success)
      (call/cc
       (lambda (return)
 	(map-search map
@@ -117,7 +117,7 @@
 ;; Updaters
 
 (define (map-set map . args)
-  (declare (map? map))
+  (assert-type map? map)
   (let loop ((args args)
 	     (map map))
     (if (null? args)
@@ -130,7 +130,7 @@
 (define map-set! map-set)
 
 (define (map-replace map key value)
-  (declare (map? map))
+  (assert-type map? map)
   (receive (map obj)
       (map-search map
 		  key
@@ -143,14 +143,14 @@
 (define map-replace! map-replace)
 
 (define (map-delete map . keys)
-  (declare (map? map))
+  (assert-type map? map)
   (map-delete-all map keys))
 
 (define map-delete! map-delete)
 
 (define (map-delete-all map keys)
-  (declare (map? map))
-  (declare (list? keys))
+  (assert-type map? map)
+  (assert-type list? keys)
   (fold (lambda (key map)
 	  (receive (map obj)
 	      (map-search map
@@ -165,8 +165,8 @@
 (define map-delete-all! map-delete-all)
 
 (define (map-intern map key failure)
-  (declare (map? map))
-  (declare (procedure? failure))
+  (assert-type map? map)
+  (assert-type procedure? failure)
   (call/cc
    (lambda (return)
      (map-search map
@@ -189,10 +189,10 @@
     (map-update map key updater failure (lambda (value)
 					  value)))
    ((map key updater failure success)
-    (declare (map? map))
-    (declare (procedure? updater))
-    (declare (procedure? failure))
-    (declare (procedure? success))
+    (assert-type map? map)
+    (assert-type procedure? updater)
+    (assert-type procedure? failure)
+    (assert-type procedure? success)
     (receive (map obj)
 	(map-search map
 		    key
@@ -210,9 +210,9 @@
 (define map-update!/default map-update/default)
 
 (define (map-search map key failure success)
-  (declare (map? map))
-  (declare (procedure? failure))
-  (declare (procedure? success))
+  (assert-type map? map)
+  (assert-type procedure? failure)
+  (assert-type procedure? success)
   (let*-values
       (((comparator)
 	(map-key-comparator map))
@@ -230,15 +230,15 @@
 ;; The whole map
 
 (define (map-size map)
-  (declare (map? map))
+  (assert-type map? map)
   (map-count (lambda (key value)
 	       #t)
 	     map))
 
 (define (map-find predicate map failure)
-  (declare (procedure? predicate))
-  (declare (map? map))
-  (declare (procedure? failure))
+  (assert-type procedure? predicate)
+  (assert-type map? map)
+  (assert-type procedure? failure)
   (call/cc
    (lambda (return)
      (map-for-each (lambda (key value)
@@ -248,8 +248,8 @@
      (failure))))
 
 (define (map-count predicate map)
-  (declare (procedure? predicate))
-  (declare (map? map))
+  (assert-type procedure? predicate)
+  (assert-type map? map)
   (map-fold (lambda (key value count)
 	      (if (predicate key value)
 		  (+ 1 count)
@@ -257,8 +257,8 @@
 	    0 map))
 
 (define (map-any? predicate map)
-  (declare (procedure? predicate))
-  (declare (map? map))
+  (assert-type procedure? predicate)
+  (assert-type map? map)
   (call/cc
    (lambda (return)
      (map-for-each (lambda (key value)
@@ -268,43 +268,65 @@
      #f)))
 
 (define (map-every? predicate map)
-  (declare (procedure? predicate))
-  (declare (map? map))
+  (assert-type procedure? predicate)
+  (assert-type map? map)
   (not (map-any? (lambda (key value)
 		   (not (predicate key value)))
 		 map)))
 
 (define (map-keys map)
-  (declare (map? map))
+  (assert-type map? map)
   (map-fold (lambda (key value keys)
 	      (cons key keys))
 	    '() map))
 
 (define (map-values map)
-  (declare (map? map))
+  (assert-type map? map)
   (map-fold (lambda (key value values)
 	      (cons value values))
 	    '() map))
 
 (define (map-entries map)
+  (assert-type map? map)
   (values (map-keys map)
 	  (map-values map)))
 
 ;; Mapping and folding
 
-(define (map-fold proc acc map)
-  (declare (procedure? proc))
-  (declare (map? map))
-  (tree-fold proc acc (map-tree map)))
+(define (map-map proc comparator map)
+  (assert-type procedure? proc)
+  (assert-type comparator? comparator)
+  (assert-type map? map)
+  (map-fold (lambda (key value map)
+	      (receive (key value)
+		  (proc key value)
+		(map-set map key value)))
+	    (make-empty-map (map-key-comparator map))
+	    map))
 
 (define (map-for-each proc map)
-  (declare (procedure? proc))
-  (declare (map? map))
+  (assert-type procedure? proc)
+  (assert-type map? map)
   (tree-for-each proc (map-tree map)))
+
+(define (map-fold proc acc map)
+  (assert-type procedure? proc)
+  (assert-type map? map)
+  (tree-fold proc acc (map-tree map)))
+
+(define (map-map->list proc map)
+  (assert-type procedure? proc)
+  (assert-type map? map)
+  (map-fold (lambda (key value lst)
+	      (cons (proc key value) lst))
+	    '()
+	    map))
+
 
 ;; Copying and conversion
 
 (define (map-copy map)
+  (assert-type map? map)
   map)
 
 (define (map->alist map)
