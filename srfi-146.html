@@ -307,7 +307,7 @@ take precedence over later arguments.</p>
 <p>Returns <code>#t</code> if <code><em>obj</em></code> is a map,
 and <code>#f</code> otherwise.</p>
 
-<p><code>(map-contains? <em>map key</em>)</code></p>
+<p><code>(map-contains? <em>map</em> <em>key</em>)</code></p>
 
 <p>Returns <code>#t</code> if <code><em>key</em></code> is the key of an
 association of <code><em>map</em></code> and <code>#f</code> otherwise.</p>
@@ -845,9 +845,10 @@ on <code>(make-default-comparator)</code>.
 The sample implementation uses a purely functional data structure and
 is based on red-black trees.  One could easily implement SRFI 113 on
 top of this (or any other) implementation of this SRFI.  The sample
-R7RS implementation is based on SRFI 2, SRFI 8, SRFI 121, SRFI 128,
-and SRFI 145 for which the sample implementations are included in the
-repository.
+R7RS implementation is based on SRFI 1, SRFI 2, SRFI 8, SRFI 121, SRFI
+128, and SRFI 145 for which the sample implementations are included in
+the repository.  (Except for SRFI 128, to which the interface proposed
+in this SRFI is intimitely tied, the dependencies are trivial.)
 </p>
 
 <a href="srfi/146.sld">Source for the reference implementation.</a>
