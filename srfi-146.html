@@ -449,12 +449,20 @@ rather than allocating a new map.
 
 <p><code>(map-update <em>map</em> <em>key</em> <em>updater</em> <em>failure</em> <em>success</em>)</code></p>
 
+<p><code>(map-update <em>map</em> <em>key</em> <em>updater</em> <em>failure</em>)</code></p>
+
+<p><code>(map-update <em>map</em> <em>key</em> <em>updater</em>)</code></p>
+
 Semantically equivalent to, but may be more efficient than, the following code
 <pre>
   (map-set <em>map</em> <em>key</em> (<em>updater</em> (map-ref <em>map</em> <em>key</em> <em>failure</em> <em>success</em>)))
 </pre>
 
 <p><code>(map-update! <em>map</em> <em>key</em> <em>updater</em> <em>failure</em> <em>success</em>)</code></p>
+
+<p><code>(map-update! <em>map</em> <em>key</em> <em>updater</em> <em>failure</em>)</code></p>
+
+<p><code>(map-update! <em>map</em> <em>key</em> <em>updater</em>)</code></p>
 
 <p>The <code>map-update!</code> procedure is the same
   as <code>map-update</code>, except that it is permitted to mutate and

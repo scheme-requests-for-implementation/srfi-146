@@ -23,6 +23,8 @@
 (define-library (srfi 146 test)
   (export run-tests)
   (import (scheme base)
+	  (srfi 1)
+	  (srfi 8)
 	  (srfi 64)
 	  (srfi 128)
 	  (srfi 146))
@@ -93,6 +95,8 @@
       (test-group "Updaters"
 	(define map1 (make-map comparator 'a 1 'b 2 'c 3))
 	(define map2 (map-set map1 'c 4 'd 4 'd 5))
+	(define map3 (map-update map1 'b (lambda (x) (* x x))))
+	(define map4 (map-update/default map1 'd (lambda (x) (* x x)) 4))
 	
 	(test-equal "map-set: key already in map"
 	  3
@@ -118,10 +122,98 @@
 	  42
 	  (map-ref/default (map-delete-all map1 '(a b)) 'b 42))
        
+	(test-equal "map-intern: key in map"
+	  (list map1 2)
+	  (receive result
+	      (map-intern map1 'b (lambda () (error "should not have been invoked")))
+	    result))
+
+	(test-equal "map-intern: key not in map"
+	  (list 42 42)
+	  (receive (map value)
+	      (map-intern map1 'd (lambda () 42))
+	    (list value (map-ref map 'd))))
+	    
+	(test-equal "map-update"
+	  4
+	  (map-ref map3 'b))
+
+	(test-equal "map-update/default"
+	  16
+	  (map-ref map4 'd)))
+
+      (test-group "The whole map"
+	(define map0 (make-map comparator))
+	(define map1 (make-map comparator 'a 1 'b 2 'c 3))
+
+	(test-equal "map-size: empty map"
+	  0
+	  (map-size map0))
+
+	(test-equal "map-size: non-empty map"
+	  3
+	  (map-size map1))
+
+	(test-equal "map-find: found in map"
+	  (list 'b 2)
+	  (receive result
+	      (map-find (lambda (key value)
+			  (and (eq? key 'b)
+			       (= value 2)))
+			map1
+			(lambda () (error "should not have been called")))
+	    result))
+
+	(test-equal "map-find: not found in map"
+	  42
+	  (receive result
+	      (map-find (lambda (key value)
+			  (eq? key 'd))
+			map1
+			(lambda ()
+			  42))
+	    result))
+
+	(test-equal "map-count"
+	  2
+	  (map-count (lambda (key value)
+		       (>= value 2))
+		     map1))
+      
+	(test-assert "map-any?: found"
+	  (map-any? (lambda (key value)
+		      (= value 3))
+		    map1))
+
+	(test-assert "map-any?: not found"
+	  (not (map-any? (lambda (key value)
+			   (= value 4))
+			 map1)))
+
+	(test-assert "map-every?: true"
+	  (map-every? (lambda (key value)
+			(<= value 3))
+		      map1))
+
+	(test-assert "map-every?: false"
+	  (not (map-every? (lambda (key value)
+			     (<= value 2))
+			   map1)))
+
+	(test-equal "map-keys"
+	  3
+	  (length (map-keys map1)))
+
+	(test-equal "map-values"
+	  6
+	  (fold + 0 (map-values map1)))
+
+	(test-equal "map-entries"
+	  (list 3 6)
+	  (receive (keys values)
+	      (map-entries map1)
+	    (list (length keys) (fold + 0 values)))))
 	
-	)
-      
-      
       (test-end "SRFI 146"))
 
     (define comparator (make-default-comparator))))

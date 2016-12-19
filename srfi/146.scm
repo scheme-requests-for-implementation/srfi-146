@@ -180,6 +180,35 @@
 
 (define map-intern! map-intern)
 
+(define map-update 
+  (case-lambda
+   ((map key updater)
+    (map-update map key updater (lambda ()
+				  (fatal-error "map-update: key not found in map" key))))
+   ((map key updater failure)
+    (map-update map key updater failure (lambda (value)
+					  value)))
+   ((map key updater failure success)
+    (declare (map? map))
+    (declare (procedure? updater))
+    (declare (procedure? failure))
+    (declare (procedure? success))
+    (receive (map obj)
+	(map-search map
+		    key
+		    (lambda (insert ignore)
+		      (insert key (updater (failure)) #f))
+		    (lambda (old-key old-value update remove)
+		      (update key (updater (success old-value)) #f)))
+      map))))
+
+(define map-update! map-update)
+
+(define (map-update/default map key updater default)
+  (map-update map key updater (lambda () default)))
+
+(define map-update!/default map-update/default)
+
 (define (map-search map key failure success)
   (declare (map? map))
   (declare (procedure? failure))
@@ -200,6 +229,33 @@
 
 ;; The whole map
 
+(define (map-size map)
+  (declare (map? map))
+  (map-count (lambda (key value)
+	       #t)
+	     map))
+
+(define (map-find predicate map failure)
+  (declare (procedure? predicate))
+  (declare (map? map))
+  (declare (procedure? failure))
+  (call/cc
+   (lambda (return)
+     (map-for-each (lambda (key value)
+		     (when (predicate key value)
+		       (return key value)))
+		   map)
+     (failure))))
+
+(define (map-count predicate map)
+  (declare (procedure? predicate))
+  (declare (map? map))
+  (map-fold (lambda (key value count)
+	      (if (predicate key value)
+		  (+ 1 count)
+		  count))
+	    0 map))
+
 (define (map-any? predicate map)
   (declare (procedure? predicate))
   (declare (map? map))
@@ -210,6 +266,29 @@
 		       (return #t)))
 		   map)
      #f)))
+
+(define (map-every? predicate map)
+  (declare (procedure? predicate))
+  (declare (map? map))
+  (not (map-any? (lambda (key value)
+		   (not (predicate key value)))
+		 map)))
+
+(define (map-keys map)
+  (declare (map? map))
+  (map-fold (lambda (key value keys)
+	      (cons key keys))
+	    '() map))
+
+(define (map-values map)
+  (declare (map? map))
+  (map-fold (lambda (key value values)
+	      (cons value values))
+	    '() map))
+
+(define (map-entries map)
+  (values (map-keys map)
+	  (map-values map)))
 
 ;; Mapping and folding
 
