@@ -520,12 +520,115 @@
   (assert-type map? map2)
   (not (%map<? comparator map1 map2)))
 
-
 ;; Set theory operations
 
-;; map-union
-;; map-intersection
-;; ...
+(define (%map-union map1 map2)
+  (map-fold (lambda (key2 value2 map)
+	      (receive (map obj)
+		  (map-search map
+			      key2
+			      (lambda (insert ignore)
+				(insert key2 value2 #f))
+			      (lambda (key1 value1 update remove)
+				(update key1 value1 #f)))
+		map))
+	    map1 map2))
+
+(define (%map-intersection map1 map2)
+  (map-fold (lambda (key2 value2 map)
+	      (receive (map obj)
+		  (map-search map
+			      key2
+			      (lambda (insert ignore)
+				(ignore #f))
+			      (lambda (key1 value1 update remove)
+				(update key1 value1 #f)))
+		map))
+	    map1 map2))
+
+(define (%map-difference map1 map2)
+  (map-fold (lambda (key2 value2 map)
+	      (receive (map obj)
+		  (map-search map
+			      key2
+			      (lambda (insert ignore)
+				(ignore #f))
+			      (lambda (key1 value1 update remove)
+				(remove #f)))
+		map))
+	    map1 map2))
+
+(define (%map-xor map1 map2)
+  (map-fold (lambda (key2 value2 map)
+	      (receive (map obj)
+		  (map-search map
+			      key2
+			      (lambda (insert ignore)
+				(insert key2 value2 #f))
+			      (lambda (key1 value1 update remove)
+				(remove #f)))
+		map))
+	    map1 map2))
+
+(define map-union
+  (case-lambda
+    ((map)
+     (assert-type map? map)
+     map)
+    ((map1 map2)
+     (assert-type map? map1)
+     (assert-type map? map2)
+     (%map-union map1 map2))
+    ((map1 map2 . maps)
+     (assert-type map? map1)
+     (assert-type map? map2)
+     (apply map-union (%map-union map1 map2) maps))))
+(define map-union! map-union)
+
+(define map-intersection
+  (case-lambda
+    ((map)
+     (assert-type map? map)
+     map)
+    ((map1 map2)
+     (assert-type map? map1)
+     (assert-type map? map2)
+     (%map-intersection map1 map2))
+    ((map1 map2 . maps)
+     (assert-type map? map1)
+     (assert-type map? map2)
+     (apply map-intersection (%map-intersection map1 map2) maps))))
+(define map-intersection! map-intersection)
+
+(define map-difference
+  (case-lambda
+    ((map)
+     (assert-type map? map)
+     map)
+    ((map1 map2)
+     (assert-type map? map1)
+     (assert-type map? map2)
+     (%map-difference map1 map2))
+    ((map1 map2 . maps)
+     (assert-type map? map1)
+     (assert-type map? map2)
+     (apply map-difference (%map-difference map1 map2) maps))))
+(define map-difference! map-difference)
+
+(define map-xor
+  (case-lambda
+    ((map)
+     (assert-type map? map)
+     map)
+    ((map1 map2)
+     (assert-type map? map1)
+     (assert-type map? map2)
+     (%map-xor map1 map2))
+    ((map1 map2 . maps)
+     (assert-type map? map1)
+     (assert-type map? map2)
+     (apply map-xor (%map-xor map1 map2) maps))))
+(define map-xor! map-xor)
 
 ;; Comparators
 

@@ -346,22 +346,37 @@
 	  (define map3 (make-map comparator 'a 1 'b 2))
 	  (define map4 (make-map comparator 'a 1 'b 2 'c 4))
 	  (define map5 (make-map comparator 'a 1 'c 3))
+	  (define map0 (make-map comparator map1 "a" map2 "b" map3 "c" map4 "d" map5 "e"))
+
+	  (test-assert "map-comparator"
+	    (comparator? map-comparator))
 	  
-	  (test-assert "=?: equal maps"
-	    (=? comparator map1 map2))
-
-	  (test-assert "=?: unequal maps"
-	    (not (=? comparator map1 map4)))
-
-	  (test-assert "<?: case 1"
-	    (<? comparator map3 map4))
-
-	  (test-assert "<?: case 2"
-	    (<? comparator map1 map4))
-
-	  (test-assert "<?: case 3"
-	    (<? comparator map1 map5))))
+	  (test-equal "map-keyed map"
+	    (list "a" "a" "c" "d" "e")
+	    (list (map-ref map0 map1)
+		  (map-ref map0 map2)
+		  (map-ref map0 map3)
+		  (map-ref map0 map4)
+		  (map-ref map0 map5)))
 	  
+	  (test-group "Ordering comparators"
+	    (test-assert "=?: equal maps"
+	      (=? comparator map1 map2))
+
+	    (test-assert "=?: unequal maps"
+	      (not (=? comparator map1 map4)))
+
+	    (test-assert "<?: case 1"
+	      (<? comparator map3 map4))
+
+	    (test-assert "<?: case 2"
+	      (<? comparator map1 map4))
+
+	    (test-assert "<?: case 3"
+	      (<? comparator map1 map5)))))
+
+      
+      
       (test-end "SRFI 146"))
 
     (define comparator (make-default-comparator))))
