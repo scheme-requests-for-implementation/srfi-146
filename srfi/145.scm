@@ -20,18 +20,20 @@
 ;; CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ;; SOFTWARE.
 
-(define-syntax assert
+(define-syntax assume
   (syntax-rules ()
-    ((assert expression)
+    ((assume expression)
      (unless expression
-       (fatal-error "assertion failed" (quote expression))))
-    ((assert . _)
-     (syntax-error "invalid assert syntax"))))
+       (fatal-error "invalid assumption" (quote expression))))
+    ((assume . _)
+     (syntax-error "invalid assume syntax"))))
 
-(define-syntax assert-type
+(define-syntax assume-type
   (syntax-rules ()
-    ((assert-type pred var)
-     (unless (pred var)
-       (fatal-error "not of expected type" (quote pred) var)))))
+    ((assume-type pred expr)
+     (unless (pred expr)
+       (fatal-error "not of expected type" (quote pred) expr)))
+    ((assume-type . _)
+     (syntax-error "invalid assume-type syntax"))))
 
 (define fatal-error error)

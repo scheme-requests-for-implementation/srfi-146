@@ -21,6 +21,6 @@
 ;; SOFTWARE.
 
 (define-library (srfi 145)
-  (export fatal-error assert assert-type)
+  (export fatal-error assume assume-type)
   (import (scheme base))
   (include "145.scm"))

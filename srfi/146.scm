@@ -29,7 +29,7 @@
   (tree map-tree))
 
 (define (make-empty-map comparator)
-  (assert-type comparator? comparator)
+  (assume-type comparator? comparator)
   (%make-map comparator (make-tree)))
 
 ;;; Exported procedures
@@ -37,7 +37,7 @@
 ;; Constructors
 
 (define (make-map comparator . args)
-  (assert-type comparator? comparator)
+  (assume-type comparator? comparator)
   (map-unfold null?
 	      (lambda (args)
 		(values (car args)
@@ -47,10 +47,10 @@
 	      comparator))
 
 (define (map-unfold stop? mapper successor seed comparator)
-  (assert-type procedure? stop?)
-  (assert-type procedure? mapper)
-  (assert-type procedure? successor)
-  (assert-type comparator? comparator)
+  (assume-type procedure? stop?)
+  (assume-type procedure? mapper)
+  (assume-type procedure? successor)
+  (assume-type comparator? comparator)
   (let loop ((map (make-empty-map comparator))
 	     (seed seed))
     (if (stop? seed)
@@ -63,11 +63,11 @@
 ;; Predicates
 
 (define (map-empty? map)
-  (assert-type map? map)
+  (assume-type map? map)
   (not (map-any? (lambda (key value) #t) map)))
 
 (define (map-contains? map key)
-  (assert-type map? map)
+  (assume-type map? map)
   (call/cc
    (lambda (return)
      (map-search map
@@ -78,8 +78,8 @@
 		   (return #t))))))
 
 (define (map-disjoint? map1 map2)
-  (assert-type map? map1)
-  (assert-type map? map2)
+  (assume-type map? map1)
+  (assume-type map? map2)
   (call/cc
    (lambda (return)
      (map-for-each (lambda (key value)
@@ -93,18 +93,18 @@
 (define map-ref
   (case-lambda
     ((map key)
-     (assert-type map? map)
+     (assume-type map? map)
      (map-ref map key (lambda ()
 			(fatal-error "map-ref: key not in map" key))))
     ((map key failure)
-     (assert-type map? map)
-     (assert-type procedure? failure)
+     (assume-type map? map)
+     (assume-type procedure? failure)
      (map-ref map key failure (lambda (value)
 				value)))
     ((map key failure success)
-     (assert-type map? map)
-     (assert-type procedure? failure)
-     (assert-type procedure? success)
+     (assume-type map? map)
+     (assume-type procedure? failure)
+     (assume-type procedure? success)
      (call/cc
       (lambda (return)
 	(map-search map
@@ -115,13 +115,13 @@
 		      (return (success value)))))))))
 
 (define (map-ref/default map key default)
-  (assert-type map? map)
+  (assume-type map? map)
   (map-ref map key (lambda () default)))
 
 ;; Updaters
 
 (define (map-set map . args)
-  (assert-type map? map)
+  (assume-type map? map)
   (let loop ((args args)
 	     (map map))
     (if (null? args)
@@ -134,7 +134,7 @@
 (define map-set! map-set)
 
 (define (map-replace map key value)
-  (assert-type map? map)
+  (assume-type map? map)
   (receive (map obj)
       (map-search map
 		  key
@@ -147,14 +147,14 @@
 (define map-replace! map-replace)
 
 (define (map-delete map . keys)
-  (assert-type map? map)
+  (assume-type map? map)
   (map-delete-all map keys))
 
 (define map-delete! map-delete)
 
 (define (map-delete-all map keys)
-  (assert-type map? map)
-  (assert-type list? keys)
+  (assume-type map? map)
+  (assume-type list? keys)
   (fold (lambda (key map)
 	  (receive (map obj)
 	      (map-search map
@@ -169,8 +169,8 @@
 (define map-delete-all! map-delete-all)
 
 (define (map-intern map key failure)
-  (assert-type map? map)
-  (assert-type procedure? failure)
+  (assume-type map? map)
+  (assume-type procedure? failure)
   (call/cc
    (lambda (return)
      (map-search map
@@ -193,10 +193,10 @@
     (map-update map key updater failure (lambda (value)
 					  value)))
    ((map key updater failure success)
-    (assert-type map? map)
-    (assert-type procedure? updater)
-    (assert-type procedure? failure)
-    (assert-type procedure? success)
+    (assume-type map? map)
+    (assume-type procedure? updater)
+    (assume-type procedure? failure)
+    (assume-type procedure? success)
     (receive (map obj)
 	(map-search map
 		    key
@@ -214,9 +214,9 @@
 (define map-update!/default map-update/default)
 
 (define (map-search map key failure success)
-  (assert-type map? map)
-  (assert-type procedure? failure)
-  (assert-type procedure? success)
+  (assume-type map? map)
+  (assume-type procedure? failure)
+  (assume-type procedure? success)
   (let*-values
       (((comparator)
 	(map-key-comparator map))
@@ -234,15 +234,15 @@
 ;; The whole map
 
 (define (map-size map)
-  (assert-type map? map)
+  (assume-type map? map)
   (map-count (lambda (key value)
 	       #t)
 	     map))
 
 (define (map-find predicate map failure)
-  (assert-type procedure? predicate)
-  (assert-type map? map)
-  (assert-type procedure? failure)
+  (assume-type procedure? predicate)
+  (assume-type map? map)
+  (assume-type procedure? failure)
   (call/cc
    (lambda (return)
      (map-for-each (lambda (key value)
@@ -252,8 +252,8 @@
      (failure))))
 
 (define (map-count predicate map)
-  (assert-type procedure? predicate)
-  (assert-type map? map)
+  (assume-type procedure? predicate)
+  (assume-type map? map)
   (map-fold (lambda (key value count)
 	      (if (predicate key value)
 		  (+ 1 count)
@@ -261,8 +261,8 @@
 	    0 map))
 
 (define (map-any? predicate map)
-  (assert-type procedure? predicate)
-  (assert-type map? map)
+  (assume-type procedure? predicate)
+  (assume-type map? map)
   (call/cc
    (lambda (return)
      (map-for-each (lambda (key value)
@@ -272,35 +272,35 @@
      #f)))
 
 (define (map-every? predicate map)
-  (assert-type procedure? predicate)
-  (assert-type map? map)
+  (assume-type procedure? predicate)
+  (assume-type map? map)
   (not (map-any? (lambda (key value)
 		   (not (predicate key value)))
 		 map)))
 
 (define (map-keys map)
-  (assert-type map? map)
+  (assume-type map? map)
   (map-fold (lambda (key value keys)
 	      (cons key keys))
 	    '() map))
 
 (define (map-values map)
-  (assert-type map? map)
+  (assume-type map? map)
   (map-fold (lambda (key value values)
 	      (cons value values))
 	    '() map))
 
 (define (map-entries map)
-  (assert-type map? map)
+  (assume-type map? map)
   (values (map-keys map)
 	  (map-values map)))
 
 ;; Mapping and folding
 
 (define (map-map proc comparator map)
-  (assert-type procedure? proc)
-  (assert-type comparator? comparator)
-  (assert-type map? map)
+  (assume-type procedure? proc)
+  (assume-type comparator? comparator)
+  (assume-type map? map)
   (map-fold (lambda (key value map)
 	      (receive (key value)
 		  (proc key value)
@@ -309,26 +309,26 @@
 	    map))
 
 (define (map-for-each proc map)
-  (assert-type procedure? proc)
-  (assert-type map? map)
+  (assume-type procedure? proc)
+  (assume-type map? map)
   (tree-for-each proc (map-tree map)))
 
 (define (map-fold proc acc map)
-  (assert-type procedure? proc)
-  (assert-type map? map)
+  (assume-type procedure? proc)
+  (assume-type map? map)
   (tree-fold proc acc (map-tree map)))
 
 (define (map-map->list proc map)
-  (assert-type procedure? proc)
-  (assert-type map? map)
+  (assume-type procedure? proc)
+  (assume-type map? map)
   (map-fold (lambda (key value lst)
 	      (cons (proc key value) lst))
 	    '()
 	    map))
 
 (define (map-filter predicate map)
-  (assert-type procedure? predicate)
-  (assert-type map? map)
+  (assume-type procedure? predicate)
+  (assume-type map? map)
   (map-fold (lambda (key value map)
 	      (if (predicate key value)
 		  (map-set map key value)
@@ -339,8 +339,8 @@
 (define map-filter! map-filter)
 
 (define (map-remove predicate map)
-  (assert-type procedure? predicate)
-  (assert-type map? map)
+  (assume-type procedure? predicate)
+  (assume-type map? map)
   (map-filter (lambda (key value)
 		(not (predicate key value)))
 	      map))
@@ -348,8 +348,8 @@
 (define map-remove! map-remove)
 
 (define (map-partition predicate map)
-  (assert-type procedure? predicate)
-  (assert-type map? map)
+  (assume-type procedure? predicate)
+  (assume-type map? map)
   (values (map-filter predicate map)
 	  (map-remove predicate map)))
 
@@ -358,24 +358,24 @@
 ;; Copying and conversion
 
 (define (map-copy map)
-  (assert-type map? map)
+  (assume-type map? map)
   map)
 
 (define (map->alist map)
-  (assert-type map? map)
+  (assume-type map? map)
   (map-fold (lambda (key value alist)
 	      (cons (cons key value) alist))
 	    '() map))
 
 (define (map->alist map)
-  (assert-type map? map)
+  (assume-type map? map)
   (map-fold (lambda (key value alist)
 	      (cons (cons key value) alist))
 	    '() map))
 
 (define (alist->map comparator alist)
-  (assert-type comparator? comparator)
-  (assert-type list? alist)
+  (assume-type comparator? comparator)
+  (assume-type list? alist)
   (map-unfold null?
 	      (lambda (alist)
 		(let ((key (caar alist))
@@ -386,8 +386,8 @@
 	      comparator))
 
 (define (alist->map! map alist)
-  (assert-type map? map)
-  (assert-type list? alist)
+  (assume-type map? map)
+  (assume-type list? alist)
   (fold (lambda (association map)
 	  (let ((key (car association))
 		(value (cdr association)))
@@ -400,7 +400,7 @@
 (define map=?
   (case-lambda
     ((comparator map)
-     (assert-type map? map)
+     (assume-type map? map)
      #t)
     ((comparator map1 map2) (%map=? comparator map1 map2))
     ((comparator map1 map2 . maps)
@@ -413,24 +413,24 @@
 (define map<=?
   (case-lambda
     ((comparator map)
-     (assert-type map? map)
+     (assume-type map? map)
      #t)
     ((comparator map1 map2)
-     (assert-type comparator? comparator)
-     (assert-type map? map1)
-     (assert-type map? map2)
+     (assume-type comparator? comparator)
+     (assume-type map? map1)
+     (assume-type map? map2)
      (%map<=? comparator map1 map2))
     ((comparator map1 map2 . maps)
-     (assert-type comparator? comparator)
-     (assert-type map? map1)
-     (assert-type map? map2)
+     (assume-type comparator? comparator)
+     (assume-type map? map1)
+     (assume-type map? map2)
      (and (%map<=? comparator map1 map2)
           (apply map<=? comparator map2 maps)))))
 
 (define (%map<=? comparator map1 map2)
-  (assert-type comparator? comparator)
-  (assert-type map? map1)
-  (assert-type map? map2)
+  (assume-type comparator? comparator)
+  (assume-type map? map1)
+  (assume-type map? map2)
   (let ((less? (comparator-ordering-predicate (map-key-comparator map1)))
 	(equality-predicate (comparator-equality-predicate comparator))
 	(gen1 (tree-generator (map-tree map1)))
@@ -458,70 +458,70 @@
 (define map>?
   (case-lambda
     ((comparator map)
-     (assert-type map? map)
+     (assume-type map? map)
      #t)
     ((comparator map1 map2)
-     (assert-type comparator? comparator)
-     (assert-type map? map1)
-     (assert-type map? map2)
+     (assume-type comparator? comparator)
+     (assume-type map? map1)
+     (assume-type map? map2)
      (%map>? comparator map1 map2))
     ((comparator map1 map2 . maps)
-     (assert-type comparator? comparator)
-     (assert-type map? map1)
-     (assert-type map? map2)
+     (assume-type comparator? comparator)
+     (assume-type map? map1)
+     (assume-type map? map2)
      (and (%map>? comparator  map1 map2)
           (apply map>? comparator map2 maps)))))
 
 (define (%map>? comparator map1 map2)
-  (assert-type comparator? comparator)
-  (assert-type map? map1)
-  (assert-type map? map2)
+  (assume-type comparator? comparator)
+  (assume-type map? map1)
+  (assume-type map? map2)
   (not (%map<=? comparator map1 map2)))
 
 (define map<?
   (case-lambda
     ((comparator map)
-     (assert-type map? map)
+     (assume-type map? map)
      #t)
     ((comparator map1 map2)
-     (assert-type comparator? comparator)
-     (assert-type map? map1)
-     (assert-type map? map2)
+     (assume-type comparator? comparator)
+     (assume-type map? map1)
+     (assume-type map? map2)
      (%map<? comparator map1 map2))
     ((comparator map1 map2 . maps)
-     (assert-type comparator? comparator)
-     (assert-type map? map1)
-     (assert-type map? map2)
+     (assume-type comparator? comparator)
+     (assume-type map? map1)
+     (assume-type map? map2)
      (and (%map<? comparator  map1 map2)
           (apply map<? comparator map2 maps)))))
 
 (define (%map<? comparator map1 map2)
-     (assert-type comparator? comparator)
-     (assert-type map? map1)
-     (assert-type map? map2)
+     (assume-type comparator? comparator)
+     (assume-type map? map1)
+     (assume-type map? map2)
      (%map>? comparator map2 map1))
 
 (define map>=?
   (case-lambda
     ((comparator map)
-     (assert-type map? map)
+     (assume-type map? map)
      #t)
     ((comparator map1 map2)
-     (assert-type comparator? comparator)
-     (assert-type map? map1)
-     (assert-type map? map2)
+     (assume-type comparator? comparator)
+     (assume-type map? map1)
+     (assume-type map? map2)
      (%map>=? comparator map1 map2))
     ((comparator map1 map2 . maps)
-     (assert-type comparator? comparator)
-     (assert-type map? map1)
-     (assert-type map? map2)
+     (assume-type comparator? comparator)
+     (assume-type map? map1)
+     (assume-type map? map2)
      (and (%map>=? comparator map1 map2)
           (apply map>=? comparator map2 maps)))))
 
 (define (%map>=? comparator map1 map2)
-  (assert-type comparator? comparator)
-  (assert-type map? map1)
-  (assert-type map? map2)
+  (assume-type comparator? comparator)
+  (assume-type map? map1)
+  (assume-type map? map2)
   (not (%map<? comparator map1 map2)))
 
 ;; Set theory operations
@@ -570,72 +570,72 @@
 (define map-union
   (case-lambda
     ((map)
-     (assert-type map? map)
+     (assume-type map? map)
      map)
     ((map1 map2)
-     (assert-type map? map1)
-     (assert-type map? map2)
+     (assume-type map? map1)
+     (assume-type map? map2)
      (%map-union map1 map2))
     ((map1 map2 . maps)
-     (assert-type map? map1)
-     (assert-type map? map2)
+     (assume-type map? map1)
+     (assume-type map? map2)
      (apply map-union (%map-union map1 map2) maps))))
 (define map-union! map-union)
 
 (define map-intersection
   (case-lambda
     ((map)
-     (assert-type map? map)
+     (assume-type map? map)
      map)
     ((map1 map2)
-     (assert-type map? map1)
-     (assert-type map? map2)
+     (assume-type map? map1)
+     (assume-type map? map2)
      (%map-intersection map1 map2))
     ((map1 map2 . maps)
-     (assert-type map? map1)
-     (assert-type map? map2)
+     (assume-type map? map1)
+     (assume-type map? map2)
      (apply map-intersection (%map-intersection map1 map2) maps))))
 (define map-intersection! map-intersection)
 
 (define map-difference
   (case-lambda
     ((map)
-     (assert-type map? map)
+     (assume-type map? map)
      map)
     ((map1 map2)
-     (assert-type map? map1)
-     (assert-type map? map2)
+     (assume-type map? map1)
+     (assume-type map? map2)
      (%map-difference map1 map2))
     ((map1 map2 . maps)
-     (assert-type map? map1)
-     (assert-type map? map2)
+     (assume-type map? map1)
+     (assume-type map? map2)
      (apply map-difference (%map-difference map1 map2) maps))))
 (define map-difference! map-difference)
 
 (define map-xor
   (case-lambda
     ((map)
-     (assert-type map? map)
+     (assume-type map? map)
      map)
     ((map1 map2)
-     (assert-type map? map1)
-     (assert-type map? map2)
+     (assume-type map? map1)
+     (assume-type map? map2)
      (%map-xor map1 map2))
     ((map1 map2 . maps)
-     (assert-type map? map1)
-     (assert-type map? map2)
+     (assume-type map? map1)
+     (assume-type map? map2)
      (apply map-xor (%map-xor map1 map2) maps))))
 (define map-xor! map-xor)
 
 ;; Comparators
 
 (define (map-equality comparator)
-  (assert-type comparator? comparator)
+  (assume-type comparator? comparator)
   (lambda (map1 map2)
     (map=? comparator map1 map2)))
 
 (define (map-ordering comparator)
-  (assert-type comparator? comparator)
+  (assume-type comparator? comparator)
   (let ((value-equality (comparator-equality-predicate comparator))
 	(value-ordering (comparator-ordering-predicate comparator)))
     (lambda (map1 map2)
