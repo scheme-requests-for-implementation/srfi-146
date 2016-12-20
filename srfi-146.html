@@ -29,7 +29,7 @@ Marc Nieper-Wi&szlig;kirchen
 <p>
 <em>Maps</em> are finite sets of associations, where each association
 is a pair consisting of a key and an arbitrary Scheme value.  The keys
-are elements of a suitable codomain.  Each map holds no more than one
+are elements of a suitable domain.  Each map holds no more than one
 association with the same key.  The fundamental map operation is
 retrieving the value of an association stored in the map when the key
 is given.
@@ -92,7 +92,7 @@ explicitely deal with sets of associations.
 </p>
 
 <p>
-  Multi-sets (<i>i.e.</i> general relations) are not covered by this SRFI.
+  Multi-maps (<i>i.e.</i> general relations) are not covered by this SRFI.
   They are left to a future SRFI should they prove to be essential.
 </p>
 
@@ -169,11 +169,14 @@ term "linear update").</p>
 
 <p>There are two benefits to this convention:</p>
 
-<ul><li><p>Implementations are free to provide the most efficient possible implementation, either functional or side-effecting.</p></li>
+<ul><li><p>Implementations are free to provide the most efficient
+possible implementation, either functional or side-effecting.</p></li>
 
 <li><p>Programmers may nonetheless continue to assume that maps are
 purely functional data structures: they may be reliably shared without
-needing to be copied, uniquified, and so forth.</p></li></ul>
+needing to be copied, uniquified, and so forth (as long as the map in
+question is not an argument of a "linear-update"
+procedure).</p></li></ul>
 
 <p>In practice, these procedures are most useful for efficiently
 constructing maps in a side-effecting manner, in some limited local
@@ -335,10 +338,11 @@ is <code>eq?</code>, <code>eqv?</code>, <code>equal?</code>, <code>string=?</cod
 
 <p>Returns a newly allocated map.  The <em>comparator</em> argument is
 a <a href="http://srfi.schemers.org/srfi-128/srfi-128.html">SRFI
-128</a> comparator, which is used to control and distinguish the
-elements of the set.  The <em>arg</em>s alter between keys and values
-and are used to initialize the map.  Earlier associations with equal keys
-take precedence over later arguments.</p>
+128</a> comparator, which is used to control and distinguish the keys
+of the map.  The <code><em>arg</em></code>s alter between keys and values and are
+used to initialize the map.  In particular, the number
+of <code><em>arg</em></code>s has to be even.  Earlier associations
+with equal keys take precedence over later arguments.</p>
 
 <p><code>(map-unfold <em>stop?</em> <em>mapper</em> <em>successor</em> <em>seed</em> <em>comparator</em>)</code></p>
 
@@ -545,8 +549,21 @@ the <code><em>failure</em></code> procedure is tail-called with two
 continuation arguments, <code><em>insert</em></code>
 and <code><em>ignore</em></code>, and is expected to tail-call one of
 them.  If an association with key <code><em>key</em></code> is found,
-then the <code><em>success</em></code> procedure is tail-called with the matching
-key of <code><em>map</em></code>, the associated value, and two continuations, <code><em>update</em></code> and <code><em>remove</em></code>, and is expected to tail-call one of them.</p>
+then the <code><em>success</em></code> procedure is tail-called with
+the matching key of <code><em>map</em></code>, the associated value,
+and two continuations, <code><em>update</em></code>
+and <code><em>remove</em></code>, and is expected to tail-call one of
+  them
+</p>
+
+<p>
+It is an error if the continuation arguments are invoked, but not in
+tail position in the
+<code><em>failure</em></code> and <code><em>success</em></code>
+procedures.  It is also an error if the <code><em>failure</em></code>
+and <code><em>success</em></code> procedures return to their implicit
+continuation without invoking one of their continuation arguments.
+</p>
 
 <p>The effects of the continuations are as follows
 (where <code><em>obj</em></code> is any Scheme object):
@@ -644,8 +661,10 @@ Returns a newly allocated list of all the values in the map <code><em>map</em></
 
 <p><code>(map-entries <em>map</em>)</code></p>
 
-Returns two values, a newly allocated list of all the keys in the map <code><em>map</em></code>,
-and a newly allocated list of all the values in the map <code><em>map</em></code>.
+Returns two values, a newly allocated list of all the keys in the
+map <code><em>map</em></code>, and a newly allocated list of all the
+values in the map <code><em>map</em></code>.  The two lists are
+consistently ordered,  so that keys can be matched to their corresponding values.
 
 <h2 id="Mappingandfolding">Mapping and folding</h2>
 
@@ -792,7 +811,7 @@ earlier in the list take precedence over those that come later.
 <h2 id="Submaps">Submaps</h2>
 
 <p>Note: The following three predicates do not obey the trichotomy law
-and therefore do not constitute a total order on sets.
+and therefore do not constitute a total order on maps.
 </p>
 
 <p>All predicates in this subsection take
