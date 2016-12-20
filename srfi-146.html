@@ -38,16 +38,20 @@ is given.
 <h1>Issues</h1>
 
 <ul>
-  <li>The canonical name for the basic map constructor would
-  be <code>map</code> (compare
-  to <code>vector</code>, <code>hash-table</code>, <code>set</code>,
-  etc.)  However, the name <code>map</code> is already taking by a
-  well-known higher-order procedure in Scheme's base library.
-  Currently, this proposal uses the non-optimal
-  name <code>make-map</code>.
-  </li>
-  <li>
-    The implementation hasn't been published yet.
+  <li><p> The canonical name for the basic map constructor would
+      be <code>map</code> (compare
+      to <code>vector</code>, <code>hash-table</code>, <code>set</code>,
+      etc.)  However, the name <code>map</code> is already taking by a
+      well-known higher-order procedure in Scheme's base library.
+      Currently, this proposal uses the non-optimal
+      name <code>make-map</code>.  Also names
+      like <code>map-map</code> appearing in this specification are
+      not optimal.
+    </p>
+    <p>
+      One solution would be to rename <em>map</em> throughout
+      to <em>dict</em>, or <em>mapping</em>.
+    </p>
   </li>
 </ul>
 
