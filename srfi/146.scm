@@ -93,9 +93,12 @@
 (define map-ref
   (case-lambda
     ((map key)
+     (assert-type map? map)
      (map-ref map key (lambda ()
 			(fatal-error "map-ref: key not in map" key))))
     ((map key failure)
+     (assert-type map? map)
+     (assert-type procedure? failure)
      (map-ref map key failure (lambda (value)
 				value)))
     ((map key failure success)
@@ -112,6 +115,7 @@
 		      (return (success value)))))))))
 
 (define (map-ref/default map key default)
+  (assert-type map? map)
   (map-ref map key (lambda () default)))
 
 ;; Updaters
@@ -535,16 +539,9 @@
 	    map1 map2))
 
 (define (%map-intersection map1 map2)
-  (map-fold (lambda (key2 value2 map)
-	      (receive (map obj)
-		  (map-search map
-			      key2
-			      (lambda (insert ignore)
-				(ignore #f))
-			      (lambda (key1 value1 update remove)
-				(update key1 value1 #f)))
-		map))
-	    map1 map2))
+  (map-filter (lambda (key1 value1)
+		(map-contains? map2 key1))
+	      map1))
 
 (define (%map-difference map1 map2)
   (map-fold (lambda (key2 value2 map)

@@ -338,8 +338,41 @@
 	    (not (map>=? comparator map5 map3))))
 
 	(test-group "Set theory operations"
-	  #f)
+	  (define map1 (make-map comparator 'a 1 'b 2 'c 3))
+	  (define map2 (make-map comparator 'a 1 'b 2 'd 4))
+	  (define map3 (make-map comparator 'a 1 'b 2))
+	  (define map4 (make-map comparator 'a 1 'b 2 'c 4))
+	  (define map5 (make-map comparator 'a 1 'c 3))
+	  (define map6 (make-map comparator 'd 4 'e 5 'f 6))
+	  
+	  (test-equal "map-union: new association"
+	    4
+	    (map-ref (map-union map1 map2) 'd))
 
+	  (test-equal "map-union: existing association"
+	    3
+	    (map-ref (map-union map1 map4) 'c))
+	  
+	  (test-equal "map-union: three maps"
+	    6
+	    (map-size (map-union map1 map2 map6)))
+	  
+	  (test-equal "map-intersection: existing association"
+	    3
+	    (map-ref (map-intersection map1 map4) 'c))
+
+	  (test-equal "map-intersection: removed association"
+	    42
+	    (map-ref/default (map-intersection map1 map5) 'b 42))
+
+	  (test-equal "map-difference"
+	    2
+	    (map-size (map-difference map2 map6)))
+
+	  (test-equal "map-xor"
+	    4
+	    (map-size (map-xor map2 map6))))
+	
 	(test-group "Comparators"
 	  (define map1 (make-map comparator 'a 1 'b 2 'c 3))
 	  (define map2 (make-map comparator 'a 1 'b 2 'c 3))
