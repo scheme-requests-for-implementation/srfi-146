@@ -161,7 +161,7 @@ side effects, depending upon the details of what is the most efficient
   (let ((map1 (set (make-default-comparator 'a 1 'b 2 'c 3)))
     (map-set! map1 'd 4)) ; &rArr; {a&map;1,b&map;2,c&map;3;d&map;4}
 </pre>
-  
+
 <p>So clients of these procedures write in a functional style, but
 must additionally be sure that, when the procedure is called, there
 are no other live pointers to the potentially-modified map (hence the
@@ -234,7 +234,7 @@ is <code>eq?</code>, <code>eqv?</code>, <code>equal?</code>, <code>string=?</cod
 <p>
   (Scheme code which would be more performant/more natural with
   comparison procedures instead of hash functions, would change the
-  order of the two <cond-expand>-clauses.
+  order of the two <cond-expand>-clauses.)
 </p>
 
 <p>As an author using SRFI 113 faces the same problems, any
