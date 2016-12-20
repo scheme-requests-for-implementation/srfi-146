@@ -208,14 +208,18 @@ is <code>eq?</code>, <code>eqv?</code>, <code>equal?</code>, <code>string=?</cod
 <p>
   In order to allow portable Scheme code to distinguish whether a
   specific implementation of this SRFI supports comparators with
-  comparison procedures or comparators with hash functions (or both),
-  it is required that an implementation supporting comparators with
-  comparison functions not only exports all identifiers in
+  comparison procedures (in which case sets of keys have a natural
+  total order) or comparators with hash functions (or both), it is
+  required that an implementation supporting comparators with
+  comparison functions not only implements the interface in
   the <code>(srfi 146)</code> namespace, but also in the <code>(srfi
   146 ordered)</code> namespace.  Likewise, an implementation
-  supporting comparators with hash functions exports all identifiers
+  supporting comparators with hash functions implements the interface
   in the <code>(srfi 146)</code> namespace also in the <code>(srfi 146
-    hash)</code> namespace.  The same should be true for all alternatives to <code>(srfi 146)</code>,
+  hash)</code> namespace.  Procedures that are exported from the
+  the <code>(srfi 146 ordered)</code> namespace have additional
+  restrictions (see below).  What has been said above should be true
+  for all alternatives to <code>(srfi 146)</code>,
   <i>e.g.</i> <code>(scheme map)</code>.
 </p>
 
@@ -239,13 +243,15 @@ is <code>eq?</code>, <code>eqv?</code>, <code>equal?</code>, <code>string=?</cod
 
 <p>As an author using SRFI 113 faces the same problems, any
   implementation of SRFI 146 that also implements SRFI 113 should
-  export its identifiers at least also under the <code>(srfi 113
+  implement its interface at least also under the <code>(srfi 113
   ordered)</code> or <code>(srfi 113 hash)</code> namespace, depending
-  on which kind of comparators are supported.  (As SRFI 113 is also
-  known as <code>(scheme set)</code> in R7RS-large, the same
-  recommendation holds for <code>(scheme set ordered)</code>
-  and <code>(scheme set hash)</code>, should this SRFI become a part
-  of a later Scheme standard based on R7RS.)
+  on which kind of comparators are supported (procedures exported
+  under <code>(srfi 113 ordered)</code> should respect the ordering
+  where it makes sense; see below).  (As SRFI 113 is also known
+  as <code>(scheme set)</code> in R7RS-large, the same recommendation
+  holds for <code>(scheme set ordered)</code> and <code>(scheme set
+  hash)</code>, should this SRFI become a part of a later Scheme
+  standard based on R7RS.)
 </p>
 
 <h2 id="index">Index</h2>
@@ -553,7 +559,12 @@ then the <code><em>success</em></code> procedure is tail-called with
 the matching key of <code><em>map</em></code>, the associated value,
 and two continuations, <code><em>update</em></code>
 and <code><em>remove</em></code>, and is expected to tail-call one of
-  them
+them.
+</p>
+
+<p>If <code>map-search</code> is imported from <code>(srfi 146
+    ordered)</code>, <code><em>map</em></code> is searched in order
+    (that is in the order of the stored keys).
 </p>
 
 <p>
@@ -624,7 +635,13 @@ Returns the number of associations in <em>map</em> as an exact integer.
   value when invoked with key and value as arguments, or the result of
   invoking <code><em>failure</em></code> with no arguments if there is
   none.  There are no guarantees how many times and with which keys and values
-  <code><em>predicate</em></code> is invoked.
+  <code><em>predicate</em></code> is invoked, but see below:
+</p>
+
+<p>If <code>map-find</code> is imported from <code>(srfi 146
+    ordered)</code>, <code><em>map</em></code> is searched in order:
+    The association with the least key that
+    satisfies <code><em>predicate</em></code> is returned.
 </p>
 
 <p><code>(map-count <em>predicate</em> <em>map</em>)</code></p>
@@ -653,25 +670,44 @@ of <code>map-find</code>), or <code>#f</code> otherwise.
 
 <p><code>(map-keys <em>map</em>)</code></p>
 
-Returns a newly allocated list of all the keys in the map <code><em>map</em></code>.
+<p>Returns a newly allocated list of all the keys in the map <code><em>map</em></code>.</p>
+
+<p>If <code>map-keys</code> is imported from <code>(srfi 146
+    ordered)</code>, the list is returned in order:  It is ordered
+  according to the ordering of the keys.
+</p>
 
 <p><code>(map-values <em>map</em>)</code></p>
 
-Returns a newly allocated list of all the values in the map <code><em>map</em></code>.
+<p>
+  Returns a newly allocated list of all the values in the map <code><em>map</em></code>.
+</p>
+
+<p>If <code>map-values</code> is imported from <code>(srfi 146
+    ordered)</code>, the list is returned in order:  It is ordered
+  according to the ordering of the keys corresponding to the values.
+</p>
 
 <p><code>(map-entries <em>map</em>)</code></p>
 
+<p>
 Returns two values, a newly allocated list of all the keys in the
 map <code><em>map</em></code>, and a newly allocated list of all the
 values in the map <code><em>map</em></code>.  The two lists are
 consistently ordered,  so that keys can be matched to their corresponding values.
+</p>
+
+<p>If <code>map-values</code> is imported from <code>(srfi 146
+    ordered)</code>, the lists is returned in order:  They are ordered
+  according to the ordering of the keys.
+</p>
 
 <h2 id="Mappingandfolding">Mapping and folding</h2>
 
 <p><code>(map-map <em>proc</em> <em>comparator</em> <em>map</em>)</code></p>
 
 <p>Applies <code><em>proc</em></code> on two arguments, the key and value of each association of 
-  <code><em>map</em></code> in arbitrary order, which returns two
+  <code><em>map</em></code> in arbitrary order (but see below), which returns two
   values, and returns a newly allocated map that uses the same
   comparator as the map <code><em>map</em></code> and which contains
   the results of the applications inserted as keys and values. Note
@@ -695,23 +731,38 @@ are omitted as in the map constructor.  It is unpredictable which one
 will be preserved in the result.
 </p>
 
+<p>If <code>map-map</code> is imported from <code>(srfi 146
+    ordered)</code>, the associations are mapped in order:  They are ordered
+  according to the natural ordering of the keys.
+</p>
+
 <p><code>(map-for-each <em>proc</em> <em>map</em>)</code></p>
 
 <p>Invokes <code><em>proc</em></code> for every association in the
-map <code><em>map</em></code> in arbitrary order, discarding the
+map <code><em>map</em></code> in arbitrary order (but see below), discarding the
 returned values, with two arguments: the key of the association and
 the value of the association.  Returns an unspecified value.
+</p>
+
+<p>If <code>map-for-each</code> is imported from <code>(srfi 146
+    ordered)</code>, the associations are processed in order:  They are ordered
+  according to the natural ordering of the keys.
 </p>
 
 <p><code>(map-fold <em>proc</em> <em>nil</em> <em>map</em>)</code></p>
 
 <p>Invokes <code><em>proc</em></code> for each association of the
-map <code><em>map</em></code> in arbitrary order with three arguments:
-the key of the association, the value of the association, and an
-accumulted and the result of the previous invocation.  
-For the first invocation, <code><em>nil</em></code> is used as the
-second argument.  Returns the result of the last invocation,
-or <code><em>nil</em></code> if there was no invocation.
+map <code><em>map</em></code> in arbitrary order (but see below) with
+three arguments: the key of the association, the value of the
+association, and an accumulated result of the previous
+invocation.  For the first invocation, <code><em>nil</em></code> is
+used as the second argument.  Returns the result of the last
+invocation, or <code><em>nil</em></code> if there was no invocation.
+</p>
+
+<p>If <code>map-fold</code> is imported from <code>(srfi 146
+    ordered)</code>, the associations are accumulated in order:  They are ordered
+  according to the natural ordering of the keys.
 </p>
 
 <p><code>(map-map-&gt;list <em>proc</em> <em>map</em>)</code></p>
@@ -722,6 +773,11 @@ map <code><em>map</em></code> with two arguments: the key of the
 association and the value of the association.  The values returned by
 the invocations of <code><em>proc</em></code> are accumulated into a
 list, which is returned.
+</p>
+
+<p>If <code>map-map-&gt;list</code> is imported from <code>(srfi 146
+    ordered)</code>, the associations are mapped in order:  They are ordered
+  according to the natural ordering of the keys.
 </p>
 
 <p><code>(map-filter <em>predicate</em> <em>map</em>)</code></p>
@@ -784,9 +840,14 @@ map <code><em>map</em></code>, and using the same comparator.
 
 <p>
   Returns a newly allocated association list containing the
-  associations of the <code><em>map</em></code> in unspecified order.
+  associations of the <code><em>map</em></code> in unspecified order (but see below).
   Each association in the list is a pair whose car is the key and
   whose cdr is the associated value.
+</p>
+
+<p>If <code>map-&gt;alist</code> is imported from <code>(srfi 146
+    ordered)</code>, the association list is in order:  It is ordered
+  according to the natural ordering of the keys.
 </p>
 
 <p><code>(alist-&gt;map <em>comparator</em> <em>alist</em>)</code></p>
@@ -904,6 +965,12 @@ in the result map are drawn from the first map in which they appear.
   the implementation of this SRFI requires comparators to provide a
   hash function. This allows maps whose keys are maps themselves, and
   it allows to compare maps whose values are maps.
+</p>
+
+<p>If <code>make-map-comparator</code> is imported from <code>(srfi
+    146 ordered)</code>, the lexicographic ordering with respect to
+    the keys (and, in case a tiebreak is neccessary, with respect to
+    the ordering of the values) is used.
 </p>
 
 The following comparator is used to compare maps when <code>(make-default-comparator)</code> 
