@@ -83,7 +83,7 @@ implementations to implement purely functional maps efficiently, while
 allowing even more efficient mutable data structures when immutability
 is not needed.  However, although one can use SRFI 113 to implement
 sets of associations, SRFI 113 does not export any procedures that
-explicitely deal with sets of associations.
+explicitly deal with sets of associations.
 </p>
 
 <p>One can view the interface proposed in this SRFI as the map
@@ -417,7 +417,7 @@ Semantically equivalent to, but may be more efficient than, the following code:
   contains all the associations of <code><em>map</em></code>, and in
   addition new associations by processing the arguments from left to
   right. The <code><em>arg</em></code>s alternate between keys and
-  values.  Whenever thre is a previous association for a key, it is
+  values.  Whenever there is a previous association for a key, it is
   deleted.  It is an error to add an element
   to <code><em>map</em></code> that does not return <code>#t</code>
   when passed to the type test procedure of the comparator.
@@ -817,6 +817,9 @@ and therefore do not constitute a total order on maps.
 <p>All predicates in this subsection take
 a <code><em>comparator</em></code> argument, which is a comparator
 used to compare the values of the associations stored in the maps.
+This comparator is used to define the equality of associations.  Two
+associations are equal if and only if their keys and values are equal,
+respectively.
 </p>
 
 <p><code>(map=? <em>comparator</em> <em>map<sub>1</sub></em> <em>map<sub>2</sub></em> ...)</code></p>
@@ -857,7 +860,7 @@ of the following <em>map</em>, and <code>#f</code> otherwise.</p>
 
 <p><code>(map-difference <em>map<sub>1</sub> map<sub>2</sub></em> ...)</code></p>
 
-<p><code>(map-xor <em>map<sub>1</sub> map<sub>2</sub></em> ...)</code></p>
+<p><code>(map-xor <em>map<sub>1</sub> map<sub>2</sub></em>)</code></p>
 
 <p>
 Return a newly allocated map whose set of associations is the union,
@@ -876,7 +879,7 @@ in the result map are drawn from the first map in which they appear.
 
 <p><code>(map-difference! <em>map<sub>1</sub> map<sub>2</sub></em> ...)</code></p>
 
-<p><code>(map-xor! <em>map<sub>1</sub> map<sub>2</sub></em> ...)</code></p>
+<p><code>(map-xor! <em>map<sub>1</sub> map<sub>2</sub></em>)</code></p>
 
 <p>Linear update procedures returning a map that is the union,
 intersection, asymmetric difference, or symmetric difference of
@@ -889,12 +892,6 @@ in the result map are drawn from the first map in which they appear.
 
 <h2 id="Comparators">Comparators</h2>
 
-<p>
-  There is no default comparator that can be used to compare maps
-  because equality and comparison of maps is only well-defined in the
-  presence of a comparator for the values of the maps.
-</p>
-
 <p><code>(make-map-comparator <em>comparator</em>)</code></p>
 
 <p>
@@ -905,11 +902,12 @@ in the result map are drawn from the first map in which they appear.
   the implementation of this SRFI requires comparators to provide a
   comparison function, and is obliged to provide hash functions when
   the implementation of this SRFI requires comparators to provide a
-  hash function. This allows maps whose keys are maps themselves.
+  hash function. This allows maps whose keys are maps themselves, and
+  it allows to compare maps whose values are maps.
 </p>
 
 The following comparator is used to compare maps when <code>(make-default-comparator)</code> 
-is invoked.
+from SRFI 128 is invoked:
 
 <p><code>map-comparator</code></p>
 
@@ -937,7 +935,9 @@ in this SRFI is intimitely tied, the dependencies are trivial.)
 <p>
 Credit goes to John Cowan for SRFI 113 and SRFI 128, to Will Clinger
 and John Cowan for SRFI 125, and to Kevin Wortman for his
-immutable-maps-proposal.
+immutable-maps-proposal.  Special credit also goes to Sudarshan S
+Chawathe for his careful reading of the drafts of this SRFI and his
+many valuable comments which helped to improve this proposal.
 </p>
 
 <p>
