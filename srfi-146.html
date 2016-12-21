@@ -29,7 +29,7 @@ Marc Nieper-Wi&szlig;kirchen
 <p>
 <em>Maps</em> are finite sets of associations, where each association
 is a pair consisting of a key and an arbitrary Scheme value.  The keys
-are elements of a suitable codomain.  Each map holds no more than one
+are elements of a suitable domain.  Each map holds no more than one
 association with the same key.  The fundamental map operation is
 retrieving the value of an association stored in the map when the key
 is given.
@@ -38,16 +38,20 @@ is given.
 <h1>Issues</h1>
 
 <ul>
-  <li>The canonical name for the basic map constructor would
-  be <code>map</code> (compare
-  to <code>vector</code>, <code>hash-table</code>, <code>set</code>,
-  etc.)  However, the name <code>map</code> is already taking by a
-  well-known higher-order procedure in Scheme's base library.
-  Currently, this proposal uses the non-optimal
-  name <code>make-map</code>.
-  </li>
-  <li>
-    The implementation hasn't been published yet.
+  <li><p> The canonical name for the basic map constructor would
+      be <code>map</code> (compare
+      to <code>vector</code>, <code>hash-table</code>, <code>set</code>,
+      etc.)  However, the name <code>map</code> is already taking by a
+      well-known higher-order procedure in Scheme's base library.
+      Currently, this proposal uses the non-optimal
+      name <code>make-map</code>.  Also names
+      like <code>map-map</code> appearing in this specification are
+      not optimal.
+    </p>
+    <p>
+      One solution would be to rename <em>map</em> throughout
+      to <em>dict</em>, or <em>mapping</em>.
+    </p>
   </li>
 </ul>
 
@@ -83,7 +87,7 @@ implementations to implement purely functional maps efficiently, while
 allowing even more efficient mutable data structures when immutability
 is not needed.  However, although one can use SRFI 113 to implement
 sets of associations, SRFI 113 does not export any procedures that
-explicitely deal with sets of associations.
+explicitly deal with sets of associations.
 </p>
 
 <p>One can view the interface proposed in this SRFI as the map
@@ -92,7 +96,7 @@ explicitely deal with sets of associations.
 </p>
 
 <p>
-  Multi-sets (<i>i.e.</i> relations) are not covered by this SRFI.
+  Multi-maps (<i>i.e.</i> general relations) are not covered by this SRFI.
   They are left to a future SRFI should they prove to be essential.
 </p>
 
@@ -120,6 +124,15 @@ Maps are disjoint from other types of Scheme objects.
 <p>
   It is an error to apply any procedures defined in this SRFI whose
   names end in <code>!</code> to a map while iterating over it.
+</p>
+
+<p>
+  When part of an R7RS implementation, the library <code>(srfi
+    146)</code> should export exactly those identifiers that are
+    described in this specification with the appropriate bindings.  Should
+    this SRFI become an essential part of a future Scheme system based
+    on R7RS (<i>e.g.</i> R7RS-large), the library's name would
+    become <code>(scheme map)</code>.
 </p>
 
 <h2>Linear update</h2>
@@ -152,7 +165,7 @@ side effects, depending upon the details of what is the most efficient
   (let ((map1 (set (make-default-comparator 'a 1 'b 2 'c 3)))
     (map-set! map1 'd 4)) ; &rArr; {a&map;1,b&map;2,c&map;3;d&map;4}
 </pre>
-  
+
 <p>So clients of these procedures write in a functional style, but
 must additionally be sure that, when the procedure is called, there
 are no other live pointers to the potentially-modified map (hence the
@@ -160,11 +173,14 @@ term "linear update").</p>
 
 <p>There are two benefits to this convention:</p>
 
-<ul><li><p>Implementations are free to provide the most efficient possible implementation, either functional or side-effecting.</p></li>
+<ul><li><p>Implementations are free to provide the most efficient
+possible implementation, either functional or side-effecting.</p></li>
 
 <li><p>Programmers may nonetheless continue to assume that maps are
 purely functional data structures: they may be reliably shared without
-needing to be copied, uniquified, and so forth.</p></li></ul>
+needing to be copied, uniquified, and so forth (as long as the map in
+question is not an argument of a "linear-update"
+procedure).</p></li></ul>
 
 <p>In practice, these procedures are most useful for efficiently
 constructing maps in a side-effecting manner, in some limited local
@@ -191,6 +207,55 @@ to provide a hash function, unless the equality predicate of the
 comparator
 is <code>eq?</code>, <code>eqv?</code>, <code>equal?</code>, <code>string=?</code>,
   or <code>string-ci=?</code>.
+</p>
+
+<p>
+  In order to allow portable Scheme code to distinguish whether a
+  specific implementation of this SRFI supports comparators with
+  comparison procedures (in which case sets of keys have a natural
+  total order) or comparators with hash functions (or both), it is
+  required that an implementation supporting comparators with
+  comparison functions not only implements the interface in
+  the <code>(srfi 146)</code> namespace, but also in the <code>(srfi
+  146 ordered)</code> namespace.  Likewise, an implementation
+  supporting comparators with hash functions implements the interface
+  in the <code>(srfi 146)</code> namespace also in the <code>(srfi 146
+  hash)</code> namespace.  Procedures that are exported from the
+  the <code>(srfi 146 ordered)</code> namespace have additional
+  restrictions (see below).  What has been said above should be true
+  for all alternatives to <code>(srfi 146)</code>,
+  <i>e.g.</i> <code>(scheme map)</code>.
+</p>
+
+<p>
+  Portable Scheme code can distinguish implementations of this SRFI using <code>cond-expand</code>:
+</p>
+
+<pre>
+  (cond-expand
+    ((library (srfi 146 hash))
+     ...) ; code that sets up comparators with hash functions
+    ((library (srfi 146 ordered))
+     ...)) ; code that sets up comparators with comparison procedures
+</pre>
+
+<p>
+  (Scheme code which would be more performant/more natural with
+  comparison procedures instead of hash functions, would change the
+  order of the two <cond-expand>-clauses.)
+</p>
+
+<p>As an author using SRFI 113 faces the same problems, any
+  implementation of SRFI 146 that also implements SRFI 113 should
+  implement its interface at least also under the <code>(srfi 113
+  ordered)</code> or <code>(srfi 113 hash)</code> namespace, depending
+  on which kind of comparators are supported (procedures exported
+  under <code>(srfi 113 ordered)</code> should respect the ordering
+  where it makes sense; see below).  (As SRFI 113 is also known
+  as <code>(scheme set)</code> in R7RS-large, the same recommendation
+  holds for <code>(scheme set ordered)</code> and <code>(scheme set
+  hash)</code>, should this SRFI become a part of a later Scheme
+  standard based on R7RS.)
 </p>
 
 <h2 id="index">Index</h2>
@@ -283,10 +348,11 @@ is <code>eq?</code>, <code>eqv?</code>, <code>equal?</code>, <code>string=?</cod
 
 <p>Returns a newly allocated map.  The <em>comparator</em> argument is
 a <a href="http://srfi.schemers.org/srfi-128/srfi-128.html">SRFI
-128</a> comparator, which is used to control and distinguish the
-elements of the set.  The <em>arg</em>s alter between keys and values
-and are used to initialize the map.  Earlier associations with equal keys
-take precedence over later arguments.</p>
+128</a> comparator, which is used to control and distinguish the keys
+of the map.  The <code><em>arg</em></code>s alter between keys and values and are
+used to initialize the map.  In particular, the number
+of <code><em>arg</em></code>s has to be even.  Earlier associations
+with equal keys take precedence over later arguments.</p>
 
 <p><code>(map-unfold <em>stop?</em> <em>mapper</em> <em>successor</em> <em>seed</em> <em>comparator</em>)</code></p>
 
@@ -307,7 +373,7 @@ take precedence over later arguments.</p>
 <p>Returns <code>#t</code> if <code><em>obj</em></code> is a map,
 and <code>#f</code> otherwise.</p>
 
-<p><code>(map-contains? <em>map key</em>)</code></p>
+<p><code>(map-contains? <em>map</em> <em>key</em>)</code></p>
 
 <p>Returns <code>#t</code> if <code><em>key</em></code> is the key of an
 association of <code><em>map</em></code> and <code>#f</code> otherwise.</p>
@@ -361,7 +427,7 @@ Semantically equivalent to, but may be more efficient than, the following code:
   contains all the associations of <code><em>map</em></code>, and in
   addition new associations by processing the arguments from left to
   right. The <code><em>arg</em></code>s alternate between keys and
-  values.  Whenever thre is a previous association for a key, it is
+  values.  Whenever there is a previous association for a key, it is
   deleted.  It is an error to add an element
   to <code><em>map</em></code> that does not return <code>#t</code>
   when passed to the type test procedure of the comparator.
@@ -449,12 +515,20 @@ rather than allocating a new map.
 
 <p><code>(map-update <em>map</em> <em>key</em> <em>updater</em> <em>failure</em> <em>success</em>)</code></p>
 
+<p><code>(map-update <em>map</em> <em>key</em> <em>updater</em> <em>failure</em>)</code></p>
+
+<p><code>(map-update <em>map</em> <em>key</em> <em>updater</em>)</code></p>
+
 Semantically equivalent to, but may be more efficient than, the following code
 <pre>
   (map-set <em>map</em> <em>key</em> (<em>updater</em> (map-ref <em>map</em> <em>key</em> <em>failure</em> <em>success</em>)))
 </pre>
 
 <p><code>(map-update! <em>map</em> <em>key</em> <em>updater</em> <em>failure</em> <em>success</em>)</code></p>
+
+<p><code>(map-update! <em>map</em> <em>key</em> <em>updater</em> <em>failure</em>)</code></p>
+
+<p><code>(map-update! <em>map</em> <em>key</em> <em>updater</em>)</code></p>
 
 <p>The <code>map-update!</code> procedure is the same
   as <code>map-update</code>, except that it is permitted to mutate and
@@ -485,8 +559,26 @@ the <code><em>failure</em></code> procedure is tail-called with two
 continuation arguments, <code><em>insert</em></code>
 and <code><em>ignore</em></code>, and is expected to tail-call one of
 them.  If an association with key <code><em>key</em></code> is found,
-then the <code><em>success</em></code> procedure is tail-called with the matching
-key of <code><em>map</em></code>, the associated value, and two continuations, <code><em>update</em></code> and <code><em>remove</em></code>, and is expected to tail-call one of them.</p>
+then the <code><em>success</em></code> procedure is tail-called with
+the matching key of <code><em>map</em></code>, the associated value,
+and two continuations, <code><em>update</em></code>
+and <code><em>remove</em></code>, and is expected to tail-call one of
+them.
+</p>
+
+<p>If <code>map-search</code> is imported from <code>(srfi 146
+    ordered)</code>, <code><em>map</em></code> is searched in order
+    (that is in the order of the stored keys).
+</p>
+
+<p>
+It is an error if the continuation arguments are invoked, but not in
+tail position in the
+<code><em>failure</em></code> and <code><em>success</em></code>
+procedures.  It is also an error if the <code><em>failure</em></code>
+and <code><em>success</em></code> procedures return to their implicit
+continuation without invoking one of their continuation arguments.
+</p>
 
 <p>The effects of the continuations are as follows
 (where <code><em>obj</em></code> is any Scheme object):
@@ -530,6 +622,14 @@ allocated <code><em>map</em></code> and
   <code><em>obj</em></code>.
 </p>
 
+<p><code>(map-search <em>map</em> <em>key</em> <em>failure</em> <em>success</em>)</code></p>
+
+<p>The <code>map-search!</code> procedure is the same
+  as <code>map-search</code>, except that it is permitted to mutate
+  and return the <code><em>map</em></code> argument rather than
+  allocating a new map.
+</p>
+
 <h2 id="Thewholemap">The whole map</h2>
 
 <p><code>(map-size <em>map</em>)</code></p>
@@ -547,7 +647,13 @@ Returns the number of associations in <em>map</em> as an exact integer.
   value when invoked with key and value as arguments, or the result of
   invoking <code><em>failure</em></code> with no arguments if there is
   none.  There are no guarantees how many times and with which keys and values
-  <code><em>predicate</em></code> is invoked.
+  <code><em>predicate</em></code> is invoked, but see below:
+</p>
+
+<p>If <code>map-find</code> is imported from <code>(srfi 146
+    ordered)</code>, <code><em>map</em></code> is searched in order:
+    The association with the least key that
+    satisfies <code><em>predicate</em></code> is returned.
 </p>
 
 <p><code>(map-count <em>predicate</em> <em>map</em>)</code></p>
@@ -576,23 +682,44 @@ of <code>map-find</code>), or <code>#f</code> otherwise.
 
 <p><code>(map-keys <em>map</em>)</code></p>
 
-Returns a newly allocated list of all the keys in the map <code><em>map</em></code>.
+<p>Returns a newly allocated list of all the keys in the map <code><em>map</em></code>.</p>
+
+<p>If <code>map-keys</code> is imported from <code>(srfi 146
+    ordered)</code>, the list is returned in order:  It is ordered
+  according to the ordering of the keys.
+</p>
 
 <p><code>(map-values <em>map</em>)</code></p>
 
-Returns a newly allocated list of all the values in the map <code><em>map</em></code>.
+<p>
+  Returns a newly allocated list of all the values in the map <code><em>map</em></code>.
+</p>
+
+<p>If <code>map-values</code> is imported from <code>(srfi 146
+    ordered)</code>, the list is returned in order:  It is ordered
+  according to the ordering of the keys corresponding to the values.
+</p>
 
 <p><code>(map-entries <em>map</em>)</code></p>
 
-Returns two values, a newly allocated list of all the keys in the map <code><em>map</em></code>,
-and a newly allocated list of all the values in the map <code><em>map</em></code>.
+<p>
+Returns two values, a newly allocated list of all the keys in the
+map <code><em>map</em></code>, and a newly allocated list of all the
+values in the map <code><em>map</em></code>.  The two lists are
+consistently ordered,  so that keys can be matched to their corresponding values.
+</p>
+
+<p>If <code>map-values</code> is imported from <code>(srfi 146
+    ordered)</code>, the lists is returned in order:  They are ordered
+  according to the ordering of the keys.
+</p>
 
 <h2 id="Mappingandfolding">Mapping and folding</h2>
 
 <p><code>(map-map <em>proc</em> <em>comparator</em> <em>map</em>)</code></p>
 
 <p>Applies <code><em>proc</em></code> on two arguments, the key and value of each association of 
-  <code><em>map</em></code> in arbitrary order, which returns two
+  <code><em>map</em></code> in arbitrary order (but see below), which returns two
   values, and returns a newly allocated map that uses the same
   comparator as the map <code><em>map</em></code> and which contains
   the results of the applications inserted as keys and values. Note
@@ -616,23 +743,38 @@ are omitted as in the map constructor.  It is unpredictable which one
 will be preserved in the result.
 </p>
 
+<p>If <code>map-map</code> is imported from <code>(srfi 146
+    ordered)</code>, the associations are mapped in order:  They are ordered
+  according to the natural ordering of the keys.
+</p>
+
 <p><code>(map-for-each <em>proc</em> <em>map</em>)</code></p>
 
 <p>Invokes <code><em>proc</em></code> for every association in the
-map <code><em>map</em></code> in arbitrary order, discarding the
+map <code><em>map</em></code> in arbitrary order (but see below), discarding the
 returned values, with two arguments: the key of the association and
 the value of the association.  Returns an unspecified value.
+</p>
+
+<p>If <code>map-for-each</code> is imported from <code>(srfi 146
+    ordered)</code>, the associations are processed in order:  They are ordered
+  according to the natural ordering of the keys.
 </p>
 
 <p><code>(map-fold <em>proc</em> <em>nil</em> <em>map</em>)</code></p>
 
 <p>Invokes <code><em>proc</em></code> for each association of the
-map <code><em>map</em></code> in arbitrary order with three arguments:
-the key of the association, the value of the association, and an
-accumulted and the result of the previous invocation.  
-For the first invocation, <code><em>nil</em></code> is used as the
-second argument.  Returns the result of the last invocation,
-or <code><em>nil</em></code> if there was no invocation.
+map <code><em>map</em></code> in arbitrary order (but see below) with
+three arguments: the key of the association, the value of the
+association, and an accumulated result of the previous
+invocation.  For the first invocation, <code><em>nil</em></code> is
+used as the second argument.  Returns the result of the last
+invocation, or <code><em>nil</em></code> if there was no invocation.
+</p>
+
+<p>If <code>map-fold</code> is imported from <code>(srfi 146
+    ordered)</code>, the associations are accumulated in order:  They are ordered
+  according to the natural ordering of the keys.
 </p>
 
 <p><code>(map-map-&gt;list <em>proc</em> <em>map</em>)</code></p>
@@ -643,6 +785,11 @@ map <code><em>map</em></code> with two arguments: the key of the
 association and the value of the association.  The values returned by
 the invocations of <code><em>proc</em></code> are accumulated into a
 list, which is returned.
+</p>
+
+<p>If <code>map-map-&gt;list</code> is imported from <code>(srfi 146
+    ordered)</code>, the associations are mapped in order:  They are ordered
+  according to the natural ordering of the keys.
 </p>
 
 <p><code>(map-filter <em>predicate</em> <em>map</em>)</code></p>
@@ -705,9 +852,14 @@ map <code><em>map</em></code>, and using the same comparator.
 
 <p>
   Returns a newly allocated association list containing the
-  associations of the <code><em>map</em></code> in unspecified order.
+  associations of the <code><em>map</em></code> in unspecified order (but see below).
   Each association in the list is a pair whose car is the key and
   whose cdr is the associated value.
+</p>
+
+<p>If <code>map-&gt;alist</code> is imported from <code>(srfi 146
+    ordered)</code>, the association list is in order:  It is ordered
+  according to the natural ordering of the keys.
 </p>
 
 <p><code>(alist-&gt;map <em>comparator</em> <em>alist</em>)</code></p>
@@ -732,12 +884,15 @@ earlier in the list take precedence over those that come later.
 <h2 id="Submaps">Submaps</h2>
 
 <p>Note: The following three predicates do not obey the trichotomy law
-and therefore do not constitute a total order on sets.
+and therefore do not constitute a total order on maps.
 </p>
 
 <p>All predicates in this subsection take
 a <code><em>comparator</em></code> argument, which is a comparator
 used to compare the values of the associations stored in the maps.
+This comparator is used to define the equality of associations.  Two
+associations are equal if and only if their keys and values are equal,
+respectively.
 </p>
 
 <p><code>(map=? <em>comparator</em> <em>map<sub>1</sub></em> <em>map<sub>2</sub></em> ...)</code></p>
@@ -778,7 +933,7 @@ of the following <em>map</em>, and <code>#f</code> otherwise.</p>
 
 <p><code>(map-difference <em>map<sub>1</sub> map<sub>2</sub></em> ...)</code></p>
 
-<p><code>(map-xor <em>map<sub>1</sub> map<sub>2</sub></em> ...)</code></p>
+<p><code>(map-xor <em>map<sub>1</sub> map<sub>2</sub></em>)</code></p>
 
 <p>
 Return a newly allocated map whose set of associations is the union,
@@ -797,7 +952,7 @@ in the result map are drawn from the first map in which they appear.
 
 <p><code>(map-difference! <em>map<sub>1</sub> map<sub>2</sub></em> ...)</code></p>
 
-<p><code>(map-xor! <em>map<sub>1</sub> map<sub>2</sub></em> ...)</code></p>
+<p><code>(map-xor! <em>map<sub>1</sub> map<sub>2</sub></em>)</code></p>
 
 <p>Linear update procedures returning a map that is the union,
 intersection, asymmetric difference, or symmetric difference of
@@ -810,12 +965,6 @@ in the result map are drawn from the first map in which they appear.
 
 <h2 id="Comparators">Comparators</h2>
 
-<p>
-  There is no default comparator that can be used to compare maps
-  because equality and comparison of maps is only well-defined in the
-  presence of a comparator for the values of the maps.
-</p>
-
 <p><code>(make-map-comparator <em>comparator</em>)</code></p>
 
 <p>
@@ -826,11 +975,18 @@ in the result map are drawn from the first map in which they appear.
   the implementation of this SRFI requires comparators to provide a
   comparison function, and is obliged to provide hash functions when
   the implementation of this SRFI requires comparators to provide a
-  hash function. This allows maps whose keys are maps themselves.
+  hash function. This allows maps whose keys are maps themselves, and
+  it allows to compare maps whose values are maps.
+</p>
+
+<p>If <code>make-map-comparator</code> is imported from <code>(srfi
+    146 ordered)</code>, the lexicographic ordering with respect to
+    the keys (and, in case a tiebreak is neccessary, with respect to
+    the ordering of the values) is used.
 </p>
 
 The following comparator is used to compare maps when <code>(make-default-comparator)</code> 
-is invoked.
+from SRFI 128 is invoked:
 
 <p><code>map-comparator</code></p>
 
@@ -845,9 +1001,10 @@ on <code>(make-default-comparator)</code>.
 The sample implementation uses a purely functional data structure and
 is based on red-black trees.  One could easily implement SRFI 113 on
 top of this (or any other) implementation of this SRFI.  The sample
-R7RS implementation is based on SRFI 2, SRFI 8, SRFI 121, SRFI 128,
-and SRFI 145 for which the sample implementations are included in the
-repository.
+R7RS implementation is based on SRFI 1, SRFI 2, SRFI 8, SRFI 121, SRFI
+128, and SRFI 145 for which the sample implementations are included in
+the repository.  (Except for SRFI 128, to which the interface proposed
+in this SRFI is intimitely tied, the dependencies are trivial.)
 </p>
 
 <a href="srfi/146.sld">Source for the reference implementation.</a>
@@ -857,7 +1014,9 @@ repository.
 <p>
 Credit goes to John Cowan for SRFI 113 and SRFI 128, to Will Clinger
 and John Cowan for SRFI 125, and to Kevin Wortman for his
-immutable-maps-proposal.
+immutable-maps-proposal.  Special credit also goes to Sudarshan S
+Chawathe for his careful reading of the drafts of this SRFI and his
+many valuable comments which helped to improve this proposal.
 </p>
 
 <p>
