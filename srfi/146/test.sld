@@ -99,11 +99,11 @@
 	(define map4 (map-update/default map1 'd (lambda (x) (* x x)) 4))
 	
 	(test-equal "map-set: key already in map"
-	  3
+	  4
 	  (map-ref map2 'c))
 
 	(test-equal "map-set: key set earlier"
-	  4
+	  5
 	  (map-ref map2 'd))
 
 	(test-equal "map-replace: key not in map"
@@ -385,7 +385,7 @@
 	    (comparator? map-comparator))
 	  
 	  (test-equal "map-keyed map"
-	    (list "a" "a" "c" "d" "e")
+	    (list "b" "b" "c" "d" "e")
 	    (list (map-ref map0 map1)
 		  (map-ref map0 map2)
 		  (map-ref map0 map3)

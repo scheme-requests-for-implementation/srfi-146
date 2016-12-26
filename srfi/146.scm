@@ -126,8 +126,8 @@
 	     (map map))
     (if (null? args)
 	map
-	(receive (map value)
-	    (map-intern map (car args) (lambda () (cadr args)))	
+	(receive (map)
+	    (map-update map (car args) (lambda (value) (cadr args)) (lambda () #f))	
 	  (loop (cddr args)
 		map)))))
 
@@ -217,17 +217,22 @@
   (assume-type map? map)
   (assume-type procedure? failure)
   (assume-type procedure? success)
-  (let*-values
-      (((comparator)
-	(map-key-comparator map))
-       ((tree obj)
-	(tree-search comparator
-		     (map-tree map)
-		     key
-		     failure
-		     success)))
-    (values (%make-map comparator tree)
-	    obj)))
+  (call/cc
+   (lambda (return)
+     (let*-values
+	 (((comparator)
+	   (map-key-comparator map))
+	  ((tree obj)
+	   (tree-search comparator
+			(map-tree map)
+			key
+			(lambda (insert ignore)
+			  (failure insert
+				   (lambda (obj)
+				     (return map obj))))
+			success)))
+       (values (%make-map comparator tree)
+	       obj)))))
 
 (define map-search! map-search)
 
@@ -305,7 +310,7 @@
 	      (receive (key value)
 		  (proc key value)
 		(map-set map key value)))
-	    (make-empty-map (map-key-comparator map))
+	    (make-empty-map comparator)
 	    map))
 
 (define (map-for-each proc map)

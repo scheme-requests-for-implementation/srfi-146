@@ -214,7 +214,7 @@ is <code>eq?</code>, <code>eqv?</code>, <code>equal?</code>, <code>string=?</cod
 <p>
   In order to allow portable Scheme code to distinguish whether a
   specific implementation of this SRFI supports comparators with
-  comparison procedures (in which case sets of keys have a natural
+  ordering procedures (in which case sets of keys have a natural
   total order) or comparators with hash functions (or both), it is
   required that an implementation supporting comparators with
   comparison functions not only implements the interface in
@@ -238,12 +238,12 @@ is <code>eq?</code>, <code>eqv?</code>, <code>equal?</code>, <code>string=?</cod
     ((library (srfi 146 hash))
      ...) ; code that sets up comparators with hash functions
     ((library (srfi 146 ordered))
-     ...)) ; code that sets up comparators with comparison procedures
+     ...)) ; code that sets up comparators with ordering procedures
 </pre>
 
 <p>
   (Scheme code which would be more performant/more natural with
-  comparison procedures instead of hash functions, would change the
+  ordering procedures instead of hash functions, would change the
   order of the two <cond-expand>-clauses.)
 </p>
 
@@ -526,6 +526,11 @@ Semantically equivalent to, but may be more efficient than, the following code
   (map-set <em>map</em> <em>key</em> (<em>updater</em> (map-ref <em>map</em> <em>key</em> <em>failure</em> <em>success</em>)))
 </pre>
 
+<p>
+  The obvious semantics hold when <code><em>success</em></code> (and <code><em>failure</em></code>)
+  are omitted (see <code>map-ref</code>).
+</p>
+
 <p><code>(map-update! <em>map</em> <em>key</em> <em>updater</em> <em>failure</em> <em>success</em>)</code></p>
 
 <p><code>(map-update! <em>map</em> <em>key</em> <em>updater</em> <em>failure</em>)</code></p>
@@ -542,7 +547,7 @@ Semantically equivalent to, but may be more efficient than, the following code
 
 Semantically equivalent to, but may be more efficient than, the following code
 <pre>
-  (map-set <em>map</em> <em>key</em> (<em>updater</em> (map-ref <em>map</em> <em>key</em> <em>default</em>)))
+  (map-set <em>map</em> <em>key</em> (<em>updater</em> (map-ref/default <em>map</em> <em>key</em> <em>default</em>)))
 </pre>
 
 <p><code>(map-update!/default <em>map</em> <em>key</em> <em>updater</em> <em>default</em>)</code></p>
@@ -595,7 +600,7 @@ mapping <code><em>key</em></code> to <code><em>value</em></code>.
 </p></li>
 <li>
   <p>Invoking <code>(<em>ignore</em> <em>obj</em>)</code>
-    has no effects (but see below).
+    has no effects; in particular, no new map is allocated (but see below).
   </p>
 </li>
 <li>
@@ -624,7 +629,7 @@ allocated <code><em>map</em></code> and
   <code><em>obj</em></code>.
 </p>
 
-<p><code>(map-search <em>map</em> <em>key</em> <em>failure</em> <em>success</em>)</code></p>
+<p><code>(map-search! <em>map</em> <em>key</em> <em>failure</em> <em>success</em>)</code></p>
 
 <p>The <code>map-search!</code> procedure is the same
   as <code>map-search</code>, except that it is permitted to mutate
@@ -673,7 +678,7 @@ satisfies <code><em>predicate</em></code> (in the sense
 of <code>map-find</code>), or <code>#f</code> otherwise.
 </p>
 
-<p><code>(map-every? <em>predicate</em> <em>set</em>)</code></p>
+<p><code>(map-every? <em>predicate</em> <em>map</em>)</code></p>
 
 <p>
 Returns <code>#t</code> if every association of the
@@ -722,8 +727,8 @@ consistently ordered,  so that keys can be matched to their corresponding values
 
 <p>Applies <code><em>proc</em></code> on two arguments, the key and value of each association of 
   <code><em>map</em></code> in arbitrary order (but see below), which returns two
-  values, and returns a newly allocated map that uses the same
-  comparator as the map <code><em>map</em></code> and which contains
+  values, and returns a newly allocated map that uses the
+  comparator <code><em>comparator</em></code>, and which contains
   the results of the applications inserted as keys and values. Note
   that this is more akin to <code>set-map</code> from SRFI 113 than
   to <code>hash-table-map</code> from SRFI 125. For example:
@@ -797,7 +802,7 @@ list, which is returned.
 <p><code>(map-filter <em>predicate</em> <em>map</em>)</code></p>
 
 <p>Returns a newly allocated map with the same comparator as the
-  map <code><em>set</em></code>, containing just the associations
+  map <code><em>map</em></code>, containing just the associations
   of <code><em>map</em></code> that satisfy <em>predicate</em> (in the
   sense of <code>map-find</code>).
 </p>
@@ -811,7 +816,7 @@ associations of <code><em>map</em></code> that satisfy <code><em>predicate</em><
 <p><code>(map-remove <em>predicate</em> <em>map</em>)</code></p>
 
 <p>Returns a newly allocated map with the same comparator as the
-  map <code><em>set</em></code>, containing just the elements
+  map <code><em>map</em></code>, containing just the elements
   of <code><em>map</em></code> that do not satisfy <em>predicate</em> (in the
   sense of <code>map-find</code>).
 </p>
@@ -973,7 +978,7 @@ in the result map are drawn from the first map in which they appear.
   Returns a comparator for maps that is compatible with the equality
   predicate
   <code>(map=? <em>comparator</em> <em>map<sub>1</sub></em> <em>map<sub>2</sub></em>)</code>.
-  These comparators are obliged to provide comparison procedures when
+  These comparators are obliged to provide ordering procedures when
   the implementation of this SRFI requires comparators to provide a
   comparison function, and is obliged to provide hash functions when
   the implementation of this SRFI requires comparators to provide a
