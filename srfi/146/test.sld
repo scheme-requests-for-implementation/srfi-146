@@ -33,382 +33,380 @@
       (test-begin "SRFI 146")
 
       (test-group "Predicates"
-	(define map0 (make-map comparator))
-	(define map1 (make-map comparator 'a 1 'b 2 'c 3))
-	(define map2 (make-map comparator 'c 1 'd 2 'e 3))
-	(define map3 (make-map comparator 'd 1 'e 2 'f 3))
+	(define mapping0 (mapping comparator))
+	(define mapping1 (mapping comparator 'a 1 'b 2 'c 3))
+	(define mapping2 (mapping comparator 'c 1 'd 2 'e 3))
+	(define mapping3 (mapping comparator 'd 1 'e 2 'f 3))
 	
-	(test-assert "map?: a map"
-	  (map? (make-map comparator)))
+	(test-assert "mapping?: a mapping"
+	  (mapping? (mapping comparator)))
 
-	(test-assert "map?: not a map"
-	  (not (map? (list 1 2 3))))
+	(test-assert "mapping?: not a mapping"
+	  (not (mapping? (list 1 2 3))))
 	
-	(test-assert "map-empty?: empty map"
-	  (map-empty? map0))
+	(test-assert "mapping-empty?: empty mapping"
+	  (mapping-empty? mapping0))
 	
-	(test-assert "map-empty?: non-empty map"
-	  (not (map-empty? map1)))
+	(test-assert "mapping-empty?: non-empty mapping"
+	  (not (mapping-empty? mapping1)))
 
-	(test-assert "map-contains?: containing"
-	  (map-contains? map1 'b))   
+	(test-assert "mapping-contains?: containing"
+	  (mapping-contains? mapping1 'b))   
 
-	(test-assert "map-contains?: not containing"
-	  (not (map-contains? map1 '2)))
+	(test-assert "mapping-contains?: not containing"
+	  (not (mapping-contains? mapping1 '2)))
 
-	(test-assert "map-disjoint?: disjoint"
-	  (map-disjoint? map1 map3))
+	(test-assert "mapping-disjoint?: disjoint"
+	  (mapping-disjoint? mapping1 mapping3))
 
-	(test-assert "map-disjoint?: not disjoint"
-	  (not (map-disjoint? map1 map2))))
+	(test-assert "mapping-disjoint?: not disjoint"
+	  (not (mapping-disjoint? mapping1 mapping2))))
 
       (test-group "Accessors"
-	(define map1 (make-map comparator 'a 1 'b 2 'c 3))
+	(define mapping1 (mapping comparator 'a 1 'b 2 'c 3))
 
-	(test-equal "map-ref: key found"
+	(test-equal "mapping-ref: key found"
 	  2
-	  (map-ref map1 'b))
+	  (mapping-ref mapping1 'b))
 
-	(test-equal "map-ref: key not found/with failure"
+	(test-equal "mapping-ref: key not found/with failure"
 	  42
-	  (map-ref map1 'd (lambda () 42)))
+	  (mapping-ref mapping1 'd (lambda () 42)))
 
-	(test-error "map-ref: key not found/without failure"
-	  (map-ref map1 'd))
+	(test-error "mapping-ref: key not found/without failure"
+	  (mapping-ref mapping1 'd))
 
-	(test-equal "map-ref: with success procedure"
+	(test-equal "mapping-ref: with success procedure"
 	  (* 2 2)
-	  (map-ref map1 'b (lambda () #f) (lambda (x) (* x x))))
+	  (mapping-ref mapping1 'b (lambda () #f) (lambda (x) (* x x))))
 
-	(test-equal "map-ref/default: key found"
+	(test-equal "mapping-ref/default: key found"
 	  3
-	  (map-ref/default map1 'c 42))
+	  (mapping-ref/default mapping1 'c 42))
 
-	(test-equal "map-ref/default: key not found"
+	(test-equal "mapping-ref/default: key not found"
 	  42
-	  (map-ref/default map1 'd 42))
+	  (mapping-ref/default mapping1 'd 42))
 
-	(test-equal "map-key-comparator"
+	(test-equal "mapping-key-comparator"
 	  comparator
-	  (map-key-comparator map1)))
+	  (mapping-key-comparator mapping1)))
 
       (test-group "Updaters"
-	(define map1 (make-map comparator 'a 1 'b 2 'c 3))
-	(define map2 (map-set map1 'c 4 'd 4 'd 5))
-	(define map3 (map-update map1 'b (lambda (x) (* x x))))
-	(define map4 (map-update/default map1 'd (lambda (x) (* x x)) 4))
+	(define mapping1 (mapping comparator 'a 1 'b 2 'c 3))
+	(define mapping2 (mapping-set mapping1 'c 4 'd 4 'd 5))
+	(define mapping3 (mapping-update mapping1 'b (lambda (x) (* x x))))
+	(define mapping4 (mapping-update/default mapping1 'd (lambda (x) (* x x)) 4))
 	
-	(test-equal "map-set: key already in map"
-	  3
-	  (map-ref map2 'c))
-
-	(test-equal "map-set: key set earlier"
+	(test-equal "mapping-set: key already in mapping"
 	  4
-	  (map-ref map2 'd))
+	  (mapping-ref mapping2 'c))
 
-	(test-equal "map-replace: key not in map"
+	(test-equal "mapping-set: key set earlier"
+	  5
+	  (mapping-ref mapping2 'd))
+
+	(test-equal "mapping-replace: key not in mapping"
 	  #f
-	  (map-ref/default (map-replace map1 'd 4) 'd #f))
+	  (mapping-ref/default (mapping-replace mapping1 'd 4) 'd #f))
 
-	(test-equal "map-replace: key in map"
+	(test-equal "mapping-replace: key in mapping"
 	  6
-	  (map-ref (map-replace map1 'c 6) 'c))
+	  (mapping-ref (mapping-replace mapping1 'c 6) 'c))
 
-	(test-equal "map-delete"
+	(test-equal "mapping-delete"
 	  42
-	  (map-ref/default (map-delete map1 'b) 'b 42))
+	  (mapping-ref/default (mapping-delete mapping1 'b) 'b 42))
 
-	(test-equal "map-delete-all"
+	(test-equal "mapping-delete-all"
 	  42
-	  (map-ref/default (map-delete-all map1 '(a b)) 'b 42))
+	  (mapping-ref/default (mapping-delete-all mapping1 '(a b)) 'b 42))
        
-	(test-equal "map-intern: key in map"
-	  (list map1 2)
+	(test-equal "mapping-intern: key in mapping"
+	  (list mapping1 2)
 	  (receive result
-	      (map-intern map1 'b (lambda () (error "should not have been invoked")))
+	      (mapping-intern mapping1 'b (lambda () (error "should not have been invoked")))
 	    result))
 
-	(test-equal "map-intern: key not in map"
+	(test-equal "mapping-intern: key not in mapping"
 	  (list 42 42)
-	  (receive (map value)
-	      (map-intern map1 'd (lambda () 42))
-	    (list value (map-ref map 'd))))
+	  (receive (mapping value)
+	      (mapping-intern mapping1 'd (lambda () 42))
+	    (list value (mapping-ref mapping 'd))))
 	    
-	(test-equal "map-update"
+	(test-equal "mapping-update"
 	  4
-	  (map-ref map3 'b))
+	  (mapping-ref mapping3 'b))
 
-	(test-equal "map-update/default"
+	(test-equal "mapping-update/default"
 	  16
-	  (map-ref map4 'd)))
+	  (mapping-ref mapping4 'd)))
 
-      (test-group "The whole map"
-	(define map0 (make-map comparator))
-	(define map1 (make-map comparator 'a 1 'b 2 'c 3))
+      (test-group "The whole mapping"
+	(define mapping0 (mapping comparator))
+	(define mapping1 (mapping comparator 'a 1 'b 2 'c 3))
 
-	(test-equal "map-size: empty map"
+	(test-equal "mapping-size: empty mapping"
 	  0
-	  (map-size map0))
+	  (mapping-size mapping0))
 
-	(test-equal "map-size: non-empty map"
+	(test-equal "mapping-size: non-empty mapping"
 	  3
-	  (map-size map1))
+	  (mapping-size mapping1))
 
-	(test-equal "map-find: found in map"
+	(test-equal "mapping-find: found in mapping"
 	  (list 'b 2)
 	  (receive result
-	      (map-find (lambda (key value)
+	      (mapping-find (lambda (key value)
 			  (and (eq? key 'b)
 			       (= value 2)))
-			map1
+			mapping1
 			(lambda () (error "should not have been called")))
 	    result))
 
-	(test-equal "map-find: not found in map"
+	(test-equal "mapping-find: not found in mapping"
 	  (list 42)
 	  (receive result
-	      (map-find (lambda (key value)
+	      (mapping-find (lambda (key value)
 			  (eq? key 'd))
-			map1
+			mapping1
 			(lambda ()
 			  42))
 	    result))
 
-	(test-equal "map-count"
+	(test-equal "mapping-count"
 	  2
-	  (map-count (lambda (key value)
+	  (mapping-count (lambda (key value)
 		       (>= value 2))
-		     map1))
+		     mapping1))
       
-	(test-assert "map-any?: found"
-	  (map-any? (lambda (key value)
+	(test-assert "mapping-any?: found"
+	  (mapping-any? (lambda (key value)
 		      (= value 3))
-		    map1))
+		    mapping1))
 
-	(test-assert "map-any?: not found"
-	  (not (map-any? (lambda (key value)
+	(test-assert "mapping-any?: not found"
+	  (not (mapping-any? (lambda (key value)
 			   (= value 4))
-			 map1)))
+			 mapping1)))
 
-	(test-assert "map-every?: true"
-	  (map-every? (lambda (key value)
+	(test-assert "mapping-every?: true"
+	  (mapping-every? (lambda (key value)
 			(<= value 3))
-		      map1))
+		      mapping1))
 
-	(test-assert "map-every?: false"
-	  (not (map-every? (lambda (key value)
+	(test-assert "mapping-every?: false"
+	  (not (mapping-every? (lambda (key value)
 			     (<= value 2))
-			   map1)))
+			   mapping1)))
 
-	(test-equal "map-keys"
+	(test-equal "mapping-keys"
 	  3
-	  (length (map-keys map1)))
+	  (length (mapping-keys mapping1)))
 
-	(test-equal "map-values"
+	(test-equal "mapping-values"
 	  6
-	  (fold + 0 (map-values map1)))
+	  (fold + 0 (mapping-values mapping1)))
 
-	(test-equal "map-entries"
+	(test-equal "mapping-entries"
 	  (list 3 6)
 	  (receive (keys values)
-	      (map-entries map1)
+	      (mapping-entries mapping1)
 	    (list (length keys) (fold + 0 values)))))
 
       (test-group "Mapping and folding"
-	(define map1 (make-map comparator 'a 1 'b 2 'c 3))
-	(define map2 (map-map (lambda (key value)
+	(define mapping1 (mapping comparator 'a 1 'b 2 'c 3))
+	(define mapping2 (mapping-map (lambda (key value)
 				(values (symbol->string key)
 					(* 10 value)))
 			      comparator
-			      map1))
+			      mapping1))
 
-	(test-equal "map-map"
+	(test-equal "mapping-map"
 	  20
-	  (map-ref map2 "b"))
+	  (mapping-ref mapping2 "b"))
 
-	(test-equal "map-for-each"
+	(test-equal "mapping-for-each"
 	  6
 	  (let ((counter 0))
-	    (map-for-each (lambda (key value)
+	    (mapping-for-each (lambda (key value)
 			    (set! counter (+ counter value)))
-			  map1)
+			  mapping1)
 	    counter))
 
-	(test-equal "map-fold"
+	(test-equal "mapping-fold"
 	  6
-	  (map-fold (lambda (key value acc)
+	  (mapping-fold (lambda (key value acc)
 		      (+ value acc))
 		    0
-		    map1))
+		    mapping1))
 
-	(test-equal "map-map->list"
+	(test-equal "mapping-map->list"
 	  (+ (* 1 1) (* 2 2) (* 3 3))
-	  (fold + 0 (map-map->list (lambda (key value)
+	  (fold + 0 (mapping-map->list (lambda (key value)
 				     (* value value))
-				   map1)))
+				   mapping1)))
 
-	(test-equal "map-filter"
+	(test-equal "mapping-filter"
 	  2
-	  (map-size (map-filter (lambda (key value)
+	  (mapping-size (mapping-filter (lambda (key value)
 				  (<= value 2))
-				map1)))
+				mapping1)))
 
-	(test-equal "map-remove"
+	(test-equal "mapping-remove"
 	  1
-	  (map-size (map-remove (lambda (key value)
+	  (mapping-size (mapping-remove (lambda (key value)
 				  (<= value 2))
-				map1)))
+				mapping1)))
 
-	(test-equal "map-partition"
+	(test-equal "mapping-partition"
 	  (list 1 2)
 	  (receive result
-	      (map-partition (lambda (key value)
+	      (mapping-partition (lambda (key value)
 			       (eq? 'b key))
-			     map1)
-	    (map map-size result)))
+			     mapping1)
+	    (map mapping-size result)))
 
 	(test-group "Copying and conversion"
-	  (define map1 (make-map comparator 'a 1 'b 2 'c 3))
-	  (define map2 (alist->map comparator '((a . 1) (b . 2) (c . 3))))
-	  (define map3 (alist->map! (map-copy map1) '((d . 4) '(c . 5))))
+	  (define mapping1 (mapping comparator 'a 1 'b 2 'c 3))
+	  (define mapping2 (alist->mapping comparator '((a . 1) (b . 2) (c . 3))))
+	  (define mapping3 (alist->mapping! (mapping-copy mapping1) '((d . 4) '(c . 5))))
 	  
-	  (test-equal "map-copy: same size"
+	  (test-equal "mapping-copy: same size"
 	    3
-	    (map-size (map-copy map1)))
+	    (mapping-size (mapping-copy mapping1)))
 
-	  (test-equal "map-copy: same comparator"
+	  (test-equal "mapping-copy: same comparator"
 	    comparator
-	    (map-key-comparator (map-copy map1)))
+	    (mapping-key-comparator (mapping-copy mapping1)))
 
-	  (test-equal "map->alist"
+	  (test-equal "mapping->alist"
 	    (cons 'b 2)
-	    (assq 'b (map->alist map1)))
+	    (assq 'b (mapping->alist mapping1)))
 	  
-	  (test-equal "alist->map"
+	  (test-equal "alist->mapping"
 	    2
-	    (map-ref map2 'b)
+	    (mapping-ref mapping2 'b)
 	    )
 
-	  (test-equal "alist->map!: new key"
+	  (test-equal "alist->mapping!: new key"
 	    4
-	    (map-ref map3 'd))
+	    (mapping-ref mapping3 'd))
 
-	  (test-equal "alist->map!: existing key"
+	  (test-equal "alist->mapping!: existing key"
 	    3
-	    (map-ref map3 'c)))
+	    (mapping-ref mapping3 'c)))
 
-	(test-group "Submaps"
-	  (define map1 (make-map comparator 'a 1 'b 2 'c 3))
-	  (define map2 (make-map comparator 'a 1 'b 2 'c 3))
-	  (define map3 (make-map comparator 'a 1 'c 3))
-	  (define map4 (make-map comparator 'a 1 'c 3 'd 4))
-	  (define map5 (make-map comparator 'a 1 'b 2 'c 6))
+	(test-group "Submappings"
+	  (define mapping1 (mapping comparator 'a 1 'b 2 'c 3))
+	  (define mapping2 (mapping comparator 'a 1 'b 2 'c 3))
+	  (define mapping3 (mapping comparator 'a 1 'c 3))
+	  (define mapping4 (mapping comparator 'a 1 'c 3 'd 4))
+	  (define mapping5 (mapping comparator 'a 1 'b 2 'c 6))
 
-	  (test-assert "map=?: equal maps"
-	    (map=? comparator map1 map2))
+	  (test-assert "mapping=?: equal mappings"
+	    (mapping=? comparator mapping1 mapping2))
 
-	  (test-assert "map=?: unequal maps"
-	    (not (map=? comparator map1 map4)))
+	  (test-assert "mapping=?: unequal mappings"
+	    (not (mapping=? comparator mapping1 mapping4)))
 
-	  (test-assert "map<?: proper subset"
-	    (map<? comparator map3 map1))
+	  (test-assert "mapping<?: proper subset"
+	    (mapping<? comparator mapping3 mapping1))
 
-	  (test-assert "map<?: improper subset"
-	    (not (map<? comparator map3 map1 map2)))
+	  (test-assert "mapping<?: improper subset"
+	    (not (mapping<? comparator mapping3 mapping1 mapping2)))
 	  
-	  (test-assert "map>?: proper superset"
-	    (map>? comparator map2 map3))
+	  (test-assert "mapping>?: proper superset"
+	    (mapping>? comparator mapping2 mapping3))
 
-	  (test-assert "map>?: improper superset"
-	    (not (map>? comparator map1 map2 map3)))
+	  (test-assert "mapping>?: improper superset"
+	    (not (mapping>? comparator mapping1 mapping2 mapping3)))
 
-	  (test-assert "map<=?: subset"
-	    (map<=? comparator map3 map2 map1))
+	  (test-assert "mapping<=?: subset"
+	    (mapping<=? comparator mapping3 mapping2 mapping1))
 
-	  (test-assert "map<=?: non-matching values"
-	    (not (map<=? comparator map3 map5)))
+	  (test-assert "mapping<=?: non-matching values"
+	    (not (mapping<=? comparator mapping3 mapping5)))
 
-	  (test-assert "map<=?: not a subset"
-	    (not (map<=? comparator map2 map4)))
+	  (test-assert "mapping<=?: not a subset"
+	    (not (mapping<=? comparator mapping2 mapping4)))
 
-	  (test-assert "map>=?: superset"
-	    (map>=? comparator map4 map3))
+	  (test-assert "mapping>=?: superset"
+	    (mapping>=? comparator mapping4 mapping3))
 
-	  (test-assert "map>=?: not a superset"
-	    (not (map>=? comparator map5 map3))))
+	  (test-assert "mapping>=?: not a superset"
+	    (not (mapping>=? comparator mapping5 mapping3))))
 
 	(test-group "Set theory operations"
-	  (define map1 (make-map comparator 'a 1 'b 2 'c 3))
-	  (define map2 (make-map comparator 'a 1 'b 2 'd 4))
-	  (define map3 (make-map comparator 'a 1 'b 2))
-	  (define map4 (make-map comparator 'a 1 'b 2 'c 4))
-	  (define map5 (make-map comparator 'a 1 'c 3))
-	  (define map6 (make-map comparator 'd 4 'e 5 'f 6))
+	  (define mapping1 (mapping comparator 'a 1 'b 2 'c 3))
+	  (define mapping2 (mapping comparator 'a 1 'b 2 'd 4))
+	  (define mapping3 (mapping comparator 'a 1 'b 2))
+	  (define mapping4 (mapping comparator 'a 1 'b 2 'c 4))
+	  (define mapping5 (mapping comparator 'a 1 'c 3))
+	  (define mapping6 (mapping comparator 'd 4 'e 5 'f 6))
 	  
-	  (test-equal "map-union: new association"
+	  (test-equal "mapping-union: new association"
 	    4
-	    (map-ref (map-union map1 map2) 'd))
+	    (mapping-ref (mapping-union mapping1 mapping2) 'd))
 
-	  (test-equal "map-union: existing association"
+	  (test-equal "mapping-union: existing association"
 	    3
-	    (map-ref (map-union map1 map4) 'c))
+	    (mapping-ref (mapping-union mapping1 mapping4) 'c))
 	  
-	  (test-equal "map-union: three maps"
+	  (test-equal "mapping-union: three mappings"
 	    6
-	    (map-size (map-union map1 map2 map6)))
+	    (mapping-size (mapping-union mapping1 mapping2 mapping6)))
 	  
-	  (test-equal "map-intersection: existing association"
+	  (test-equal "mapping-intersection: existing association"
 	    3
-	    (map-ref (map-intersection map1 map4) 'c))
+	    (mapping-ref (mapping-intersection mapping1 mapping4) 'c))
 
-	  (test-equal "map-intersection: removed association"
+	  (test-equal "mapping-intersection: removed association"
 	    42
-	    (map-ref/default (map-intersection map1 map5) 'b 42))
+	    (mapping-ref/default (mapping-intersection mapping1 mapping5) 'b 42))
 
-	  (test-equal "map-difference"
+	  (test-equal "mapping-difference"
 	    2
-	    (map-size (map-difference map2 map6)))
+	    (mapping-size (mapping-difference mapping2 mapping6)))
 
-	  (test-equal "map-xor"
+	  (test-equal "mapping-xor"
 	    4
-	    (map-size (map-xor map2 map6))))
+	    (mapping-size (mapping-xor mapping2 mapping6))))
 	
 	(test-group "Comparators"
-	  (define map1 (make-map comparator 'a 1 'b 2 'c 3))
-	  (define map2 (make-map comparator 'a 1 'b 2 'c 3))
-	  (define map3 (make-map comparator 'a 1 'b 2))
-	  (define map4 (make-map comparator 'a 1 'b 2 'c 4))
-	  (define map5 (make-map comparator 'a 1 'c 3))
-	  (define map0 (make-map comparator map1 "a" map2 "b" map3 "c" map4 "d" map5 "e"))
+	  (define mapping1 (mapping comparator 'a 1 'b 2 'c 3))
+	  (define mapping2 (mapping comparator 'a 1 'b 2 'c 3))
+	  (define mapping3 (mapping comparator 'a 1 'b 2))
+	  (define mapping4 (mapping comparator 'a 1 'b 2 'c 4))
+	  (define mapping5 (mapping comparator 'a 1 'c 3))
+	  (define mapping0 (mapping comparator mapping1 "a" mapping2 "b" mapping3 "c" mapping4 "d" mapping5 "e"))
 
-	  (test-assert "map-comparator"
-	    (comparator? map-comparator))
+	  (test-assert "mapping-comparator"
+	    (comparator? mapping-comparator))
 	  
-	  (test-equal "map-keyed map"
-	    (list "a" "a" "c" "d" "e")
-	    (list (map-ref map0 map1)
-		  (map-ref map0 map2)
-		  (map-ref map0 map3)
-		  (map-ref map0 map4)
-		  (map-ref map0 map5)))
+	  (test-equal "mapping-keyed mapping"
+	    (list "b" "b" "c" "d" "e")
+	    (list (mapping-ref mapping0 mapping1)
+		  (mapping-ref mapping0 mapping2)
+		  (mapping-ref mapping0 mapping3)
+		  (mapping-ref mapping0 mapping4)
+		  (mapping-ref mapping0 mapping5)))
 	  
 	  (test-group "Ordering comparators"
-	    (test-assert "=?: equal maps"
-	      (=? comparator map1 map2))
+	    (test-assert "=?: equal mappings"
+	      (=? comparator mapping1 mapping2))
 
-	    (test-assert "=?: unequal maps"
-	      (not (=? comparator map1 map4)))
+	    (test-assert "=?: unequal mappings"
+	      (not (=? comparator mapping1 mapping4)))
 
 	    (test-assert "<?: case 1"
-	      (<? comparator map3 map4))
+	      (<? comparator mapping3 mapping4))
 
 	    (test-assert "<?: case 2"
-	      (<? comparator map1 map4))
+	      (<? comparator mapping1 mapping4))
 
 	    (test-assert "<?: case 3"
-	      (<? comparator map1 map5)))))
-
-      
+	      (<? comparator mapping1 mapping5)))))
       
       (test-end "SRFI 146"))
 
