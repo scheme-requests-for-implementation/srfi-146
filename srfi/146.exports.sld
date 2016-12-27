@@ -21,24 +21,24 @@
 ;; SOFTWARE.
 
 
-(export make-map map-unfold
-	map? map-contains? map-empty? map-disjoint?
-	map-ref map-ref/default map-key-comparator
-	map-set map-set! 
-	map-replace map-replace!
-	map-delete map-delete! map-delete-all map-delete-all!
-	map-intern map-intern!
-	map-update map-update! map-update/default map-update!/default
-	map-search map-search!
-	map-size map-find map-count map-any? map-every?
-	map-keys map-values map-entries
-	map-map map-map->list map-for-each map-fold
-	map-filter map-filter!
-	map-remove map-remove!
-	map-partition map-partition!
-	map-copy map->alist alist->map alist->map!
-	map=? map<? map>? map<=? map>=?
-	map-union map-intersection map-difference map-xor
-	map-union! map-intersection! map-difference! map-xor!
-	make-map-comparator
-	map-comparator)
+(export mapping mapping-unfold
+	mapping? mapping-contains? mapping-empty? mapping-disjoint?
+	mapping-ref mapping-ref/default mapping-key-comparator
+	mapping-set mapping-set! 
+	mapping-replace mapping-replace!
+	mapping-delete mapping-delete! mapping-delete-all mapping-delete-all!
+	mapping-intern mapping-intern!
+	mapping-update mapping-update! mapping-update/default mapping-update!/default
+	mapping-search mapping-search!
+	mapping-size mapping-find mapping-count mapping-any? mapping-every?
+	mapping-keys mapping-values mapping-entries
+	mapping-map mapping-map->list mapping-for-each mapping-fold
+	mapping-filter mapping-filter!
+	mapping-remove mapping-remove!
+	mapping-partition mapping-partition!
+	mapping-copy mapping->alist alist->mapping alist->mapping!
+	mapping=? mapping<? mapping>? mapping<=? mapping>=?
+	mapping-union mapping-intersection mapping-difference mapping-xor
+	mapping-union! mapping-intersection! mapping-difference! mapping-xor!
+	make-mapping-comparator
+	mapping-comparator)
