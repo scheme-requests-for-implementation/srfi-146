@@ -285,15 +285,17 @@
 
 (define (mapping-keys mapping)
   (assume-type mapping? mapping)
-  (mapping-fold (lambda (key value keys)
-	      (cons key keys))
-	    '() mapping))
+  (reverse
+   (mapping-fold (lambda (key value keys)
+		   (cons key keys))
+		 '() mapping)))
 
 (define (mapping-values mapping)
   (assume-type mapping? mapping)
-  (mapping-fold (lambda (key value values)
-	      (cons value values))
-	    '() mapping))
+  (reverse
+   (mapping-fold (lambda (key value values)
+		   (cons value values))
+		 '() mapping)))
 
 (define (mapping-entries mapping)
   (assume-type mapping? mapping)
@@ -326,10 +328,11 @@
 (define (mapping-map->list proc mapping)
   (assume-type procedure? proc)
   (assume-type mapping? mapping)
-  (mapping-fold (lambda (key value lst)
-	      (cons (proc key value) lst))
-	    '()
-	    mapping))
+  (reverse
+   (mapping-fold (lambda (key value lst)
+		   (cons (proc key value) lst))
+		 '()
+		 mapping)))
 
 (define (mapping-filter predicate mapping)
   (assume-type procedure? predicate)
@@ -368,15 +371,10 @@
 
 (define (mapping->alist mapping)
   (assume-type mapping? mapping)
-  (mapping-fold (lambda (key value alist)
-	      (cons (cons key value) alist))
-	    '() mapping))
-
-(define (mapping->alist mapping)
-  (assume-type mapping? mapping)
-  (mapping-fold (lambda (key value alist)
-	      (cons (cons key value) alist))
-	    '() mapping))
+  (reverse
+   (mapping-fold (lambda (key value alist)
+		   (cons (cons key value) alist))
+		 '() mapping)))
 
 (define (alist->mapping comparator alist)
   (assume-type comparator? comparator)
