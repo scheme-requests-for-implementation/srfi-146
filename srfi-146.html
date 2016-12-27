@@ -139,9 +139,10 @@ side effects, depending upon the details of what is the most efficient
   effect.  For example, this is not guaranteed to work:</p>
 
 <pre>
-  (let* ((mapping1 (mapping (make-default-comparator) 'a 1 'b 2 'c 3)) ; mapping1 = {a&mapping;1,b&mapping;2,c&mapping;3}.
-    (mapping2 (mapping-set! mapping1 'd 4))) ; mapping2 = {a&mapping;1,b&mapping;2,c&mapping;3,d&mapping;4}
-  mapping1) ; mapping1 = {a&mapping;1,b&mapping;2,c&mapping;3} or mapping1 = {a&mapping;1,b&mapping;2,c&mapping;3;d&mapping;4}
+  (let* ((mapping1
+         (mapping (make-default-comparator) 'a 1 'b 2 'c 3)) ; mapping1 = {a&map;1,b&map;2,c&map;3}.
+    (mapping2 (mapping-set! mapping1 'd 4))) ; mapping2 = {a&map;1,b&map;2,c&map;3,d&map;4}
+  mapping1) ; mapping1 = {a&map;1,b&map;2,c&map;3} or mapping1 = {a&map;1,b&map;2,c&map;3;d&map;4}
 </pre>
 
 
@@ -149,7 +150,7 @@ side effects, depending upon the details of what is the most efficient
 
 <pre>
   (let ((mapping1 (set (make-default-comparator 'a 1 'b 2 'c 3)))
-    (mapping-set! mapping1 'd 4)) ; &rArr; {a&mapping;1,b&mapping;2,c&mapping;3;d&mapping;4}
+    (mapping-set! mapping1 'd 4)) ; &rArr; {a&map;1,b&map;2,c&map;3;d&map;4}
 </pre>
 
 <p>So clients of these procedures write in a functional style, but
