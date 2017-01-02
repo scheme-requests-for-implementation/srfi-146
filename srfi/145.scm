@@ -28,12 +28,4 @@
     ((assume . _)
      (syntax-error "invalid assume syntax"))))
 
-(define-syntax assume-type
-  (syntax-rules ()
-    ((assume-type pred expr)
-     (unless (pred expr)
-       (fatal-error "not of expected type" (quote pred) expr)))
-    ((assume-type . _)
-     (syntax-error "invalid assume-type syntax"))))
-
 (define fatal-error error)

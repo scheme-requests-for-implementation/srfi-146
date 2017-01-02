@@ -29,7 +29,7 @@
   (tree mapping-tree))
 
 (define (make-empty-mapping comparator)
-  (assume-type comparator? comparator)
+  (assume (comparator? comparator))
   (%make-mapping comparator (make-tree)))
 
 ;;; Exported procedures
@@ -37,7 +37,7 @@
 ;; Constructors
 
 (define (mapping comparator . args)
-  (assume-type comparator? comparator)
+  (assume (comparator? comparator))
   (mapping-unfold null?
 	      (lambda (args)
 		(values (car args)
@@ -47,10 +47,10 @@
 	      comparator))
 
 (define (mapping-unfold stop? mapper successor seed comparator)
-  (assume-type procedure? stop?)
-  (assume-type procedure? mapper)
-  (assume-type procedure? successor)
-  (assume-type comparator? comparator)
+  (assume (procedure? stop?))
+  (assume (procedure? mapper))
+  (assume (procedure? successor))
+  (assume (comparator? comparator))
   (let loop ((mapping (make-empty-mapping comparator))
 	     (seed seed))
     (if (stop? seed)
@@ -63,11 +63,11 @@
 ;; Predicates
 
 (define (mapping-empty? mapping)
-  (assume-type mapping? mapping)
+  (assume (mapping? mapping))
   (not (mapping-any? (lambda (key value) #t) mapping)))
 
 (define (mapping-contains? mapping key)
-  (assume-type mapping? mapping)
+  (assume (mapping? mapping))
   (call/cc
    (lambda (return)
      (mapping-search mapping
@@ -78,8 +78,8 @@
 		   (return #t))))))
 
 (define (mapping-disjoint? mapping1 mapping2)
-  (assume-type mapping? mapping1)
-  (assume-type mapping? mapping2)
+  (assume (mapping? mapping1))
+  (assume (mapping? mapping2))
   (call/cc
    (lambda (return)
      (mapping-for-each (lambda (key value)
@@ -93,18 +93,18 @@
 (define mapping-ref
   (case-lambda
     ((mapping key)
-     (assume-type mapping? mapping)
+     (assume (mapping? mapping))
      (mapping-ref mapping key (lambda ()
 			(fatal-error "mapping-ref: key not in mapping" key))))
     ((mapping key failure)
-     (assume-type mapping? mapping)
-     (assume-type procedure? failure)
+     (assume (mapping? mapping))
+     (assume (procedure? failure))
      (mapping-ref mapping key failure (lambda (value)
 				value)))
     ((mapping key failure success)
-     (assume-type mapping? mapping)
-     (assume-type procedure? failure)
-     (assume-type procedure? success)
+     (assume (mapping? mapping))
+     (assume (procedure? failure))
+     (assume (procedure? success))
      (call/cc
       (lambda (return)
 	(mapping-search mapping
@@ -115,13 +115,13 @@
 		      (return (success value)))))))))
 
 (define (mapping-ref/default mapping key default)
-  (assume-type mapping? mapping)
+  (assume (mapping? mapping))
   (mapping-ref mapping key (lambda () default)))
 
 ;; Updaters
 
 (define (mapping-set mapping . args)
-  (assume-type mapping? mapping)
+  (assume (mapping? mapping))
   (let loop ((args args)
 	     (mapping mapping))
     (if (null? args)
@@ -134,7 +134,7 @@
 (define mapping-set! mapping-set)
 
 (define (mapping-replace mapping key value)
-  (assume-type mapping? mapping)
+  (assume (mapping? mapping))
   (receive (mapping obj)
       (mapping-search mapping
 		  key
@@ -147,14 +147,14 @@
 (define mapping-replace! mapping-replace)
 
 (define (mapping-delete mapping . keys)
-  (assume-type mapping? mapping)
+  (assume (mapping? mapping))
   (mapping-delete-all mapping keys))
 
 (define mapping-delete! mapping-delete)
 
 (define (mapping-delete-all mapping keys)
-  (assume-type mapping? mapping)
-  (assume-type list? keys)
+  (assume (mapping? mapping))
+  (assume (list? keys))
   (fold (lambda (key mapping)
 	  (receive (mapping obj)
 	      (mapping-search mapping
@@ -169,8 +169,8 @@
 (define mapping-delete-all! mapping-delete-all)
 
 (define (mapping-intern mapping key failure)
-  (assume-type mapping? mapping)
-  (assume-type procedure? failure)
+  (assume (mapping? mapping))
+  (assume (procedure? failure))
   (call/cc
    (lambda (return)
      (mapping-search mapping
@@ -193,10 +193,10 @@
     (mapping-update mapping key updater failure (lambda (value)
 					  value)))
    ((mapping key updater failure success)
-    (assume-type mapping? mapping)
-    (assume-type procedure? updater)
-    (assume-type procedure? failure)
-    (assume-type procedure? success)
+    (assume (mapping? mapping))
+    (assume (procedure? updater))
+    (assume (procedure? failure))
+    (assume (procedure? success))
     (receive (mapping obj)
 	(mapping-search mapping
 		    key
@@ -214,9 +214,9 @@
 (define mapping-update!/default mapping-update/default)
 
 (define (mapping-search mapping key failure success)
-  (assume-type mapping? mapping)
-  (assume-type procedure? failure)
-  (assume-type procedure? success)
+  (assume (mapping? mapping))
+  (assume (procedure? failure))
+  (assume (procedure? success))
   (call/cc
    (lambda (return)
      (let*-values
@@ -239,15 +239,15 @@
 ;; The whole mapping
 
 (define (mapping-size mapping)
-  (assume-type mapping? mapping)
+  (assume (mapping? mapping))
   (mapping-count (lambda (key value)
 	       #t)
 	     mapping))
 
 (define (mapping-find predicate mapping failure)
-  (assume-type procedure? predicate)
-  (assume-type mapping? mapping)
-  (assume-type procedure? failure)
+  (assume (procedure? predicate))
+  (assume (mapping? mapping))
+  (assume (procedure? failure))
   (call/cc
    (lambda (return)
      (mapping-for-each (lambda (key value)
@@ -257,8 +257,8 @@
      (failure))))
 
 (define (mapping-count predicate mapping)
-  (assume-type procedure? predicate)
-  (assume-type mapping? mapping)
+  (assume (procedure? predicate))
+  (assume (mapping? mapping))
   (mapping-fold (lambda (key value count)
 	      (if (predicate key value)
 		  (+ 1 count)
@@ -266,8 +266,8 @@
 	    0 mapping))
 
 (define (mapping-any? predicate mapping)
-  (assume-type procedure? predicate)
-  (assume-type mapping? mapping)
+  (assume (procedure? predicate))
+  (assume (mapping? mapping))
   (call/cc
    (lambda (return)
      (mapping-for-each (lambda (key value)
@@ -277,37 +277,37 @@
      #f)))
 
 (define (mapping-every? predicate mapping)
-  (assume-type procedure? predicate)
-  (assume-type mapping? mapping)
+  (assume (procedure? predicate))
+  (assume (mapping? mapping))
   (not (mapping-any? (lambda (key value)
 		   (not (predicate key value)))
 		 mapping)))
 
 (define (mapping-keys mapping)
-  (assume-type mapping? mapping)
+  (assume (mapping? mapping))
   (reverse
    (mapping-fold (lambda (key value keys)
 		   (cons key keys))
 		 '() mapping)))
 
 (define (mapping-values mapping)
-  (assume-type mapping? mapping)
+  (assume (mapping? mapping))
   (reverse
    (mapping-fold (lambda (key value values)
 		   (cons value values))
 		 '() mapping)))
 
 (define (mapping-entries mapping)
-  (assume-type mapping? mapping)
+  (assume (mapping? mapping))
   (values (mapping-keys mapping)
 	  (mapping-values mapping)))
 
 ;; Mapping and folding
 
 (define (mapping-map proc comparator mapping)
-  (assume-type procedure? proc)
-  (assume-type comparator? comparator)
-  (assume-type mapping? mapping)
+  (assume (procedure? proc))
+  (assume (comparator? comparator))
+  (assume (mapping? mapping))
   (mapping-fold (lambda (key value mapping)
 	      (receive (key value)
 		  (proc key value)
@@ -316,18 +316,18 @@
 	    mapping))
 
 (define (mapping-for-each proc mapping)
-  (assume-type procedure? proc)
-  (assume-type mapping? mapping)
+  (assume (procedure? proc))
+  (assume (mapping? mapping))
   (tree-for-each proc (mapping-tree mapping)))
 
 (define (mapping-fold proc acc mapping)
-  (assume-type procedure? proc)
-  (assume-type mapping? mapping)
+  (assume (procedure? proc))
+  (assume (mapping? mapping))
   (tree-fold proc acc (mapping-tree mapping)))
 
 (define (mapping-map->list proc mapping)
-  (assume-type procedure? proc)
-  (assume-type mapping? mapping)
+  (assume (procedure? proc))
+  (assume (mapping? mapping))
   (reverse
    (mapping-fold (lambda (key value lst)
 		   (cons (proc key value) lst))
@@ -335,8 +335,8 @@
 		 mapping)))
 
 (define (mapping-filter predicate mapping)
-  (assume-type procedure? predicate)
-  (assume-type mapping? mapping)
+  (assume (procedure? predicate))
+  (assume (mapping? mapping))
   (mapping-fold (lambda (key value mapping)
 	      (if (predicate key value)
 		  (mapping-set mapping key value)
@@ -347,8 +347,8 @@
 (define mapping-filter! mapping-filter)
 
 (define (mapping-remove predicate mapping)
-  (assume-type procedure? predicate)
-  (assume-type mapping? mapping)
+  (assume (procedure? predicate))
+  (assume (mapping? mapping))
   (mapping-filter (lambda (key value)
 		(not (predicate key value)))
 	      mapping))
@@ -356,8 +356,8 @@
 (define mapping-remove! mapping-remove)
 
 (define (mapping-partition predicate mapping)
-  (assume-type procedure? predicate)
-  (assume-type mapping? mapping)
+  (assume (procedure? predicate))
+  (assume (mapping? mapping))
   (values (mapping-filter predicate mapping)
 	  (mapping-remove predicate mapping)))
 
@@ -366,19 +366,19 @@
 ;; Copying and conversion
 
 (define (mapping-copy mapping)
-  (assume-type mapping? mapping)
+  (assume (mapping? mapping))
   mapping)
 
 (define (mapping->alist mapping)
-  (assume-type mapping? mapping)
+  (assume (mapping? mapping))
   (reverse
    (mapping-fold (lambda (key value alist)
 		   (cons (cons key value) alist))
 		 '() mapping)))
 
 (define (alist->mapping comparator alist)
-  (assume-type comparator? comparator)
-  (assume-type list? alist)
+  (assume (comparator? comparator))
+  (assume (list? alist))
   (mapping-unfold null?
 	      (lambda (alist)
 		(let ((key (caar alist))
@@ -389,8 +389,8 @@
 	      comparator))
 
 (define (alist->mapping! mapping alist)
-  (assume-type mapping? mapping)
-  (assume-type list? alist)
+  (assume (mapping? mapping))
+  (assume (list? alist))
   (fold (lambda (association mapping)
 	  (let ((key (car association))
 		(value (cdr association)))
@@ -403,7 +403,7 @@
 (define mapping=?
   (case-lambda
     ((comparator mapping)
-     (assume-type mapping? mapping)
+     (assume (mapping? mapping))
      #t)
     ((comparator mapping1 mapping2) (%mapping=? comparator mapping1 mapping2))
     ((comparator mapping1 mapping2 . mappings)
@@ -416,24 +416,24 @@
 (define mapping<=?
   (case-lambda
     ((comparator mapping)
-     (assume-type mapping? mapping)
+     (assume (mapping? mapping))
      #t)
     ((comparator mapping1 mapping2)
-     (assume-type comparator? comparator)
-     (assume-type mapping? mapping1)
-     (assume-type mapping? mapping2)
+     (assume (comparator? comparator))
+     (assume (mapping? mapping1))
+     (assume (mapping? mapping2))
      (%mapping<=? comparator mapping1 mapping2))
     ((comparator mapping1 mapping2 . mappings)
-     (assume-type comparator? comparator)
-     (assume-type mapping? mapping1)
-     (assume-type mapping? mapping2)
+     (assume (comparator? comparator))
+     (assume (mapping? mapping1))
+     (assume (mapping? mapping2))
      (and (%mapping<=? comparator mapping1 mapping2)
           (apply mapping<=? comparator mapping2 mappings)))))
 
 (define (%mapping<=? comparator mapping1 mapping2)
-  (assume-type comparator? comparator)
-  (assume-type mapping? mapping1)
-  (assume-type mapping? mapping2)
+  (assume (comparator? comparator))
+  (assume (mapping? mapping1))
+  (assume (mapping? mapping2))
   (let ((less? (comparator-ordering-predicate (mapping-key-comparator mapping1)))
 	(equality-predicate (comparator-equality-predicate comparator))
 	(gen1 (tree-generator (mapping-tree mapping1)))
@@ -461,70 +461,70 @@
 (define mapping>?
   (case-lambda
     ((comparator mapping)
-     (assume-type mapping? mapping)
+     (assume (mapping? mapping))
      #t)
     ((comparator mapping1 mapping2)
-     (assume-type comparator? comparator)
-     (assume-type mapping? mapping1)
-     (assume-type mapping? mapping2)
+     (assume (comparator? comparator))
+     (assume (mapping? mapping1))
+     (assume (mapping? mapping2))
      (%mapping>? comparator mapping1 mapping2))
     ((comparator mapping1 mapping2 . mappings)
-     (assume-type comparator? comparator)
-     (assume-type mapping? mapping1)
-     (assume-type mapping? mapping2)
+     (assume (comparator? comparator))
+     (assume (mapping? mapping1))
+     (assume (mapping? mapping2))
      (and (%mapping>? comparator  mapping1 mapping2)
           (apply mapping>? comparator mapping2 mappings)))))
 
 (define (%mapping>? comparator mapping1 mapping2)
-  (assume-type comparator? comparator)
-  (assume-type mapping? mapping1)
-  (assume-type mapping? mapping2)
+  (assume (comparator? comparator))
+  (assume (mapping? mapping1))
+  (assume (mapping? mapping2))
   (not (%mapping<=? comparator mapping1 mapping2)))
 
 (define mapping<?
   (case-lambda
     ((comparator mapping)
-     (assume-type mapping? mapping)
+     (assume (mapping? mapping))
      #t)
     ((comparator mapping1 mapping2)
-     (assume-type comparator? comparator)
-     (assume-type mapping? mapping1)
-     (assume-type mapping? mapping2)
+     (assume (comparator? comparator))
+     (assume (mapping? mapping1))
+     (assume (mapping? mapping2))
      (%mapping<? comparator mapping1 mapping2))
     ((comparator mapping1 mapping2 . mappings)
-     (assume-type comparator? comparator)
-     (assume-type mapping? mapping1)
-     (assume-type mapping? mapping2)
+     (assume (comparator? comparator))
+     (assume (mapping? mapping1))
+     (assume (mapping? mapping2))
      (and (%mapping<? comparator  mapping1 mapping2)
           (apply mapping<? comparator mapping2 mappings)))))
 
 (define (%mapping<? comparator mapping1 mapping2)
-     (assume-type comparator? comparator)
-     (assume-type mapping? mapping1)
-     (assume-type mapping? mapping2)
+     (assume (comparator? comparator))
+     (assume (mapping? mapping1))
+     (assume (mapping? mapping2))
      (%mapping>? comparator mapping2 mapping1))
 
 (define mapping>=?
   (case-lambda
     ((comparator mapping)
-     (assume-type mapping? mapping)
+     (assume (mapping? mapping))
      #t)
     ((comparator mapping1 mapping2)
-     (assume-type comparator? comparator)
-     (assume-type mapping? mapping1)
-     (assume-type mapping? mapping2)
+     (assume (comparator? comparator))
+     (assume (mapping? mapping1))
+     (assume (mapping? mapping2))
      (%mapping>=? comparator mapping1 mapping2))
     ((comparator mapping1 mapping2 . mappings)
-     (assume-type comparator? comparator)
-     (assume-type mapping? mapping1)
-     (assume-type mapping? mapping2)
+     (assume (comparator? comparator))
+     (assume (mapping? mapping1))
+     (assume (mapping? mapping2))
      (and (%mapping>=? comparator mapping1 mapping2)
           (apply mapping>=? comparator mapping2 mappings)))))
 
 (define (%mapping>=? comparator mapping1 mapping2)
-  (assume-type comparator? comparator)
-  (assume-type mapping? mapping1)
-  (assume-type mapping? mapping2)
+  (assume (comparator? comparator))
+  (assume (mapping? mapping1))
+  (assume (mapping? mapping2))
   (not (%mapping<? comparator mapping1 mapping2)))
 
 ;; Set theory operations
@@ -573,72 +573,72 @@
 (define mapping-union
   (case-lambda
     ((mapping)
-     (assume-type mapping? mapping)
+     (assume (mapping? mapping))
      mapping)
     ((mapping1 mapping2)
-     (assume-type mapping? mapping1)
-     (assume-type mapping? mapping2)
+     (assume (mapping? mapping1))
+     (assume (mapping? mapping2))
      (%mapping-union mapping1 mapping2))
     ((mapping1 mapping2 . mappings)
-     (assume-type mapping? mapping1)
-     (assume-type mapping? mapping2)
+     (assume (mapping? mapping1))
+     (assume (mapping? mapping2))
      (apply mapping-union (%mapping-union mapping1 mapping2) mappings))))
 (define mapping-union! mapping-union)
 
 (define mapping-intersection
   (case-lambda
     ((mapping)
-     (assume-type mapping? mapping)
+     (assume (mapping? mapping))
      mapping)
     ((mapping1 mapping2)
-     (assume-type mapping? mapping1)
-     (assume-type mapping? mapping2)
+     (assume (mapping? mapping1))
+     (assume (mapping? mapping2))
      (%mapping-intersection mapping1 mapping2))
     ((mapping1 mapping2 . mappings)
-     (assume-type mapping? mapping1)
-     (assume-type mapping? mapping2)
+     (assume (mapping? mapping1))
+     (assume (mapping? mapping2))
      (apply mapping-intersection (%mapping-intersection mapping1 mapping2) mappings))))
 (define mapping-intersection! mapping-intersection)
 
 (define mapping-difference
   (case-lambda
     ((mapping)
-     (assume-type mapping? mapping)
+     (assume (mapping? mapping))
      mapping)
     ((mapping1 mapping2)
-     (assume-type mapping? mapping1)
-     (assume-type mapping? mapping2)
+     (assume (mapping? mapping1))
+     (assume (mapping? mapping2))
      (%mapping-difference mapping1 mapping2))
     ((mapping1 mapping2 . mappings)
-     (assume-type mapping? mapping1)
-     (assume-type mapping? mapping2)
+     (assume (mapping? mapping1))
+     (assume (mapping? mapping2))
      (apply mapping-difference (%mapping-difference mapping1 mapping2) mappings))))
 (define mapping-difference! mapping-difference)
 
 (define mapping-xor
   (case-lambda
     ((mapping)
-     (assume-type mapping? mapping)
+     (assume (mapping? mapping))
      mapping)
     ((mapping1 mapping2)
-     (assume-type mapping? mapping1)
-     (assume-type mapping? mapping2)
+     (assume (mapping? mapping1))
+     (assume (mapping? mapping2))
      (%mapping-xor mapping1 mapping2))
     ((mapping1 mapping2 . mappings)
-     (assume-type mapping? mapping1)
-     (assume-type mapping? mapping2)
+     (assume (mapping? mapping1))
+     (assume (mapping? mapping2))
      (apply mapping-xor (%mapping-xor mapping1 mapping2) mappings))))
 (define mapping-xor! mapping-xor)
 
 ;; Comparators
 
 (define (mapping-equality comparator)
-  (assume-type comparator? comparator)
+  (assume (comparator? comparator))
   (lambda (mapping1 mapping2)
     (mapping=? comparator mapping1 mapping2)))
 
 (define (mapping-ordering comparator)
-  (assume-type comparator? comparator)
+  (assume (comparator? comparator))
   (let ((value-equality (comparator-equality-predicate comparator))
 	(value-ordering (comparator-ordering-predicate comparator)))
     (lambda (mapping1 mapping2)
