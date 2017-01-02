@@ -229,20 +229,12 @@ is <code>eq?</code>, <code>eqv?</code>, <code>equal?</code>, <code>string=?</cod
 <p>
   (Scheme code which would be more performant/more natural with
   ordering procedures instead of hash functions, would change the
-  order of the two <cond-expand>-clauses.)
+  order of the two <code>&lt;cond-expand&gt;</code>-clauses.)
 </p>
 
-<p>As an author using SRFI 113 faces the same problems, any
-  implementation of SRFI 146 that also implements SRFI 113 should
-  implement its interface at least also under the <code>(srfi 113
-  ordered)</code> or <code>(srfi 113 hash)</code> namespace, depending
-  on which kind of comparators are supported (procedures exported
-  under <code>(srfi 113 ordered)</code> should respect the ordering
-  where it makes sense; see below).  (As SRFI 113 is also known
-  as <code>(scheme set)</code> in R7RS-large, the same recommendation
-  holds for <code>(scheme set ordered)</code> and <code>(scheme set
-  hash)</code>, should this SRFI become a part of a later Scheme
-  standard based on R7RS.)
+<p>It is left to a future SRFI that will update SRFI 113 to provide an
+  analogous addition to <code>(scheme set)</code>, <em>i.e.</em> to
+  specify <code>(scheme set hash)</code> and <code>(scheme set ordered)</code>.
 </p>
 
 <h2 id="index">Index</h2>
