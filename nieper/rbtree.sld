@@ -22,7 +22,8 @@
 
 (define-library (nieper rbtree)
   (export make-tree tree-search tree-for-each tree-fold tree-fold/reverse tree-generator
-	  tree-key-predecessor tree-key-successor)
+	  tree-key-predecessor tree-key-successor
+	  tree-map tree-catenate tree-split)
   (import (scheme base)
 	  (scheme case-lambda)
 	  (srfi 2)

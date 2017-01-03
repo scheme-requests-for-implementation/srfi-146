@@ -96,7 +96,7 @@
     ((mapping key)
      (assume (mapping? mapping))
      (mapping-ref mapping key (lambda ()
-			(fatal-error "mapping-ref: key not in mapping" key))))
+			(error "mapping-ref: key not in mapping" key))))
     ((mapping key failure)
      (assume (mapping? mapping))
      (assume (procedure? failure))
@@ -189,7 +189,7 @@
   (case-lambda
    ((mapping key updater)
     (mapping-update mapping key updater (lambda ()
-				  (fatal-error "mapping-update: key not found in mapping" key))))
+				  (error "mapping-update: key not found in mapping" key))))
    ((mapping key updater failure)
     (mapping-update mapping key updater failure (lambda (value)
 					  value)))
@@ -286,17 +286,15 @@
 
 (define (mapping-keys mapping)
   (assume (mapping? mapping))
-  (reverse
-   (mapping-fold (lambda (key value keys)
-		   (cons key keys))
-		 '() mapping)))
+  (mapping-fold/reverse (lambda (key value keys)
+			  (cons key keys))
+			'() mapping))
 
 (define (mapping-values mapping)
   (assume (mapping? mapping))
-  (reverse
-   (mapping-fold (lambda (key value values)
-		   (cons value values))
-		 '() mapping)))
+  (mapping-fold/reverse (lambda (key value values)
+			  (cons value values))
+			'() mapping))
 
 (define (mapping-entries mapping)
   (assume (mapping? mapping))
@@ -671,14 +669,48 @@
 (define (mapping-key-predecessor mapping obj failure)
   (assume (mapping? mapping))
   (assume (procedure? failure))
-  (tree-key-predecessor (mapping-comparator mapping) (mapping-tree tree) obj failure))
+  (tree-key-predecessor (mapping-key-comparator mapping) (mapping-tree mapping) obj failure))
 
 (define (mapping-key-successor mapping obj failure)
   (assume (mapping? mapping))
   (assume (procedure? failure))
-  (tree-key-successor (mapping-comparator mapping) (mapping-tree tree) obj failure))
+  (tree-key-successor (mapping-key-comparator mapping) (mapping-tree mapping) obj failure))
 
-(define (mapping-range= map obj))
+(define (mapping-range= mapping obj)
+  (assume (mapping? mapping))
+  (let ((comparator (mapping-key-comparator mapping)))
+    (receive (tree< tree<= tree= tree>= tree>)
+	(tree-split comparator (mapping-tree mapping) obj)
+      (%make-mapping comparator tree=))))
+
+(define (mapping-range< mapping obj)
+  (assume (mapping? mapping))
+  (let ((comparator (mapping-key-comparator mapping)))
+    (receive (tree< tree<= tree= tree>= tree>)
+	(tree-split comparator (mapping-tree mapping) obj)
+      (%make-mapping comparator tree<))))
+
+(define (mapping-range<= mapping obj)
+  (assume (mapping? mapping))
+  (let ((comparator (mapping-key-comparator mapping)))
+    (receive (tree< tree<= tree= tree>= tree>)
+	(tree-split comparator (mapping-tree mapping) obj)
+      (%make-mapping comparator tree<=))))
+
+(define (mapping-range> mapping obj)
+  (assume (mapping? mapping))
+  (let ((comparator (mapping-key-comparator mapping)))
+    (receive (tree< tree<= tree= tree>= tree>)
+	(tree-split comparator (mapping-tree mapping) obj)
+      (%make-mapping comparator tree>))))
+
+(define (mapping-range>= mapping obj)
+  (assume (mapping? mapping))
+  (assume (mapping? mapping))
+  (let ((comparator (mapping-key-comparator mapping)))
+    (receive (tree< tree<= tree= tree>= tree>)
+	(tree-split comparator (mapping-tree mapping) obj)
+      (%make-mapping comparator tree>=))))
 
 (define mapping-range=! mapping-range=)
 (define mapping-range<! mapping-range<)
@@ -686,22 +718,40 @@
 (define mapping-range<=! mapping-range<=)
 (define mapping-range>=! mapping-range>=)
 
+(define (mapping-split mapping obj)
+  (assume (mapping? mapping))
+  (let ((comparator (mapping-key-comparator mapping)))
+    (receive (tree< tree<= tree= tree>= tree>)
+	(tree-split comparator (mapping-tree mapping) obj)
+      (values (%make-mapping comparator tree<)
+	      (%make-mapping comparator tree<=)
+	      (%make-mapping comparator tree=)
+	      (%make-mapping comparator tree>=)
+	      (%make-mapping comparator tree>)))))
+
+(define (mapping-catenate comparator mapping1 pivot-key pivot-value mapping2)
+  (assume (comparator? comparator))
+  (assume (mapping? mapping1))
+  (assume (mapping? mapping2))
+  (%make-mapping comparator (tree-catenate (mapping-tree mapping1)
+					   pivot-key
+					   pivot-value
+					   (mapping-tree mapping2))))
+
+(define mapping-catenate! mapping-catenate)
+
+(define (mapping-map/monotone proc comparator mapping)
+  (assume (procedure? proc))
+  (assume (comparator? comparator))
+  (assume (mapping? mapping))
+  (%make-mapping comparator (tree-map proc (mapping-tree mapping))))
+
 (define mapping-map/monotone! mapping-map/monotone)
 
 (define (mapping-fold/reverse proc acc mapping)
   (assume (procedure? proc))
   (assume (mapping? mapping))
   (tree-fold/reverse proc acc (mapping-tree mapping)))
-
-
-;mapping-min-key mapping-max-key
-;	mapping-min-value mapping-max-value
-;	mapping-key-predecessor mapping-key-successor
-;	mapping-range= mapping-range< mapping-range> mapping-range<= mapping-range>=
-;	mapping-range=! mapping-range<! mapping-range>! mapping-range<=! mapping-range>=!
-;	mapping-map/monotone mapping-map/monotone!
-;	mapping-fold/reverse
-	
 
 ;; Comparators
 

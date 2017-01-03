@@ -337,6 +337,7 @@ is <code>eq?</code>, <code>eqv?</code>, <code>equal?</code>, <code>string=?</cod
       <code>mapping-range&gt;!</code>,
       <code>mapping-range&lt;=!</code>,
       <code>mapping-range&gt;=!</code>,
+      <code>mapping-split</code>,
       <code>mapping-catenate</code>,
       <code>mapping-catenate!</code>,
       <code>mapping-map/monotone</code>,
@@ -723,7 +724,7 @@ values in the mapping <code><em>mapping</em></code>.  The two lists are
 consistently ordered,  so that keys can be matched to their corresponding values.
 </p>
 
-<p>If <code>mapping-values</code> is imported from <code>(srfi 146
+<p>If <code>mapping-entries</code> is imported from <code>(srfi 146
     ordered)</code>, the lists is returned in order:  They are ordered
   according to the ordering of the keys.
 </p>
@@ -1038,6 +1039,19 @@ association.</i></p>
 associations of the <code><em>mapping</em></code> whose keys are equal
 to, less than, greater than, less than or equal to, or greater than or
 equal to <code><em>obj</em></code>.
+</p>
+
+<p><code>(mapping-split <em>mapping</em> <em>obj</em>)</code></p>
+
+<p>
+  Returns five values, equivalent to the results of invoking
+  <code>(mapping-range&lt; <em>mapping</em> <em>obj</em>)</code>,
+  <code>(mapping-range&lt;= <em>mapping</em> <em>obj</em>)</code>,
+  <code>(mapping-range= <em>mapping</em> <em>obj</em>)</code>,
+  <code>(mapping-range&gt;= <em>mapping</em> <em>obj</em>)</code>,
+  and
+  <code>(mapping-range&gt; <em>mapping</em> <em>obj</em>)</code>, but
+  may be more efficient.
 </p>
 
 <p><code>(mapping-catenate <em>mapping</em><sub>1</sub> <em>key</em> <em>value</em>
