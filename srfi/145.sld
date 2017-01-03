@@ -21,6 +21,6 @@
 ;; SOFTWARE.
 
 (define-library (srfi 145)
-  (export fatal-error assume assume-type)
+  (export assume)
   (import (scheme base))
   (include "145.scm"))

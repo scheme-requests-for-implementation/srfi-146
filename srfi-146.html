@@ -146,7 +146,6 @@ side effects, depending upon the details of what is the most efficient
   mapping1) ; mapping1 = {a&map;1,b&map;2,c&map;3} or mapping1 = {a&map;1,b&map;2,c&map;3;d&map;4}
 </pre>
 
-
 <p>However, this is well-defined:</p>
 
 <pre>
@@ -230,20 +229,18 @@ is <code>eq?</code>, <code>eqv?</code>, <code>equal?</code>, <code>string=?</cod
 <p>
   (Scheme code which would be more performant/more natural with
   ordering procedures instead of hash functions, would change the
-  order of the two <cond-expand>-clauses.)
+  order of the two <code>&lt;cond-expand&gt;</code>-clauses.)
 </p>
 
-<p>As an author using SRFI 113 faces the same problems, any
-  implementation of SRFI 146 that also implements SRFI 113 should
-  implement its interface at least also under the <code>(srfi 113
-  ordered)</code> or <code>(srfi 113 hash)</code> namespace, depending
-  on which kind of comparators are supported (procedures exported
-  under <code>(srfi 113 ordered)</code> should respect the ordering
-  where it makes sense; see below).  (As SRFI 113 is also known
-  as <code>(scheme set)</code> in R7RS-large, the same recommendation
-  holds for <code>(scheme set ordered)</code> and <code>(scheme set
-  hash)</code>, should this SRFI become a part of a later Scheme
-  standard based on R7RS.)
+<p>A number of additional operation with mappings that make only sense
+  when the keys are ordered (see below) are exported from
+  the <code>(srfi 146 ordered)</code> namespace, but neither from <code>(srfi 146)</code>, nor
+  <code>(srfi 146 hash)</code>.
+</p>
+
+<p>It is left to a future SRFI that will update SRFI 113 to provide an
+  analogous addition to <code>(scheme set)</code>, <em>i.e.</em> to
+  specify <code>(scheme set hash)</code> and <code>(scheme set ordered)</code>.
 </p>
 
 <h2 id="index">Index</h2>
@@ -324,6 +321,32 @@ is <code>eq?</code>, <code>eqv?</code>, <code>equal?</code>, <code>string=?</cod
     </p>
   </li>
 
+  <li><p><a href="#Additionalproceduresformappingswithorderedkeys">Addition
+	procedures for mappings with ordered keys</a>:
+      <code>mapping-min-key</code>,
+      <code>mapping-max-key</code>, <code>mapping-min-value</code>.
+      <code>mapping-max-value</code>,
+      <code>mapping-key-predecessor</code>,
+      <code>mapping-key-successor</code>,
+      <code>mapping-range=</code>,
+      <code>mapping-range&lt;</code>,
+      <code>mapping-range&gt;</code>,
+      <code>mapping-range&lt;=</code>,
+      <code>mapping-range&gt;=</code>,
+      <code>mapping-range=!</code>,
+      <code>mapping-range&lt;!</code>,
+      <code>mapping-range&gt;!</code>,
+      <code>mapping-range&lt;=!</code>,
+      <code>mapping-range&gt;=!</code>,
+      <code>mapping-split</code>,
+      <code>mapping-catenate</code>,
+      <code>mapping-catenate!</code>,
+      <code>mapping-map/monotone</code>,
+      <code>mapping-map/monotone!</code>,
+      <code>mapping-fold/reverse</code>
+      </p>
+  </li>
+  
   <li>
     <p><a href="#Comparators">Comparators</a>:
       <code>mapping-comparator</code>
@@ -702,7 +725,7 @@ values in the mapping <code><em>mapping</em></code>.  The two lists are
 consistently ordered,  so that keys can be matched to their corresponding values.
 </p>
 
-<p>If <code>mapping-values</code> is imported from <code>(srfi 146
+<p>If <code>mapping-entries</code> is imported from <code>(srfi 146
     ordered)</code>, the lists is returned in order:  They are ordered
   according to the ordering of the keys.
 </p>
@@ -956,6 +979,133 @@ In case of duplicate keys (in the sense of the equality predicate), associations
 in the result mapping are drawn from the first mapping in which they appear.
 </p>
 
+<h2 id="Additionalproceduresformappingswithorderedkeys">Additional
+procedures for mappings with ordererd keys</h2>
+
+<p>The following procedures are only exported by the <code>(srfi 146
+    ordered)</code> library (and, if applicable, by <code>(scheme mappings
+    ordered)</code>).
+</p>
+
+<p><code>(mapping-min-key <em>mapping</em>)</code></p>
+<p><code>(mapping-max-key <em>mapping</em>)</code></p>
+
+<p>Returns the least/greatest key contained in the mapping <code><em>mapping</em></code>.  It is an error for
+  <code><em>mapping</em></code> to be empty.
+</p>
+
+<p><code>(mapping-min-value <em>mapping</em>)</code></p>
+<p><code>(mapping-max-value <em>mapping</em>)</code></p>
+
+<p>Returns the value associated with the least/greatest key contained
+  in the mapping <code><em>mapping</em></code>.  It is an error
+  for <code><em>mapping</em></code> to be empty.</p>
+
+<p><i>Note: It does not make sense to ask for the least/greatest value
+contained in <code><em>mapping</em></code> because the values have no specified
+order.</i></p>
+
+<p><code>(mapping-key-predecessor <em>mapping</em> <em>obj</em> <em>failure</em>)</code></p>
+<p><code>(mapping-key-successor <em>mapping</em> <em>obj</em> <em>failure</em>)</code></p>
+<p>Returns the key contained in the mapping <code><em>mapping</em></code> that
+immediately precedes/succeeds <code><em>obj</em></code> in the mapping's order of
+keys.  If no such key is contained in <code><em>mapping</em></code>
+(because <code><em>obj</em></code> is the minimum/maximum key, or
+because <code><em>mapping</em></code> is empty), returns the result of tail-calling
+the thunk <code><em>failure</em></code>.
+
+<p><code>(mapping-range= <em>mapping</em> <em>obj</em>)</code></p>
+<p><code>(mapping-range&lt; <em>mapping</em> <em>obj</em>)</code></p>
+<p><code>(mapping-range&gt; <em>mapping</em> <em>obj</em>)</code></p>
+<p><code>(mapping-range&lt;= <em>mapping</em> <em>obj</em>)</code></p>
+<p><code>(mapping-range&gt;= <em>mapping</em> <em>obj</em>)</code></p>
+
+<p>Returns a mapping containing only the associations of
+the <code><em>mapping</em></code> whose keys are equal to, less
+than, greater than, less than or equal to, or greater than or equal
+  to <code><em>obj</em></code>.
+</p>
+
+<p><i>Note: Note that since keys in mappings are
+unique, <code>mapping-range=</code> returns a map with at most one
+association.</i></p>
+
+<p><code>(mapping-range=! <em>mapping</em> <em>obj</em>)</code></p>
+<p><code>(mapping-range&lt!; <em>mapping</em> <em>obj</em>)</code></p>
+<p><code>(mapping-range&gt;! <em>mapping</em> <em>obj</em>)</code></p>
+<p><code>(mapping-range&lt;=! <em>mapping</em> <em>obj</em>)</code></p>
+<p><code>(mapping-range&gt;=! <em>mapping</em> <em>obj</em>)</code></p>
+
+<p>Linear update procedures returning a mapping containing only the
+associations of the <code><em>mapping</em></code> whose keys are equal
+to, less than, greater than, less than or equal to, or greater than or
+equal to <code><em>obj</em></code>.
+</p>
+
+<p><code>(mapping-split <em>mapping</em> <em>obj</em>)</code></p>
+
+<p>
+  Returns five values, equivalent to the results of invoking
+  <code>(mapping-range&lt; <em>mapping</em> <em>obj</em>)</code>,
+  <code>(mapping-range&lt;= <em>mapping</em> <em>obj</em>)</code>,
+  <code>(mapping-range= <em>mapping</em> <em>obj</em>)</code>,
+  <code>(mapping-range&gt;= <em>mapping</em> <em>obj</em>)</code>,
+  and
+  <code>(mapping-range&gt; <em>mapping</em> <em>obj</em>)</code>, but
+  may be more efficient.
+</p>
+
+<p><code>(mapping-catenate <em>mapping</em><sub>1</sub> <em>key</em> <em>value</em>
+    <em>mapping</em></sub>2</sub>)</code></p>
+
+<p>
+Returns a newly allocated mapping using the
+comparator <code><em>comparator</em></code> whose set of associations
+is the union of the sets of associations of the
+mapping <code><em>mapping</em><sub>1</sub></code>,
+the association mapping <code><em>key</em></code> to
+<code><em>value</em></code>, and the associations of
+<code><em>mapping</em><sub>2</sub></code>.  It is an error if the keys
+contained in <code><em>mapping</em><sub>1</sub></code> in their
+natural order, the key <em>key</em>, and the keys contained
+in <code><em>mapping</em><sub>2</sub></code> in their natural order
+(in that order) do not form a strictly monotone sequence with respect
+to the ordering of <code><em>comparator</em></code>.
+</p>
+
+<p><code>(mapping-catenate! <em>mapping1</em> <em>key</em> <em>value</em> <em>mapping2</em>)</code></p>
+
+<p>The <code>mapping-map/monotone!</code> procedure is the same
+as <code>mapping-map/monotone</code>, except that it is permitted to mutate and
+return one of the <code><em>mapping</em></code>s rather than allocating a new mapping.
+</p>
+
+<p><code>(mapping-map/monotone <em>proc</em> <em>comparator</em> <em>mapping</em>)</code></p>
+
+<p>Equivalent
+to <code>(mapping-map <em>proc</em> <em>comparator</em> <em>mapping</em>)</code>,
+but it is an error if <em>proc</em> does not induce a strictly
+monotone mapping between the keys with respect to the ordering of the
+comparator of <code><em>mapping</em></code> and the ordering
+of <code><em>comparator</em></code>.  Maybe be implemented more
+efficiently than <code>mapping-map</code>.
+</p>
+
+<p><code>(mapping-map/monotone! <em>proc</em> <em>comparator</em> <em>mapping</em>)</code></p>
+
+<p>The <code>mapping-map/monotone!</code> procedure is the same
+as <code>mapping-map/monotone</code>, except that it is permitted to mutate and
+return the <code><em>mapping</em></code> argument rather than allocating a new mapping.
+</p>
+
+<p><code>(mapping-fold/reverse <em>proc</em> <em>nil</em> <em>mapping</em>)</code></p>
+
+<p>Equivalent
+to <code>(mapping-fold <em>proc</em> <em>nil</em> <em>mapping</em>)</code>
+except that the associations are processed in reverse order with
+respect to the natural ordering of the keys.
+</p>
+
 <h2 id="Comparators">Comparators</h2>
 
 <p><code>(make-mapping-comparator <em>comparator</em>)</code></p>
@@ -1016,8 +1166,8 @@ many valuable comments which helped to improve this proposal.
 Some wording from SRFI 113 and SRFI 125 has been copied <i> mutatis mutandis</i>.
 </p>
 
-<h1>Copyright</h1>
-Copyright (C) Marc Nieper-Wi&szlig;kirchen (2016).  All Rights Reserved. 
+<h1>Copyright</h1> Copyright (C) Marc Nieper-Wi&szlig;kirchen (2016,
+2017).  All Rights Reserved.
 
 <p>
   Permission is hereby granted, free of charge, to any person

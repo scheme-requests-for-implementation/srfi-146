@@ -27,7 +27,7 @@
 	  (srfi 8)
 	  (srfi 64)
 	  (srfi 128)
-	  (srfi 146))
+	  (srfi 146 ordered))
   (begin
     (define (run-tests)
       (test-begin "SRFI 146")
@@ -372,6 +372,89 @@
 	  (test-equal "mapping-xor"
 	    4
 	    (mapping-size (mapping-xor mapping2 mapping6))))
+
+	(test-group "Additional procedures for mappings with ordered keys"
+	  (define mapping1 (mapping comparator 'a 1 'b 2 'c 3))
+	  (define mapping2 (mapping comparator 'a 1 'b 2 'c 3 'd 4))
+	  (define mapping3 (mapping comparator 'a 1 'b 2 'c 3 'd 4 'e 5))
+	  (define mapping4 (mapping comparator 'a 1 'b 2 'c 3 'd 4 'e 5 'f 6))
+	  (define mapping5 (mapping comparator 'f 6 'g 7 'h 8))
+
+	  (test-equal "mapping-min-key"
+	    '(a a a a)
+	    (map mapping-min-key (list mapping1 mapping2 mapping3 mapping4)))
+
+	  (test-equal "mapping-max-key"
+	    '(c d e f)
+	    (map mapping-max-key (list mapping1 mapping2 mapping3 mapping4)))
+	  
+	  (test-equal "mapping-min-value"
+	    '(1 1 1 1)
+	    (map mapping-min-value (list mapping1 mapping2 mapping3 mapping4)))
+
+	  (test-equal "mapping-max-value"
+	    '(3 4 5 6)
+	    (map mapping-max-value (list mapping1 mapping2 mapping3 mapping4)))
+
+	  (test-equal "mapping-key-predecessor"
+	    '(c d d d)
+	    (map (lambda (mapping)
+		   (mapping-key-predecessor mapping 'e (lambda () #f)))
+		 (list mapping1 mapping2 mapping3 mapping4)))
+
+	  (test-equal "mapping-key-successor"
+	    '(#f #f e e)
+	    (map (lambda (mapping)
+		   (mapping-key-successor mapping 'd (lambda () #f)))
+		 (list mapping1 mapping2 mapping3 mapping4)))
+
+	  (test-equal "mapping-range=: contained"
+	    '(4)
+	    (mapping-values (mapping-range= mapping4 'd)))
+
+	  (test-equal "mapping-range=: not contained"
+	    '()
+	    (mapping-values (mapping-range= mapping4 'z)))
+
+	  (test-equal "mapping-range<"
+	    '(1 2 3)
+	    (mapping-values (mapping-range< mapping4 'd)))
+
+	  (test-equal "mapping-range<="
+	    '(1 2 3 4)
+	    (mapping-values (mapping-range<= mapping4 'd)))
+
+	  (test-equal "mapping-range>"
+	    '(5 6)
+	    (mapping-values (mapping-range> mapping4 'd)))
+
+	  (test-equal "mapping-range>="
+	    '(4 5 6)
+	    (mapping-values (mapping-range>= mapping4 'd)))
+
+	  (test-equal "mapping-split"
+	    '((1 2 3) (1 2 3 4) (4) (4 5 6) (5 6))
+	    (receive mappings
+		(mapping-split mapping4 'd)
+	      (map mapping-values mappings)))
+	  
+	  (test-equal "mapping-catenate"
+	    '((a . 1) (b . 2) (c . 3) (d . 4) (e . 5) (f . 6) (g . 7) (h . 8))
+	    (mapping->alist (mapping-catenate comparator mapping2 'e 5 mapping5)))
+	  
+	  (test-equal "mapping-map/monotone"
+	    '((1 . 1) (2 . 4) (3 . 9))
+	    (mapping->alist
+	     (mapping-map/monotone (lambda (key value)
+				     (values value (* value value)))
+				   comparator
+				   mapping1)))
+
+	  (test-equal "mapping-fold/reverse"
+	    '(1 2 3)
+	    (mapping-fold/reverse (lambda (key value acc)
+				    (cons value acc))
+				  '() mapping1)))
 	
 	(test-group "Comparators"
 	  (define mapping1 (mapping comparator 'a 1 'b 2 'c 3))

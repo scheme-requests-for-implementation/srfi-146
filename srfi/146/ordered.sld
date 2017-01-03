@@ -1,4 +1,5 @@
-;; Copyright (C) Marc Nieper-Wißkirchen (2016).  All Rights Reserved. 
+;; Copyright (C) Marc Nieper-Wißkirchen (2016, 2017).  All Rights
+;; Reserved.
 
 ;; Permission is hereby granted, free of charge, to any person
 ;; obtaining a copy of this software and associated documentation
@@ -23,4 +24,20 @@
 
 (define-library (srfi 146 ordered)
   (include-library-declarations "../146.exports.sld")
-  (import (srfi 146)))
+  (export mapping-min-key mapping-max-key
+	  mapping-min-value mapping-max-value
+	  mapping-key-predecessor mapping-key-successor
+	  mapping-range= mapping-range< mapping-range> mapping-range<= mapping-range>=
+	  mapping-range=! mapping-range<! mapping-range>! mapping-range<=! mapping-range>=!
+	  mapping-split
+	  mapping-catenate mapping-catenate!
+	  mapping-map/monotone mapping-map/monotone!
+	  mapping-fold/reverse)
+  (import (scheme base)
+	  (scheme case-lambda)
+	  (srfi 1)
+	  (srfi 8)
+      	  (srfi 128)
+	  (srfi 145)
+	  (nieper rbtree))
+  (include "../146.scm"))
