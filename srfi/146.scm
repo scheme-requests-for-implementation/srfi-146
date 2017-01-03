@@ -631,6 +631,9 @@
      (apply mapping-xor (%mapping-xor mapping1 mapping2) mappings))))
 (define mapping-xor! mapping-xor)
 
+;; Additional procedures for mappings with ordererd keys
+
+
 ;; Comparators
 
 (define (mapping-equality comparator)
