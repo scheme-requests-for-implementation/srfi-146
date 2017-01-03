@@ -193,6 +193,18 @@
 	    (acc (loop acc b)))
 	 acc)))))
 
+(define (tree-fold/reverse proc seed tree)
+  (let loop ((acc seed) (tree tree))
+    (tree-match tree
+      ((black)
+       acc)
+      ((node _ a x b)
+       (let*
+	   ((acc (loop acc b))
+	    (acc (proc (item-key x) (item-value x) acc))
+	    (acc (loop acc a)))
+	 acc)))))
+
 (define (tree-for-each proc tree)
   (tree-fold (lambda (key value acc)
 	       (proc key value))
@@ -255,6 +267,30 @@
 		 (values (op (node c a x b)) ret op)))))))
       
     (values (blacken tree) ret)))
+
+(define (tree-key-successor comparator tree obj failure)
+  (let loop ((return failure) (tree tree))
+    (tree-match tree
+      ((black)
+       (return))
+      ((node _ a x b)
+       (let ((key (item-key x)))
+	 (comparator-if<=> comparator obj key
+			   (loop return b)
+			   (loop return b)
+			   (loop (lambda () key) a)))))))
+
+(define (tree-key-predecessor comparator tree obj failure)
+  (let loop ((return failure) (tree tree))
+    (tree-match tree
+      ((black)
+       (return))
+      ((node _ a x b)
+       (let ((key (item-key x)))
+	 (comparator-if<=> comparator obj key
+			   (loop (lambda () key) b)
+			   (loop return a)
+			   (loop return a)))))))
 
 ;;; Helper procedures for deleting and balancing
 

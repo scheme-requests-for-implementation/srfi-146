@@ -329,11 +329,10 @@
 (define (mapping-map->list proc mapping)
   (assume (procedure? proc))
   (assume (mapping? mapping))
-  (reverse
-   (mapping-fold (lambda (key value lst)
-		   (cons (proc key value) lst))
-		 '()
-		 mapping)))
+  (mapping-fold/reverse (lambda (key value lst)
+			  (cons (proc key value) lst))
+			'()
+			mapping))
 
 (define (mapping-filter predicate mapping)
   (assume (procedure? predicate))
@@ -633,6 +632,76 @@
 
 ;; Additional procedures for mappings with ordererd keys
 
+(define (mapping-min-key mapping)
+  (assume (mapping? mapping))
+  (call/cc
+   (lambda (return)
+     (mapping-fold (lambda (key value acc)
+		     (return key))
+		   #f mapping)
+     (error "mapping-min-key: empty map"))))
+
+(define (mapping-max-key mapping)
+  (assume (mapping? mapping))
+  (call/cc
+   (lambda (return)
+     (mapping-fold/reverse (lambda (key value acc)
+			     (return key))
+			   #f mapping)
+     (error "mapping-max-key: empty map"))))
+
+(define (mapping-min-value mapping)
+  (assume (mapping? mapping))
+  (call/cc
+   (lambda (return)
+     (mapping-fold (lambda (key value acc)
+		     (return value))
+		   #f mapping)
+     (error "mapping-min-value: empty map"))))
+
+(define (mapping-max-value mapping)
+  (assume (mapping? mapping))
+  (call/cc
+   (lambda (return)
+     (mapping-fold/reverse (lambda (key value acc)
+			     (return value))
+			   #f mapping)
+     (error "mapping-max-value: empty map"))))
+
+(define (mapping-key-predecessor mapping obj failure)
+  (assume (mapping? mapping))
+  (assume (procedure? failure))
+  (tree-key-predecessor (mapping-comparator mapping) (mapping-tree tree) obj failure))
+
+(define (mapping-key-successor mapping obj failure)
+  (assume (mapping? mapping))
+  (assume (procedure? failure))
+  (tree-key-successor (mapping-comparator mapping) (mapping-tree tree) obj failure))
+
+(define (mapping-range= map obj))
+
+(define mapping-range=! mapping-range=)
+(define mapping-range<! mapping-range<)
+(define mapping-range>! mapping-range>)
+(define mapping-range<=! mapping-range<=)
+(define mapping-range>=! mapping-range>=)
+
+(define mapping-map/monotone! mapping-map/monotone)
+
+(define (mapping-fold/reverse proc acc mapping)
+  (assume (procedure? proc))
+  (assume (mapping? mapping))
+  (tree-fold/reverse proc acc (mapping-tree mapping)))
+
+
+;mapping-min-key mapping-max-key
+;	mapping-min-value mapping-max-value
+;	mapping-key-predecessor mapping-key-successor
+;	mapping-range= mapping-range< mapping-range> mapping-range<= mapping-range>=
+;	mapping-range=! mapping-range<! mapping-range>! mapping-range<=! mapping-range>=!
+;	mapping-map/monotone mapping-map/monotone!
+;	mapping-fold/reverse
+	
 
 ;; Comparators
 

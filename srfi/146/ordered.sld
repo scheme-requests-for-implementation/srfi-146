@@ -31,7 +31,11 @@
 	  mapping-range=! mapping-range<! mapping-range>! mapping-range<=! mapping-range>=!
 	  mapping-map/monotone mapping-map/monotone!
 	  mapping-fold/reverse)
-  (import (srfi 146))
-  (import (srfi 145)
+  (import (scheme base)
+	  (scheme case-lambda)
+	  (srfi 1)
+	  (srfi 8)
+      	  (srfi 128)
+	  (srfi 145)
 	  (nieper rbtree))
-  (include "ordered.scm"))
+  (include "../146.scm"))
