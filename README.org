@@ -1,8 +1,8 @@
-* SRFI 146: Maps
+* SRFI 146: Mappings
 
 ** by Marc Nieper-Wißkirchen
 
-This repository hosts [[http://srfi.schemers.org/srfi-146/][SRFI 146]]: Maps, a [[http://srfi.schemers.org/][Scheme Request for Implementation]].
+This repository hosts [[http://srfi.schemers.org/srfi-146/][SRFI 146]]: Mappings, a [[http://srfi.schemers.org/][Scheme Request for Implementation]].
 
 This SRFI is in /draft/ status.
 
