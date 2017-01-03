@@ -337,7 +337,10 @@ is <code>eq?</code>, <code>eqv?</code>, <code>equal?</code>, <code>string=?</cod
       <code>mapping-range&gt;!</code>,
       <code>mapping-range&lt;=!</code>,
       <code>mapping-range&gt;=!</code>,
+      <code>mapping-catenate</code>,
+      <code>mapping-catenate!</code>,
       <code>mapping-map/monotone</code>,
+      <code>mapping-map/monotone!</code>,
       <code>mapping-fold/reverse</code>
       </p>
   </li>
@@ -1016,8 +1019,8 @@ the thunk <code><em>failure</em></code>.
 <p><code>(mapping-range&gt;= <em>mapping</em> <em>obj</em>)</code></p>
 
 <p>Returns a mapping containing only the associations of
-the <code><em>mapping</em></code> whose keys are equal to/less
-than/greater than/less than or equal to/greater than or equal
+the <code><em>mapping</em></code> whose keys are equal to, less
+than, greater than, less than or equal to, or greater than or equal
   to <code><em>obj</em></code>.
 </p>
 
@@ -1031,10 +1034,35 @@ association.</i></p>
 <p><code>(mapping-range&lt;=! <em>mapping</em> <em>obj</em>)</code></p>
 <p><code>(mapping-range&gt;=! <em>mapping</em> <em>obj</em>)</code></p>
 
-<p>Linear update procedures returning a mapping containing only the associations of
-the <code><em>mapping</em></code> whose keys are equal to/less
-than/greater than/less than or equal to/greater than or equal
-  to <code><em>obj</em></code>.
+<p>Linear update procedures returning a mapping containing only the
+associations of the <code><em>mapping</em></code> whose keys are equal
+to, less than, greater than, less than or equal to, or greater than or
+equal to <code><em>obj</em></code>.
+</p>
+
+<p><code>(mapping-catenate <em>mapping</em><sub>1</sub> <em>key</em> <em>value</em>
+    <em>mapping</em></sub>2</sub>)</code></p>
+
+<p>
+Returns a newly allocated mapping using the
+comparator <code><em>comparator</em></code> whose set of associations
+is the union of the sets of associations of the
+mapping <code><em>mapping</em><sub>1</sub></code>,
+the association mapping <code><em>key</em></code> to
+<code><em>value</em></code>, and the associations of
+<code><em>mapping</em><sub>2</sub></code>.  It is an error if the keys
+contained in <code><em>mapping</em><sub>1</sub></code> in their
+natural order, the key <em>key</em>, and the keys contained
+in <code><em>mapping</em><sub>2</sub></code> in their natural order
+(in that order) do not form a strictly monotone sequence with respect
+to the ordering of <code><em>comparator</em></code>.
+</p>
+
+<p><code>(mapping-catenate! <em>mapping1</em> <em>key</em> <em>value</em> <em>mapping2</em>)</code></p>
+
+<p>The <code>mapping-map/monotone!</code> procedure is the same
+as <code>mapping-map/monotone</code>, except that it is permitted to mutate and
+return one of the <code><em>mapping</em></code>s rather than allocating a new mapping.
 </p>
 
 <p><code>(mapping-map/monotone <em>proc</em> <em>comparator</em> <em>mapping</em>)</code></p>
