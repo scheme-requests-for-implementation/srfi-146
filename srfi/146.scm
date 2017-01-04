@@ -106,14 +106,14 @@
      (assume (mapping? mapping))
      (assume (procedure? failure))
      (assume (procedure? success))
-     (call/cc
-      (lambda (return)
-	(mapping-search mapping
-		    key
-		    (lambda (insert ignore)
-		      (return (failure)))
-		    (lambda (key value update remove)
-		      (return (success value)))))))))
+     ((call/cc
+       (lambda (return-thunk)
+	 (mapping-search mapping
+			 key
+			 (lambda (insert ignore)
+			   (return-thunk failure))
+			 (lambda (key value update remove)
+			   (return-thunk (lambda () (success value)))))))))))
 
 (define (mapping-ref/default mapping key default)
   (assume (mapping? mapping))

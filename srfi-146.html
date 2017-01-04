@@ -409,11 +409,11 @@ The following three procedures, given a key, return the corresponding value.
 
 <p>Extracts the value associated to <code><em>key</em></code>
   in the mapping <code><em>mapping</em></code>, invokes the
-  procedure <code><em>success</em></code> on it, and returns its result;
+  procedure <code><em>success</em></code> in tail context on it, and returns its result;
   if <code><em>success</em></code> is not provided, then the value
   itself is return.  If <code><em>key</em></code> is not contained
   in <code><em>mapping</em></code> and <code><em>failure</em></code> is
-  supplied, then <code><em>failure</em></code> is invoked on no
+  supplied, then <code><em>failure</em></code> is invoked in tail context on no
   arguments and its result is return.  Otherwise, it is an error.
 </p>
 
@@ -661,7 +661,7 @@ Returns the number of associations in <em>mapping</em> as an exact integer.
   of the mapping <code><em>mapping</em></code> consisting of a key and value as two
   values such that <code><em>predicate</em></code> returns a true
   value when invoked with key and value as arguments, or the result of
-  invoking <code><em>failure</em></code> with no arguments if there is
+  tail-calling <code><em>failure</em></code> with no arguments if there is
   none.  There are no guarantees how many times and with which keys and values
   <code><em>predicate</em></code> is invoked, but see below:
 </p>
