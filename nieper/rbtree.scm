@@ -314,13 +314,15 @@
        (let loop ((tree tree2) (depth (- height2 height1)))
 	 (if (zero? depth)
 	     (red tree1 pivot tree)
-	     (balance (node (loop (left tree) (- depth 1)) (item tree) (right tree)))))))
+	     (balance
+	      (node (color node) (loop (left tree) (- depth 1)) (item tree) (right tree)))))))
      (else
       (blacken
        (let loop ((tree tree1) (depth (- height1 height2)))
 	 (if (zero? depth)
 	     (red tree pivot tree2)
-	     (balance (node (right tree) (item tree) (loop (right tree) (- depth 1)))))))))))
+	     (balance
+	      (node (color node) (left tree) (item tree) (loop (right tree) (- depth 1)))))))))))
 
 (define (tree-split comparator tree obj)
   (let loop ((tree1 (black))

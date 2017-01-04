@@ -22,6 +22,10 @@
 
 (define-syntax assume
   (syntax-rules ()
+    ((assume (t x))
+     (unless (t x)
+       (fatal-error "invalid assumption" (quote (t x)) x)))
+
     ((assume expression)
      (unless expression
        (fatal-error "invalid assumption" (quote expression))))
