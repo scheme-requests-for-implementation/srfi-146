@@ -106,14 +106,14 @@
      (assume (mapping? mapping))
      (assume (procedure? failure))
      (assume (procedure? success))
-     (call/cc
-      (lambda (return)
-	(mapping-search mapping
-		    key
-		    (lambda (insert ignore)
-		      (return (failure)))
-		    (lambda (key value update remove)
-		      (return (success value)))))))))
+     ((call/cc
+       (lambda (return-thunk)
+	 (mapping-search mapping
+			 key
+			 (lambda (insert ignore)
+			   (return-thunk failure))
+			 (lambda (key value update remove)
+			   (return-thunk (lambda () (success value)))))))))))
 
 (define (mapping-ref/default mapping key default)
   (assume (mapping? mapping))
@@ -179,7 +179,7 @@
 		 (lambda (insert ignore)
 		   (receive (value)
 		       (failure)
-		     (insert key value value)))
+		     (insert value value)))
 		 (lambda (old-key old-value update remove)
 		   (return mapping old-value))))))
 
@@ -202,7 +202,7 @@
 	(mapping-search mapping
 		    key
 		    (lambda (insert ignore)
-		      (insert key (updater (failure)) #f))
+		      (insert (updater (failure)) #f))
 		    (lambda (old-key old-value update remove)
 		      (update key (updater (success old-value)) #f)))
       mapping))))
@@ -228,7 +228,8 @@
 			(mapping-tree mapping)
 			key
 			(lambda (insert ignore)
-			  (failure insert
+			  (failure (lambda (value obj)
+				     (insert key value obj))
 				   (lambda (obj)
 				     (return mapping obj))))
 			success)))
@@ -451,7 +452,7 @@
 	    #f)
 	   ((less? key2 key1)
 	    (loop item1 (gen2)))
-	   ((equality-predicate item1 item2)
+	   ((equality-predicate value1 value2)
 	    (loop (gen1) (gen2)))
 	   (else
 	    #f))))))))
@@ -529,15 +530,15 @@
 
 (define (%mapping-union mapping1 mapping2)
   (mapping-fold (lambda (key2 value2 mapping)
-	      (receive (mapping obj)
-		  (mapping-search mapping
-			      key2
-			      (lambda (insert ignore)
-				(insert key2 value2 #f))
-			      (lambda (key1 value1 update remove)
-				(update key1 value1 #f)))
-		mapping))
-	    mapping1 mapping2))
+		  (receive (mapping obj)
+		      (mapping-search mapping
+				      key2
+				      (lambda (insert ignore)
+					(insert value2 #f))
+				      (lambda (key1 value1 update remove)
+					(update key1 value1 #f)))
+		    mapping))
+		mapping1 mapping2))
 
 (define (%mapping-intersection mapping1 mapping2)
   (mapping-filter (lambda (key1 value1)
@@ -562,7 +563,7 @@
 		  (mapping-search mapping
 			      key2
 			      (lambda (insert ignore)
-				(insert key2 value2 #f))
+				(insert value2 #f))
 			      (lambda (key1 value1 update remove)
 				(remove #f)))
 		mapping))
