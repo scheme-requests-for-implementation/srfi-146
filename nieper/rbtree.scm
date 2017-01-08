@@ -302,6 +302,7 @@
 	   (proc (item-key x) (item-value x))
 	 (node c (loop a) (make-item key value) (loop b)))))))
 
+
 (define (tree-catenate tree1 pivot-key pivot-value tree2)
   (let ((pivot (make-item pivot-key pivot-value))
 	(height1 (black-height tree1))
@@ -313,16 +314,16 @@
       (blacken
        (let loop ((tree tree2) (depth (- height2 height1)))
 	 (if (zero? depth)
-	     (red tree1 pivot tree)
+	     (balance (red tree1 pivot tree))
 	     (balance
-	      (node (color node) (loop (left tree) (- depth 1)) (item tree) (right tree)))))))
+	      (node (color tree) (loop (left tree) (- depth 1)) (item tree) (right tree)))))))
      (else
       (blacken
        (let loop ((tree tree1) (depth (- height1 height2)))
 	 (if (zero? depth)
-	     (red tree pivot tree2)
+	     (balance (red tree pivot tree2))
 	     (balance
-	      (node (color node) (left tree) (item tree) (loop (right tree) (- depth 1)))))))))))
+	      (node (color tree) (left tree) (item tree) (loop (right tree) (- depth 1)))))))))))
 
 (define (tree-split comparator tree obj)
   (let loop ((tree1 (black))
@@ -338,20 +339,24 @@
       ((node _ a x b)
        (comparator-if<=> comparator obj (item-key x)
 			 (loop tree1
-			       (catenate-right b pivot2 tree2)
+			       (catenate-right (blacken b) pivot2 tree2)
 			       pivot1
 			       x
-			       a)
-			 (let* ((tree1 (catenate-left tree1 pivot1 a))
+			       (blacken a))
+			 (let* ((tree1 (catenate-left tree1 pivot1 (blacken a)))
 				(tree1+ (catenate-left tree1 x (black)))
-				(tree2 (catenate-right b pivot2 tree2))
+				(tree2 (catenate-right (blacken b) pivot2 tree2))
 				(tree2+ (catenate-right (black) x tree2)))
-			   (values tree1 tree1+ (black (black) x (black)) tree2+ tree2))
-			 (loop (catenate-left tree1 pivot1 a)
+			   (values tree1
+				   tree1+
+				   (black (black) x (black))
+				   tree2+
+				   tree2))
+			 (loop (catenate-left tree1 pivot1 (blacken a))
 			       tree2
 			       x
 			       pivot2
-			       b))))))
+			       (blacken b)))))))
 
 (define (catenate-left tree1 item tree2)
   (if item
