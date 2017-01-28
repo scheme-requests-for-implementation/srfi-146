@@ -20,6 +20,8 @@
 ;; CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ;; SOFTWARE.
 
-(import (rename (srfi 146 test) (run-tests run-srfi-146-tests)))
+(import (rename (srfi 146 test) (run-tests run-srfi-146-tests))
+	(rename (srfi 113 test) (run-tests run-srfi-113-tests)))
 
 (run-srfi-146-tests)
+(run-srfi-113-tests)
