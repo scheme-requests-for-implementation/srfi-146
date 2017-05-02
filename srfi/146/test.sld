@@ -28,7 +28,7 @@
 	  (srfi 8)
 	  (srfi 64)
 	  (srfi 128)
-	  (srfi 146 ordered))
+	  (srfi 146))
   (begin
     (define (run-tests)
       (test-begin "SRFI 146")
