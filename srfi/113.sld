@@ -61,5 +61,5 @@
 	  (srfi 121)
 	  (srfi 128)
 	  (srfi 145)
-	  (srfi 146 ordered))
+	  (srfi 146))
   (include "113.scm"))

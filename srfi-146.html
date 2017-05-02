@@ -189,61 +189,41 @@ example, <code>mapping-copy</code> could be a no-op.</p>
 
 <h2>Comparator restrictions</h2>
 
-<p>Implementations of this SRFI are allowed to place restrictions on
-the comparators that the procedures accept as follows:  An
-implementation may require comparators to provide a comparison
-procedure.  Alternatively, an implementation may require comparators
-to provide a hash function, unless the equality predicate of the
-comparator
-is <code>eq?</code>, <code>eqv?</code>, <code>equal?</code>, <code>string=?</code>,
+<p>This SRFI requires comparators to provide a comparison function.
+  However, any implementation may also provide the optional
+  library <code>(srfi 146 hash)</code> which implements essentially
+  the same interface (see below) as <code>(srfi 146)</code> but
+  requires comparators to provide a hash function instead of a
+  comparison function, unless the equality predicate of the comparator
+  is <code>eq?</code>, <code>eqv?</code>, <code>equal?</code>, <code>string=?</code>,
   or <code>string-ci=?</code>.
 </p>
 
 <p>
-  In order to allow portable Scheme code to distinguish whether a
-  specific implementation of this SRFI supports comparators with
-  ordering procedures (in which case sets of keys have a natural
-  total order) or comparators with hash functions (or both), it is
-  required that an implementation supporting comparators with
-  comparison functions not only implements the interface in
-  the <code>(srfi 146)</code> namespace, but also in the <code>(srfi
-  146 ordered)</code> namespace.  Likewise, an implementation
-  supporting comparators with hash functions implements the interface
-  in the <code>(srfi 146)</code> namespace also in the <code>(srfi 146
-  hash)</code> namespace.  Procedures that are exported from the
-  the <code>(srfi 146 ordered)</code> namespace have additional
-  restrictions (see below).  What has been said above should be true
-  for all alternatives to <code>(srfi 146)</code>,
-  <i>e.g.</i> <code>(scheme mapping)</code>.
+  The optional library <code>(srfi 146 hash)</code> exports exactly
+  the same identifiers except for those bound to locations which make
+  no sense when a comparison function is absent
+  (e.g. <code>mapping-split</code>).  Should <code>(srfi 146)</code>
+  once be known as <code>(scheme mapping)</code>, the optional library
+  <code>(srfi 146 hash)</code> will get the alternative name <code>(scheme mapping hash)</code>.
 </p>
 
 <p>
-  Portable Scheme code can distinguish implementations of this SRFI using <code>cond-expand</code>:
+  Portable Scheme code can discern the availability of mappings with
+  hash functions using <code>cond-expand</code>:
 </p>
 
 <pre>
   (cond-expand
     ((library (srfi 146 hash))
      ...) ; code that sets up comparators with hash functions
-    ((library (srfi 146 ordered))
+    ((library (srfi 146))
      ...)) ; code that sets up comparators with ordering procedures
 </pre>
 
-<p>
-  (Scheme code which would be more performant/more natural with
-  ordering procedures instead of hash functions, would change the
-  order of the two <code>&lt;cond-expand&gt;</code>-clauses.)
-</p>
-
-<p>A number of additional operation with mappings that make only sense
-  when the keys are ordered (see below) are exported from
-  the <code>(srfi 146 ordered)</code> namespace, but neither from <code>(srfi 146)</code>, nor
-  <code>(srfi 146 hash)</code>.
-</p>
-
 <p>It is left to a future SRFI that will update SRFI 113 to provide an
   analogous addition to <code>(scheme set)</code>, <em>i.e.</em> to
-  specify <code>(scheme set hash)</code> and <code>(scheme set ordered)</code>.
+  specify <code>(scheme set hash)</code>.
 </p>
 
 <h2 id="index">Index</h2>
@@ -585,8 +565,8 @@ and <code><em>remove</em></code>, and is expected to tail-call one of
 them.
 </p>
 
-<p>If <code>mapping-search</code> is imported from <code>(srfi 146
-    ordered)</code>, <code><em>mapping</em></code> is searched in order
+<p>If <code>mapping-search</code> is imported from <code>(srfi 146)</code>,
+  <code><em>mapping</em></code> is searched in order
     (that is in the order of the stored keys).
 </p>
 
@@ -669,8 +649,8 @@ Returns the number of associations in <em>mapping</em> as an exact integer.
   <code><em>predicate</em></code> is invoked, but see below:
 </p>
 
-<p>If <code>mapping-find</code> is imported from <code>(srfi 146
-    ordered)</code>, <code><em>mapping</em></code> is searched in order:
+<p>If <code>mapping-find</code> is imported from <code>(srfi 146)</code>,
+  <code><em>mapping</em></code> is searched in order:
     The association with the least key that
     satisfies <code><em>predicate</em></code> is returned.
 </p>
@@ -703,8 +683,7 @@ of <code>mapping-find</code>), or <code>#f</code> otherwise.
 
 <p>Returns a newly allocated list of all the keys in the mapping <code><em>mapping</em></code>.</p>
 
-<p>If <code>mapping-keys</code> is imported from <code>(srfi 146
-    ordered)</code>, the list is returned in order:  It is ordered
+<p>If <code>mapping-keys</code> is imported from <code>(srfi 146)</code>, the list is returned in order:  It is ordered
   according to the ordering of the keys.
 </p>
 
@@ -714,8 +693,7 @@ of <code>mapping-find</code>), or <code>#f</code> otherwise.
   Returns a newly allocated list of all the values in the mapping <code><em>mapping</em></code>.
 </p>
 
-<p>If <code>mapping-values</code> is imported from <code>(srfi 146
-    ordered)</code>, the list is returned in order:  It is ordered
+<p>If <code>mapping-values</code> is imported from <code>(srfi 146)</code>, the list is returned in order:  It is ordered
   according to the ordering of the keys corresponding to the values.
 </p>
 
@@ -728,8 +706,7 @@ values in the mapping <code><em>mapping</em></code>.  The two lists are
 consistently ordered,  so that keys can be matched to their corresponding values.
 </p>
 
-<p>If <code>mapping-entries</code> is imported from <code>(srfi 146
-    ordered)</code>, the lists is returned in order:  They are ordered
+<p>If <code>mapping-entries</code> is imported from <code>(srfi 146)</code>, the lists is returned in order:  They are ordered
   according to the ordering of the keys.
 </p>
 
@@ -762,8 +739,7 @@ are omitted as in the mapping constructor.  It is unpredictable which one
 will be preserved in the result.
 </p>
 
-<p>If <code>mapping-map</code> is imported from <code>(srfi 146
-    ordered)</code>, the associations are mapped in order:  They are ordered
+<p>If <code>mapping-map</code> is imported from <code>(srfi 146)</code>, the associations are mapped in order:  They are ordered
   according to the natural ordering of the keys.
 </p>
 
@@ -775,8 +751,7 @@ returned values, with two arguments: the key of the association and
 the value of the association.  Returns an unspecified value.
 </p>
 
-<p>If <code>mapping-for-each</code> is imported from <code>(srfi 146
-    ordered)</code>, the associations are processed in order:  They are ordered
+<p>If <code>mapping-for-each</code> is imported from <code>(srfi 146)</code>, the associations are processed in order:  They are ordered
   according to the natural ordering of the keys.
 </p>
 
@@ -791,8 +766,7 @@ used as the second argument.  Returns the result of the last
 invocation, or <code><em>nil</em></code> if there was no invocation.
 </p>
 
-<p>If <code>mapping-fold</code> is imported from <code>(srfi 146
-    ordered)</code>, the associations are accumulated in order:  They are ordered
+<p>If <code>mapping-fold</code> is imported from <code>(srfi 146)</code>, the associations are accumulated in order:  They are ordered
   according to the natural ordering of the keys.
 </p>
 
@@ -806,8 +780,7 @@ the invocations of <code><em>proc</em></code> are accumulated into a
 list, which is returned.
 </p>
 
-<p>If <code>mapping-map-&gt;list</code> is imported from <code>(srfi 146
-    ordered)</code>, the associations are mapped in order:  They are ordered
+<p>If <code>mapping-map-&gt;list</code> is imported from <code>(srfi 146)</code>, the associations are mapped in order:  They are ordered
   according to the natural ordering of the keys.
 </p>
 
@@ -876,8 +849,7 @@ mapping <code><em>mapping</em></code>, and using the same comparator.
   whose cdr is the associated value.
 </p>
 
-<p>If <code>mapping-&gt;alist</code> is imported from <code>(srfi 146
-    ordered)</code>, the association list is in order:  It is ordered
+<p>If <code>mapping-&gt;alist</code> is imported from <code>(srfi 146)</code>, the association list is in order:  It is ordered
   according to the natural ordering of the keys.
 </p>
 
@@ -985,9 +957,8 @@ in the result mapping are drawn from the first mapping in which they appear.
 <h2 id="Additionalproceduresformappingswithorderedkeys">Additional
 procedures for mappings with ordererd keys</h2>
 
-<p>The following procedures are only exported by the <code>(srfi 146
-    ordered)</code> library (and, if applicable, by <code>(scheme mappings
-    ordered)</code>).
+<p>The following procedures are only exported by the <code>(srfi 146)</code> library
+  and not by <code>(srfi 146 hash)</code>:
 </p>
 
 <p><code>(mapping-min-key <em>mapping</em>)</code></p>
@@ -1126,7 +1097,7 @@ respect to the natural ordering of the keys.
 </p>
 
 <p>If <code>make-mapping-comparator</code> is imported from <code>(srfi
-    146 ordered)</code>, the lexicographic ordering with respect to
+    146)</code>, the lexicographic ordering with respect to
     the keys (and, in case a tiebreak is neccessary, with respect to
     the ordering of the values) is used.
 </p>
