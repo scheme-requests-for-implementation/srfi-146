@@ -956,7 +956,7 @@ in the result mapping are drawn from the first mapping in which they appear.
 </p>
 
 <h2 id="Additionalproceduresformappingswithorderedkeys">Additional
-procedures for mappings with ordererd keys</h2>
+procedures for mappings with ordered keys</h2>
 
 <p>The following procedures are only exported by the <code>(srfi 146)</code> library
   and not by <code>(srfi 146 hash)</code>:
@@ -1050,8 +1050,8 @@ to the ordering of <code><em>comparator</em></code>.
 
 <p><code>(mapping-catenate! <em>mapping1</em> <em>key</em> <em>value</em> <em>mapping2</em>)</code></p>
 
-<p>The <code>mapping-map/monotone!</code> procedure is the same
-as <code>mapping-map/monotone</code>, except that it is permitted to mutate and
+<p>The <code>mapping-map/catenate!</code> procedure is the same
+as <code>mapping-map/catenate</code>, except that it is permitted to mutate and
 return one of the <code><em>mapping</em></code>s rather than allocating a new mapping.
 </p>
 
