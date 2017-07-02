@@ -67,7 +67,7 @@ do not implement the restriction that keys have to be unique in mappings.
 
 <p>
 While the hash table model of SRFI 125 implements proper mappings, it
-makes very strict assumptions on how these mappings have to implemented.
+makes very strict assumptions on how these mappings have to be implemented.
 In particular, these requirements make purely functional mappings based on
 SRFI 125 rather inefficient.
 </p>
@@ -140,14 +140,15 @@ side effects, depending upon the details of what is the most efficient
   or simple to implement in terms of the underlying representation.
 </p>
 
-<p>It is an error to rely upon these procedures working by side
-  effect.  For example, this is not guaranteed to work:</p>
+<p>It is an error to reference a (mapping) parameter after a
+linear-update procedure has been invoked.  For example, this is not
+guaranteed to work:</p>
 
 <pre>
   (let* ((mapping1
          (mapping (make-default-comparator) 'a 1 'b 2 'c 3)) ; mapping1 = {a&map;1,b&map;2,c&map;3}.
     (mapping2 (mapping-set! mapping1 'd 4))) ; mapping2 = {a&map;1,b&map;2,c&map;3,d&map;4}
-  mapping1) ; mapping1 = {a&map;1,b&map;2,c&map;3} or mapping1 = {a&map;1,b&map;2,c&map;3;d&map;4}
+  mapping1) ; mapping1 = {a&map;1,b&map;2,c&map;3} or mapping1 = {a&map;1,b&map;2,c&map;3;d&map;4} ???
 </pre>
 
 <p>However, this is well-defined:</p>
@@ -344,7 +345,7 @@ example, <code>mapping-copy</code> could be a no-op.</p>
 <p>Returns a newly allocated mapping.  The <em>comparator</em> argument is
 a <a href="http://srfi.schemers.org/srfi-128/srfi-128.html">SRFI
 128</a> comparator, which is used to control and distinguish the keys
-of the mapping.  The <code><em>arg</em></code>s alter between keys and values and are
+of the mapping.  The <code><em>arg</em></code>s alternate between keys and values and are
 used to initialize the mapping.  In particular, the number
 of <code><em>arg</em></code>s has to be even.  Earlier associations
 with equal keys take precedence over later arguments.</p>
