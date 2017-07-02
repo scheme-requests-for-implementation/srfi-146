@@ -155,7 +155,7 @@ guaranteed to work:</p>
 <p>However, this is well-defined:</p>
 
 <pre>
-  (let ((mapping1 (set (make-default-comparator 'a 1 'b 2 'c 3)))
+  (let ((mapping1 (mapping make-default-comparator 'a 1 'b 2 'c 3)))
     (mapping-set! mapping1 'd 4)) ; &rArr; {a&map;1,b&map;2,c&map;3;d&map;4}
 </pre>
 
