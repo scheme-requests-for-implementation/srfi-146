@@ -95,7 +95,9 @@ explicitly deal with sets of associations.
 <h1>Specification</h1>
 
 <p>
-Mappings are disjoint from other types of Scheme objects.
+  Mappings are disjoint at least from those types of Scheme objects
+  that were in existence when this library was loaded for the first
+  time.
 </p>
 
 <p>
@@ -155,7 +157,7 @@ guaranteed to work:</p>
 <p>However, this is well-defined:</p>
 
 <pre>
-  (let ((mapping1 (mapping make-default-comparator 'a 1 'b 2 'c 3)))
+  (let ((mapping1 (mapping (make-default-comparator) 'a 1 'b 2 'c 3)))
     (mapping-set! mapping1 'd 4)) ; &rArr; {a&map;1,b&map;2,c&map;3;d&map;4}
 </pre>
 
@@ -361,6 +363,17 @@ with equal keys take precedence over later arguments.</p>
   key and the value, respectively.  Then get a new seed by applying the
   procedure <em>successor</em> to <em>seed</em>, and repeat this
   algorithm.  Associations earlier in the list take precedence over those that come later.
+</p>
+
+<p><code>(mapping/ordered <em>comparator</em> <em>arg</em> ...)</code></p>
+
+<p><code>(mapping-unfold/ordered <em>stop?</em> <em>mapper</em> <em>successor</em> <em>seed</em> <em>comparator</em>)</code></p>
+
+<p>
+  These are the same as <code>mapping</code>
+  and <code>mapping-unfold</code>, except that it is an error if they
+  are imported from <code>(srfi 146)</code> and the keys are not in
+  order, and they may be more efficient.
 </p>
 
 <h2 id="Predicates">Predicates</h2>
@@ -836,6 +849,7 @@ satisfy <code><em>predicate</em></code>.</p>
 
 <h2 id="Copyingandconversion">Copying and conversion</h2>
 
+
 <p><code>(mapping-copy <em>mapping</em>)</code></p>
 
 <p>
@@ -873,6 +887,17 @@ A linear update procedure that returns a mapping that contains the
 associations of both <code><em>mapping</em></code>
 and <code><em>alist</em></code>.  Associations in the mapping and those
 earlier in the list take precedence over those that come later.
+</p>
+
+<p><code>(alist-&gt;mapping/ordered <em>comparator</em> <em>alist</em>)</code></p>
+
+<p><code>(alist-&gt;mapping/ordered! <em>mapping</em> <em>alist</em>)</code></p>
+
+<p>
+  These are the same as <code>alist-&gt;mapping/ordered</code>
+  and <code>alist-&gt;mapping/ordered!</code>, except that it is an error if they
+  are imported from <code>(srfi 146)</code> and the keys are not in
+  order, and they may be more efficient.
 </p>
 
 <h2 id="Submappings">Submappings</h2>

@@ -61,6 +61,9 @@
 	  (loop (mapping-set mapping key value)
 		(successor seed))))))
 
+(define mapping-ordered mapping-ordered)
+(define mapping-unfold mapping-unfold)
+
 ;; Predicates
 
 (define (mapping-empty? mapping)
@@ -396,6 +399,9 @@
 	    (mapping-set mapping key value)))
 	mapping
 	alist))
+
+(define alist->mapping/ordered alist->mapping)
+(define alist->mapping/ordered! alist->mapping!)
 
 ;; Submappings
 
