@@ -47,6 +47,9 @@
 	      args
 	      comparator))
 
+;; FIXME: mapping-unfold has a different precedence with respect to
+;; duplicate keys to the spec.
+
 (define (mapping-unfold stop? mapper successor seed comparator)
   (assume (procedure? stop?))
   (assume (procedure? mapper))
@@ -61,8 +64,8 @@
 	  (loop (mapping-set mapping key value)
 		(successor seed))))))
 
-(define mapping-ordered mapping-ordered)
-(define mapping-unfold mapping-unfold)
+(define mapping/ordered mapping)
+(define mapping-unfold/ordered mapping-unfold)
 
 ;; Predicates
 

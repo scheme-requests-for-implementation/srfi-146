@@ -96,9 +96,10 @@ explicitly deal with sets of associations.
 <h1>Specification</h1>
 
 <p>
-  Mappings are disjoint at least from those types of Scheme objects
-  that were in existence when this library was loaded for the first
-  time.
+  Mappings form a new type as if created
+  by <code>define-record-type</code>.  It is an error to use
+  record-type inspection or inheritance on the mapping type; <i>i.e.</i> the
+  mapping type is sealed and opaque in the language of SRFI 99.
 </p>
 
 <p>
