@@ -47,9 +47,6 @@
 	      args
 	      comparator))
 
-;; FIXME: mapping-unfold has a different precedence with respect to
-;; duplicate keys to the spec.
-
 (define (mapping-unfold stop? mapper successor seed comparator)
   (assume (procedure? stop?))
   (assume (procedure? mapper))
@@ -61,7 +58,7 @@
 	mapping
 	(receive (key value)
 	    (mapper seed)
-	  (loop (mapping-set mapping key value)
+	  (loop (mapping-adjoin mapping key value)
 		(successor seed))))))
 
 (define mapping/ordered mapping)
@@ -126,6 +123,18 @@
   (mapping-ref mapping key (lambda () default)))
 
 ;; Updaters
+
+(define (mapping-adjoin mapping . args)
+  (assume (mapping? mapping))
+  (let loop ((args args)
+	     (mapping mapping))
+    (if (null? args)
+	mapping
+	(receive (mapping value)
+	    (mapping-intern mapping (car args) (lambda () (cadr args)))
+	  (loop (cddr args) mapping)))))
+
+(define mapping-adjoin! mapping-adjoin)
 
 (define (mapping-set mapping . args)
   (assume (mapping? mapping))
