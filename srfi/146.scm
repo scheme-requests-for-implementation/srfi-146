@@ -58,11 +58,11 @@
 	mapping
 	(receive (key value)
 	    (mapper seed)
-	  (loop (mapping-set mapping key value)
+	  (loop (mapping-adjoin mapping key value)
 		(successor seed))))))
 
-(define mapping-ordered mapping-ordered)
-(define mapping-unfold mapping-unfold)
+(define mapping/ordered mapping)
+(define mapping-unfold/ordered mapping-unfold)
 
 ;; Predicates
 
@@ -123,6 +123,18 @@
   (mapping-ref mapping key (lambda () default)))
 
 ;; Updaters
+
+(define (mapping-adjoin mapping . args)
+  (assume (mapping? mapping))
+  (let loop ((args args)
+	     (mapping mapping))
+    (if (null? args)
+	mapping
+	(receive (mapping value)
+	    (mapping-intern mapping (car args) (lambda () (cadr args)))
+	  (loop (cddr args) mapping)))))
+
+(define mapping-adjoin! mapping-adjoin)
 
 (define (mapping-set mapping . args)
   (assume (mapping? mapping))

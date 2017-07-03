@@ -25,7 +25,8 @@
 	  mapping/ordered mapping-unfold/ordered
 	  mapping? mapping-contains? mapping-empty? mapping-disjoint?
 	  mapping-ref mapping-ref/default mapping-key-comparator
-	  mapping-set mapping-set! 
+	  mapping-adjoin mapping-adjoin!
+	  mapping-set mapping-set!
 	  mapping-replace mapping-replace!
 	  mapping-delete mapping-delete! mapping-delete-all mapping-delete-all!
 	  mapping-intern mapping-intern!
@@ -38,7 +39,7 @@
 	  mapping-remove mapping-remove!
 	  mapping-partition mapping-partition!
 	  mapping-copy mapping->alist alist->mapping alist->mapping!
-	  alist->mapping/ordered alist-mapping/ordered!
+	  alist->mapping/ordered alist->mapping/ordered!
 	  mapping=? mapping<? mapping>? mapping<=? mapping>=?
 	  mapping-union mapping-intersection mapping-difference mapping-xor
 	  mapping-union! mapping-intersection! mapping-difference! mapping-xor!

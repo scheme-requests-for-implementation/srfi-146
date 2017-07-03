@@ -96,9 +96,10 @@ explicitly deal with sets of associations.
 <h1>Specification</h1>
 
 <p>
-  Mappings are disjoint at least from those types of Scheme objects
-  that were in existence when this library was loaded for the first
-  time.
+  Mappings form a new type as if created
+  by <code>define-record-type</code>.  The effect of using record-type
+  inspection or inheritance for the mapping type is
+  unspecified.
 </p>
 
 <p>
@@ -346,13 +347,15 @@ example, <code>mapping-copy</code> could be a no-op.</p>
 
 <p><code>(mapping <em>comparator</em> <em>arg</em> ...)</code></p>
 
-<p>Returns a newly allocated mapping.  The <em>comparator</em> argument is
+<p>Returns a newly allocated mapping.  The <em>comparator</em>
+argument is
 a <a href="http://srfi.schemers.org/srfi-128/srfi-128.html">SRFI
 128</a> comparator, which is used to control and distinguish the keys
-of the mapping.  The <code><em>arg</em></code>s alternate between keys and values and are
-used to initialize the mapping.  In particular, the number
-of <code><em>arg</em></code>s has to be even.  Earlier associations
-with equal keys take precedence over later arguments.</p>
+of the mapping.  The <code><em>arg</em></code>s alternate between keys
+and values and are used to initialize the mapping.  In particular, the
+number of <code><em>arg</em></code>s has to be even.  Earlier
+associations with equal keys take precedence over later arguments.
+</p>
 
 <p><code>(mapping-unfold <em>stop?</em> <em>mapper</em> <em>successor</em> <em>seed</em> <em>comparator</em>)</code></p>
 
@@ -365,6 +368,13 @@ with equal keys take precedence over later arguments.</p>
   procedure <em>successor</em> to <em>seed</em>, and repeat this
   algorithm.  Associations earlier in the list take precedence over those that come later.
 </p>
+
+<p><i>Note that the choice of precedence in <code>mapping</code> and <code>mapping-unfold</code>
+    is compatible
+    with <code>mapping-adjoin</code> and <code>alist->mapping</code>
+    detailed below and with <code>alist-&gt;hash-table</code> from SRFI
+    125, but different from the one in <code>mapping-set</code> from below.
+</i></p>
 
 <p><code>(mapping/ordered <em>comparator</em> <em>arg</em> ...)</code></p>
 
@@ -430,6 +440,29 @@ Semantically equivalent to, but may be more efficient than, the following code:
 <p>Returns the comparator used to compare the keys of the mapping <em>mapping</em>.</p>
 
 <h2 id="Updaters">Updaters</h2>
+
+<p><code>(mapping-adjoin <em>mapping</em> <em>arg</em> ...)</code></p>
+
+<p>The <code>mapping-set</code> procedure returns a newly allocated
+  mapping that uses the same comparator as the
+  mapping <code><em>mapping</em></code> and contains all the
+  associations of <code><em>mapping</em></code>, and in addition new
+  associations by processing the arguments from left to
+  right. The <code><em>arg</em></code>s alternate between keys and
+  values.  Whenever there is a previous association for a key, the
+  previous association prevails and the new associating is skipped.
+  It is an error to add an element to <code><em>mapping</em></code>
+  that does not return <code>#t</code> when passed to the type test
+  procedure of the comparator.
+</p>
+
+<p><code>(mapping-adjoin! <em>mapping</em> <em>arg</em> ...)</code></p>
+
+<p>The <code>mapping-adjoin!</code> procedure is the same
+  as <code>mapping-adjoin</code>, except that it is permitted to mutate and
+  return the <code><em>mapping</em></code> argument rather than allocating
+  a new mapping.
+</p>
 
 <p><code>(mapping-set <em>mapping</em> <em>arg</em> ...)</code></p>
 

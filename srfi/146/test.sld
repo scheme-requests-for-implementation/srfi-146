@@ -98,6 +98,15 @@
 	(define mapping2 (mapping-set mapping1 'c 4 'd 4 'd 5))
 	(define mapping3 (mapping-update mapping1 'b (lambda (x) (* x x))))
 	(define mapping4 (mapping-update/default mapping1 'd (lambda (x) (* x x)) 4))
+	(define mapping5 (mapping-adjoin mapping1 'c 4 'd 4 'd 5))
+
+	(test-equal "mapping-adjoin: key already in mapping"
+	  3
+	  (mapping-ref mapping5 'c))
+
+	(test-equal "mapping-adjoin: key set earlier"
+	  4
+	  (mapping-ref mapping5 'd))
 	
 	(test-equal "mapping-set: key already in mapping"
 	  4
@@ -469,7 +478,7 @@
 	    (comparator? mapping-comparator))
 	  
 	  (test-equal "mapping-keyed mapping"
-	    (list "b" "b" "c" "d" "e")
+	    (list "a" "a" "c" "d" "e")
 	    (list (mapping-ref mapping0 mapping1)
 		  (mapping-ref mapping0 mapping2)
 		  (mapping-ref mapping0 mapping3)
