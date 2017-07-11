@@ -946,12 +946,13 @@ earlier in the list take precedence over those that come later.
 and therefore do not constitute a total order on mappings.
 </p>
 
-<p>All predicates in this subsection take
-a <code><em>comparator</em></code> argument, which is a comparator
-used to compare the values of the associations stored in the mappings.
-This comparator is used to define the equality of associations.  Two
-associations are equal if and only if their keys and values are equal,
-respectively.
+<p>
+  All predicates in this subsection take a <code><em>comparator</em></code> argument, which
+  is a comparator used to compare the values of the associations
+  stored in the mappings.  Entries in the mappings are equal if their
+  keys are equal with mappings' key comparator, and their values are
+  equal with the given comparator.  Two associations are equal if and
+  only if their entries are equal, respectively.
 </p>
 
 <p><code>(mapping=? <em>comparator</em> <em>mapping<sub>1</sub></em> <em>mapping<sub>2</sub></em> ...)</code></p>
@@ -1206,9 +1207,9 @@ layer over the procedures of SRFI 146.
 Credit goes to John Cowan for SRFI 113 and SRFI 128, to Will Clinger
 and John Cowan for SRFI 125, and to Kevin Wortman for his
 immutable-maps-proposal.  Special credit also goes to Sudarshan S
-Chawathe for his careful reading of the drafts of this SRFI and his
-many valuable comments which helped to improve this proposal, and to
-Jown Cowan for ideas on ordered mappings.
+Chawathe and Shiro Kawai for their careful readings of the drafts of
+this SRFI and their many valuable comments which helped to improve
+this proposal, and to Jown Cowan for ideas on ordered mappings.
 </p>
 
 <p>
