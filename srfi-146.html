@@ -1098,7 +1098,7 @@ equal to <code><em>obj</em></code>.
   may be more efficient.
 </p>
 
-<p><code>(mapping-catenate <em>mapping</em><sub>1</sub> <em>key</em> <em>value</em>
+<p><code>(mapping-catenate <em>comparator</em> <em>mapping</em><sub>1</sub> <em>key</em> <em>value</em>
     <em>mapping</em></sub>2</sub>)</code></p>
 
 <p>
@@ -1118,8 +1118,8 @@ to the ordering of <code><em>comparator</em></code>.
 
 <p><code>(mapping-catenate! <em>mapping1</em> <em>key</em> <em>value</em> <em>mapping2</em>)</code></p>
 
-<p>The <code>mapping-map/catenate!</code> procedure is the same
-as <code>mapping-map/catenate</code>, except that it is permitted to mutate and
+<p>The <code>mapping-catenate!</code> procedure is the same
+as <code>mapping-catenate</code>, except that it is permitted to mutate and
 return one of the <code><em>mapping</em></code>s rather than allocating a new mapping.
 </p>
 
