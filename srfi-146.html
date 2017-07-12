@@ -202,41 +202,40 @@ example, <code>mapping-copy</code> could be a no-op.</p>
 
 <h2>Comparator restrictions</h2>
 
-<p>This SRFI requires comparators to provide a comparison function.
-  However, any implementation may also provide the optional
-  library <code>(srfi 146 hash)</code> which implements essentially
-  the same interface (see below) as <code>(srfi 146)</code> but
-  requires comparators to provide a hash function instead of a
-  comparison function, unless the equality predicate of the comparator
+<p>The library <code>(srfi 146)</code> described in this SRFI requires
+  comparators to provide a comparison function.  Any
+  implementation shall also provide the library <code>(srfi 146
+  hash)</code> which implements essentially the same interface (see
+  below) as <code>(srfi 146)</code> but requires comparators to
+  provide a hash function instead of a comparison function, unless the
+  equality predicate of the comparator
   is <code>eq?</code>, <code>eqv?</code>, <code>equal?</code>, <code>string=?</code>,
   or <code>string-ci=?</code>.
 </p>
 
 <p>
-  The optional library <code>(srfi 146 hash)</code> exports exactly
-  the same identifiers except for those bound to locations which make
-  no sense when a comparison function is absent
-  (e.g. <code>mapping-split</code>).  Should <code>(srfi 146)</code>
-  once be known as <code>(scheme mapping)</code>, the optional library
-  <code>(srfi 146 hash)</code> will get the alternative name <code>(scheme mapping hash)</code>.
+  The library <code>(srfi 146 hash)</code> exports exactly the same
+  identifiers (up to a simple prefix-replacing textual substitution as
+  described in the next paragraph), except for
+  those bound to locations which make no sense when a comparison
+  function is absent (e.g. <code>mapping-split</code>).
+  Should <code>(srfi 146)</code> once become known as <code>(scheme
+  mapping)</code>, it is recommanded that the library
+  <code>(srfi 146 hash)</code> receives the alternative
+  name <code>(scheme hashmap)</code>.
 </p>
 
-<p>
-  Portable Scheme code can discern the availability of mappings with
-  hash functions using <code>cond-expand</code>:
-</p>
-
-<pre>
-  (cond-expand
-    ((library (srfi 146 hash))
-     ...) ; code that sets up comparators with hash functions
-    ((library (srfi 146))
-     ...)) ; code that sets up comparators with ordering procedures
-</pre>
-
-<p>It is left to a future SRFI that will update SRFI 113 to provide an
-  analogous addition to <code>(scheme set)</code>, <em>i.e.</em> to
-  specify <code>(scheme set hash)</code>.
+<p>To make it possible for a program to easily import <code>(srfi
+  146)</code> and <code>(srfi 146 hash)</code> at the same time, the
+  prefix <code>mapping</code> that prefixes the identifiers
+  in <code>(srfi 146)</code> is substituted by <code>hashmap</code>
+  in <code>(srfi 146 hash)</code>.  For example, <code>mapping</code>
+  becomes <code>hashmap</code>, <code>mapping?</code>
+  becomes <code>hashmap?</code>, and <code>mapping-ref</code>
+  becomes <code>hashmap-ref</code>.
+  <code>comparator?</code> remains unchanged.
+  For simplicity, the rest of this
+  SRFI refers to the identifiers by their names in <code>(srfi 146)</code>.
 </p>
 
 <h2 id="index">Index</h2>
