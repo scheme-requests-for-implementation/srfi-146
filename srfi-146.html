@@ -268,6 +268,7 @@ example, <code>mapping-copy</code> could be a no-op.</p>
       <code>mapping-intern</code>, <code>mapping-intern!</code>,
       <code>mapping-update</code>, <code>mapping-update!</code>,
       <code>mapping-update/default</code>, <code>mapping-update!/default</code>,
+      <code>mapping-pop</code>, <code>mapping-pop!</code>,
       <code>mapping-search</code>, <code>mapping-search!</code></p>
   </li>
 
@@ -433,7 +434,7 @@ The following three procedures, given a key, return the corresponding value.
   itself is return.  If <code><em>key</em></code> is not contained
   in <code><em>mapping</em></code> and <code><em>failure</em></code> is
   supplied, then <code><em>failure</em></code> is invoked in tail context on no
-  arguments and its result is return.  Otherwise, it is an error.
+  arguments and its values are returned.  Otherwise, it is an error.
 </p>
 
 <p><code>(mapping-ref/default <em>mapping</em> <em>key</em> <em>default</em>)</code></p>
@@ -607,6 +608,35 @@ Semantically equivalent to, but may be more efficient than, the following code
   as <code>mapping-update/default</code>, except that it is permitted to mutate and
   return the <code><em>mapping</em></code> argument rather than allocating
   a new mapping.
+</p>
+
+<p><code>(mapping-pop <em>mapping</em> <em>failure</em>)</code></p>
+<p><code>(mapping-pop <em>mapping</em>)</code></p>
+
+<p>The <code>mapping-pop</code> procedure chooses an arbitrary (but
+  see below)
+  association from <code><em>mapping</em></code> and returns three
+  values, a newly allocated mapping that uses the same comparator
+  as <code><em>mapping</em></code> and contains all associations
+  of <code><em>mapping</em></code> except the chosen one, and the key
+  and the value of the chosen association.
+  If <code><em>mapping</em></code> contains no association
+  and <code><em>failure</em></code> is supplied,
+  then <code><em>failure</em></code> is invoked in tail context on no
+  arguments and its values returned.  Otherwise, it is an error.
+</p>
+
+<p>If <code>mapping-pop</code> is imported from <code>(srfi
+    146)</code>, the association with the least key is chosen.
+</p>
+
+<p><code>(mapping-pop! <em>mapping</em> <em>failure</em>)</code></p>
+<p><code>(mapping-pop! <em>mapping</em>)</code></p>
+
+<p>The <code>mapping-pop!</code> procedure is the same
+  as <code>mapping-pop</code>, except that it is permitted to mutate
+  and return the <code><em>mapping</em></code> argument rather than
+  allocating a new mapping.
 </p>
 
 <p><code>(mapping-search <em>mapping</em> <em>key</em> <em>failure</em> <em>success</em>)</code></p>

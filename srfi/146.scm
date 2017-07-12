@@ -229,6 +229,23 @@
 
 (define mapping-update!/default mapping-update/default)
 
+(define mapping-pop
+  (case-lambda
+    ((mapping)
+     (mapping-pop mapping (lambda ()
+			    (error "mapping-pop: mapping has no association"))))
+    ((mapping failure)
+     (assume (mapping? mapping))
+     (assume (procedure? failure))
+     ((call/cc
+       (lambda (return-thunk)
+	 (receive (key value)
+	     (mapping-find (lambda (key value) #t) mapping (lambda () (return-thunk failure)))
+	   (lambda ()
+	     (values (mapping-delete mapping key) key value)))))))))
+
+(define mapping-pop! mapping-pop)
+
 (define (mapping-search mapping key failure success)
   (assume (mapping? mapping))
   (assume (procedure? failure))
