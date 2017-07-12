@@ -54,7 +54,8 @@
 	  mapping-split
 	  mapping-catenate mapping-catenate!
 	  mapping-map/monotone mapping-map/monotone!
-	  mapping-fold/reverse)
+	  mapping-fold/reverse
+	  comparator?)
   (import (scheme base)
 	  (scheme case-lambda)
 	  (srfi 1)
