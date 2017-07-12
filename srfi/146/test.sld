@@ -99,6 +99,7 @@
 	(define mapping3 (mapping-update mapping1 'b (lambda (x) (* x x))))
 	(define mapping4 (mapping-update/default mapping1 'd (lambda (x) (* x x)) 4))
 	(define mapping5 (mapping-adjoin mapping1 'c 4 'd 4 'd 5))
+	(define mapping0 (mapping comparator))
 
 	(test-equal "mapping-adjoin: key already in mapping"
 	  3
@@ -150,7 +151,17 @@
 
 	(test-equal "mapping-update/default"
 	  16
-	  (mapping-ref mapping4 'd)))
+	  (mapping-ref mapping4 'd))
+
+	(test-equal "mapping-pop: empty mapping"
+	  'empty
+	  (mapping-pop mapping0 (lambda () 'empty)))
+
+	(test-equal "mapping-pop: non-empty mapping"
+	  (list 2 'a 1)
+	  (receive (mapping key value)
+	      (mapping-pop mapping1)
+	    (list (mapping-size mapping) key value))))
 
       (test-group "The whole mapping"
 	(define mapping0 (mapping comparator))

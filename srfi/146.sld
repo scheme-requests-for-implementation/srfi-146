@@ -31,6 +31,7 @@
 	  mapping-delete mapping-delete! mapping-delete-all mapping-delete-all!
 	  mapping-intern mapping-intern!
 	  mapping-update mapping-update! mapping-update/default mapping-update!/default
+	  mapping-pop mapping-pop!
 	  mapping-search mapping-search!
 	  mapping-size mapping-find mapping-count mapping-any? mapping-every?
 	  mapping-keys mapping-values mapping-entries
@@ -53,7 +54,8 @@
 	  mapping-split
 	  mapping-catenate mapping-catenate!
 	  mapping-map/monotone mapping-map/monotone!
-	  mapping-fold/reverse)
+	  mapping-fold/reverse
+	  comparator?)
   (import (scheme base)
 	  (scheme case-lambda)
 	  (srfi 1)
