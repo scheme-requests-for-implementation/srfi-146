@@ -967,8 +967,8 @@ earlier in the list take precedence over those that come later.
 <p><code>(alist-&gt;mapping/ordered! <em>mapping</em> <em>alist</em>)</code></p>
 
 <p>
-  These are the same as <code>alist-&gt;mapping/ordered</code>
-  and <code>alist-&gt;mapping/ordered!</code>, except that it is an error if they
+  These are the same as <code>alist-&gt;mapping</code>
+  and <code>alist-&gt;mapping!</code>, except that it is an error if they
   are imported from <code>(srfi 146)</code> and the keys are not in
   order, and they may be more efficient.
 </p>
@@ -1184,7 +1184,7 @@ respect to the natural ordering of the keys.
 
 <h2 id="Comparators">Comparators</h2>
 
-<p><code>(comparator?)</code></p>
+<p><code>(comparator? <em>obj</em>)</code></p>
 
 <p>Type predicate for comparators as exported by <code>(srfi 128)</code>.</p>
 
