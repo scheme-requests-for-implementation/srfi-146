@@ -444,7 +444,8 @@
      (and (%mapping=? comparator mapping1 mapping2)
           (apply mapping=? comparator mapping2 mappings)))))
 (define (%mapping=? comparator mapping1 mapping2)
-  (and (%mapping<=? comparator mapping1 mapping2)
+  (and (eq? (mapping-key-comparator mapping1) (mapping-key-comparator mapping2))
+       (%mapping<=? comparator mapping1 mapping2)
        (%mapping<=? comparator mapping2 mapping1)))
 
 (define mapping<=?

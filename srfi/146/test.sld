@@ -324,13 +324,22 @@
 	  (define mapping3 (mapping comparator 'a 1 'c 3))
 	  (define mapping4 (mapping comparator 'a 1 'c 3 'd 4))
 	  (define mapping5 (mapping comparator 'a 1 'b 2 'c 6))
+	  (define mapping6 (mapping (make-comparator (comparator-type-test-predicate comparator)
+						     (comparator-equality-predicate comparator)
+						     (comparator-ordering-predicate comparator)
+						     (comparator-hash-function comparator))
+				    'a 1 'b 2 'c 3))
+	  
 
 	  (test-assert "mapping=?: equal mappings"
 	    (mapping=? comparator mapping1 mapping2))
-
+	  
 	  (test-assert "mapping=?: unequal mappings"
 	    (not (mapping=? comparator mapping1 mapping4)))
 
+	  (test-assert "mapping=?: different comparators"
+	    (not (mapping=? comparator mapping1 mapping6)))
+	  
 	  (test-assert "mapping<?: proper subset"
 	    (mapping<? comparator mapping3 mapping1))
 
