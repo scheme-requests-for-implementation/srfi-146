@@ -110,9 +110,15 @@ explicitly deal with sets of associations.
 </p>
 
 <p>
+  This specification uses the notion of equality of comparators.  The
+  exact equality predicate is left implementation-dependent but is
+  always at least as fine as <code>equal?</code> (and not finer
+  than <code>eq?</code>).
+</p>
+
+<p>
   It is an error for any procedure defined in this SRFI to be invoked
-  on mappings with distinct comparators (in the sense
-  of <code>eq?</code>).
+  on mappings with distinct comparators, except if noted otherwise.
 </p>
 
 <p>
@@ -998,7 +1004,7 @@ contains the same associations, and <code>#f</code> otherwise.
 
 <p>Furthermore, it is explicitly not an error
   if <code>mapping=?</code> is invoked on mappings that do not share
-  the same comparator (in the sense of <code>eq?</code>).  In that case, <code>#f</code> is returned.
+  the same (key) comparator.  In that case, <code>#f</code> is returned.
 </p>
 
 <p><code>(mapping&lt;? <em>comparator</em> <em>mapping<sub>1</sub></em> <em>mapping<sub>2</sub></em> ...)</code></p>
@@ -1201,24 +1207,12 @@ respect to the natural ordering of the keys.
   Returns a comparator for mappings that is compatible with the equality
   predicate
   <code>(mapping=? <em>comparator</em> <em>mapping<sub>1</sub></em> <em>mapping<sub>2</sub></em>)</code>.
-  The comparator is obliged to provide ordering procedures when the
-  particular implementation of this SRFI (<i>e.g.</i> <code>(srfi
-  146)</code> or <code>(srfi 146 hash)</code>) requires comparators to
-  provide a comparison function, and is obliged to provide hash
-  functions when the implementation of this SRFI requires comparators
-  to provide a hash function. This allows mappings whose keys are
-  mappings themselves, and it allows to compare mappings whose values
-  are mappings.
-</p>
-
-<p>
-  When mappings with different comparators are compared, it is an
-  error if the implementation's default comparator doesn't compare
-  comparators using <code>eq?</code> as the equality predicate and
-  doesn't provide a compatible ordering procedure or hash function, respectively. 
-  (If an implementation's
-  default comparator doesn't handle comparators, an implementation of
-  this SRFI may still provide its own ordering of comparators.)
+  If <code>make-mapping-comparator</code> is imported from <code>(srfi
+  146)</code>, it provides a (partial) ordering predicate that is
+  applicable to pairs of mappings with the same (key) comparator.
+  If <code>(make-hashmap-comparator)</code> is imported
+  from <code>(srfi 146 hash)</code>, it provides an
+  implementation-dependent hash function.
 </p>
 
 <p>If <code>make-mapping-comparator</code> is imported from <code>(srfi
@@ -1227,9 +1221,10 @@ respect to the natural ordering of the keys.
     the ordering of the values) is used for mappings sharing a comparator.
 </p>
 
-<p>
-  When ordering mappings with different comparators, they are ordered
-  by the default ordering of their comparators.
+<p>The existence of comparators returned
+  by <code>make-mapping-comparator</code> allows mappings whose keys
+  are mappings themselves, and it allows to compare mappings whose
+  values are mappings.
 </p>
 
 <p>
