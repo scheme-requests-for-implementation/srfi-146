@@ -110,9 +110,15 @@ explicitly deal with sets of associations.
 </p>
 
 <p>
+  This specification uses the notion of equality of comparators.  The
+  exact equality predicate is left implementation-dependent but is
+  always at least as fine as <code>equal?</code> (and not finer
+  than <code>eq?</code>).
+</p>
+
+<p>
   It is an error for any procedure defined in this SRFI to be invoked
-  on mappings with distinct comparators (in the sense
-  of <code>eq?</code>).
+  on mappings with distinct comparators, except if noted otherwise.
 </p>
 
 <p>
@@ -349,7 +355,9 @@ example, <code>mapping-copy</code> could be a no-op.</p>
   
   <li>
     <p><a href="#Comparators">Comparators</a>:
-      <code>mapping-comparator</code>
+      <code>comparator?</code>,
+      <code>mapping-comparator</code>,
+      <code>make-mapping-comparator</code>      
   </li>
 </ul>
 
@@ -385,17 +393,6 @@ associations with equal keys take precedence over later arguments.
     detailed below and with <code>alist-&gt;hash-table</code> from SRFI
     125, but different from the one in <code>mapping-set</code> from below.
 </i></p>
-
-<p><code>(mapping/ordered <em>comparator</em> <em>arg</em> ...)</code></p>
-
-<p><code>(mapping-unfold/ordered <em>stop?</em> <em>mapper</em> <em>successor</em> <em>seed</em> <em>comparator</em>)</code></p>
-
-<p>
-  These are the same as <code>mapping</code>
-  and <code>mapping-unfold</code>, except that it is an error if they
-  are imported from <code>(srfi 146)</code> and the keys are not in
-  order, and they may be more efficient.
-</p>
 
 <h2 id="Predicates">Predicates</h2>
 
@@ -613,9 +610,9 @@ Semantically equivalent to, but may be more efficient than, the following code
 <p><code>(mapping-pop <em>mapping</em> <em>failure</em>)</code></p>
 <p><code>(mapping-pop <em>mapping</em>)</code></p>
 
-<p>The <code>mapping-pop</code> procedure chooses an arbitrary (but
-  see below)
-  association from <code><em>mapping</em></code> and returns three
+<p>The <code>mapping-pop</code> procedure exported from <code>(srfi
+  146)</code> chooses the
+  association with the least key from <code><em>mapping</em></code> and returns three
   values, a newly allocated mapping that uses the same comparator
   as <code><em>mapping</em></code> and contains all associations
   of <code><em>mapping</em></code> except the chosen one, and the key
@@ -626,8 +623,8 @@ Semantically equivalent to, but may be more efficient than, the following code
   arguments and its values returned.  Otherwise, it is an error.
 </p>
 
-<p>If <code>mapping-pop</code> is imported from <code>(srfi
-    146)</code>, the association with the least key is chosen.
+<p>The <code>hashmap-pop</code> procedure exported by <code>(srfi
+    146 hash)</code> returns an arbitrary association.
 </p>
 
 <p><code>(mapping-pop! <em>mapping</em> <em>failure</em>)</code></p>
@@ -641,22 +638,22 @@ Semantically equivalent to, but may be more efficient than, the following code
 
 <p><code>(mapping-search <em>mapping</em> <em>key</em> <em>failure</em> <em>success</em>)</code></p>
 
-<p>The mapping <code><em>mapping</em></code> is searched for an association
-with key <code><em>key</em></code>.  If it is not found, then
+<p>The mapping <code><em>mapping</em></code> is searched in order
+(that is in the order of the stored keys) for an association with
+key <code><em>key</em></code>.  If it is not found, then
 the <code><em>failure</em></code> procedure is tail-called with two
 continuation arguments, <code><em>insert</em></code>
 and <code><em>ignore</em></code>, and is expected to tail-call one of
 them.  If an association with key <code><em>key</em></code> is found,
 then the <code><em>success</em></code> procedure is tail-called with
-the matching key of <code><em>mapping</em></code>, the associated value,
-and two continuations, <code><em>update</em></code>
+the matching key of <code><em>mapping</em></code>, the associated
+value, and two continuations, <code><em>update</em></code>
 and <code><em>remove</em></code>, and is expected to tail-call one of
 them.
 </p>
 
-<p>If <code>mapping-search</code> is imported from <code>(srfi 146)</code>,
-  <code><em>mapping</em></code> is searched in order
-    (that is in the order of the stored keys).
+<p>The <code>hashmap-search</code> procedure exported by <code>(srfi
+    146 hash)</code> searches in an arbitrary order,
 </p>
 
 <p>
@@ -729,7 +726,7 @@ Returns the number of associations in <em>mapping</em> as an exact integer.
 <p><code>(mapping-find <em>predicate</em> <em>mapping</em> <em>failure</em>)</code></p>
 
 <p>
-  Returns an arbitrarily chosen association
+  Returns the association with the least key
   of the mapping <code><em>mapping</em></code> consisting of a key and value as two
   values such that <code><em>predicate</em></code> returns a true
   value when invoked with key and value as arguments, or the result of
@@ -738,10 +735,8 @@ Returns the number of associations in <em>mapping</em> as an exact integer.
   <code><em>predicate</em></code> is invoked, but see below:
 </p>
 
-<p>If <code>mapping-find</code> is imported from <code>(srfi 146)</code>,
-  <code><em>mapping</em></code> is searched in order:
-    The association with the least key that
-    satisfies <code><em>predicate</em></code> is returned.
+<p>The <code>hashmap-find</code> procedure exported by <code>(srfi 146
+    hash)</code> searches in arbitrary order.
 </p>
 
 <p><code>(mapping-count <em>predicate</em> <em>mapping</em>)</code></p>
@@ -770,20 +765,24 @@ of <code>mapping-find</code>), or <code>#f</code> otherwise.
 
 <p><code>(mapping-keys <em>mapping</em>)</code></p>
 
-<p>Returns a newly allocated list of all the keys in the mapping <code><em>mapping</em></code>.</p>
+<p>Returns a newly allocated list of all the keys in increasing order
+in the mapping <code><em>mapping</em></code>.</p>
 
-<p>If <code>mapping-keys</code> is imported from <code>(srfi 146)</code>, the list is returned in order:  It is ordered
-  according to the ordering of the keys.
+<p>If <code>hashmap-keys</code> is imported from <code>(srfi 146
+    hash)</code>, the list is returned in
+  arbitrary order.
 </p>
 
 <p><code>(mapping-values <em>mapping</em>)</code></p>
 
 <p>
-  Returns a newly allocated list of all the values in the mapping <code><em>mapping</em></code>.
+  Returns a newly allocated list of all the values in increasing order
+  of the keys in the mapping <code><em>mapping</em></code>.
 </p>
 
-<p>If <code>mapping-values</code> is imported from <code>(srfi 146)</code>, the list is returned in order:  It is ordered
-  according to the ordering of the keys corresponding to the values.
+<p>If <code>hashmap-values</code> is imported from <code>(srfi 146
+    hash)</code>,
+  the list is returned in arbitrary order.
 </p>
 
 <p><code>(mapping-entries <em>mapping</em>)</code></p>
@@ -791,12 +790,13 @@ of <code>mapping-find</code>), or <code>#f</code> otherwise.
 <p>
 Returns two values, a newly allocated list of all the keys in the
 mapping <code><em>mapping</em></code>, and a newly allocated list of all the
-values in the mapping <code><em>mapping</em></code>.  The two lists are
-consistently ordered,  so that keys can be matched to their corresponding values.
+values in the mapping <code><em>mapping</em></code> in increasing
+order of the keys.
 </p>
 
-<p>If <code>mapping-entries</code> is imported from <code>(srfi 146)</code>, the lists are returned in order:  They are ordered
-  according to the ordering of the keys.
+<p>If <code>hashmap-entries</code> is imported from <code>(srfi 146
+    hash)</code>,
+  the lists are returned in arbitrary, but consistent order.
 </p>
 
 <h2 id="Mappingandfolding">Mapping and folding</h2>
@@ -804,7 +804,7 @@ consistently ordered,  so that keys can be matched to their corresponding values
 <p><code>(mapping-map <em>proc</em> <em>comparator</em> <em>mapping</em>)</code></p>
 
 <p>Applies <code><em>proc</em></code> on two arguments, the key and value of each association of 
-  <code><em>mapping</em></code> in arbitrary order (but see below), which returns two
+  <code><em>mapping</em></code> in increasing order of the keys, which returns two
   values, and returns a newly allocated mapping that uses the
   comparator <code><em>comparator</em></code>, and which contains
   the results of the applications inserted as keys and values. Note
@@ -828,26 +828,26 @@ are omitted as in the mapping constructor.  It is unpredictable which one
 will be preserved in the result.
 </p>
 
-<p>If <code>mapping-map</code> is imported from <code>(srfi 146)</code>, the associations are mapped in order:  They are ordered
-  according to the natural ordering of the keys.
+<p>If <code>hashmap-map</code> is imported from <code>(srfi 146
+    hash)</code>, the associations are mapped in arbitrary order.
 </p>
 
 <p><code>(mapping-for-each <em>proc</em> <em>mapping</em>)</code></p>
 
 <p>Invokes <code><em>proc</em></code> for every association in the
-mapping <code><em>mapping</em></code> in arbitrary order (but see below), discarding the
+mapping <code><em>mapping</em></code> in increasing order of the keys, discarding the
 returned values, with two arguments: the key of the association and
 the value of the association.  Returns an unspecified value.
 </p>
 
-<p>If <code>mapping-for-each</code> is imported from <code>(srfi 146)</code>, the associations are processed in order:  They are ordered
-  according to the natural ordering of the keys.
+<p>If <code>hashmap-for-each</code> is imported from <code>(srfi
+    146 hash)</code>, the associations are processed in arbitrary order.
 </p>
 
 <p><code>(mapping-fold <em>proc</em> <em>nil</em> <em>mapping</em>)</code></p>
 
 <p>Invokes <code><em>proc</em></code> for each association of the
-mapping <code><em>mapping</em></code> in arbitrary order (but see below) with
+mapping <code><em>mapping</em></code> in increasing order of the keys with
 three arguments: the key of the association, the value of the
 association, and an accumulated result of the previous
 invocation.  For the first invocation, <code><em>nil</em></code> is
@@ -855,22 +855,24 @@ used as the second argument.  Returns the result of the last
 invocation, or <code><em>nil</em></code> if there was no invocation.
 </p>
 
-<p>If <code>mapping-fold</code> is imported from <code>(srfi 146)</code>, the associations are accumulated in order:  They are ordered
-  according to the natural ordering of the keys.
+<p>If <code>hashmap-fold</code> is imported from <code>(srfi
+  146 hash)</code>, the associations are accumulated in arbitrary
+  order.
 </p>
 
 <p><code>(mapping-map-&gt;list <em>proc</em> <em>mapping</em>)</code></p>
 
 <p>
-Calls <code><em>proc</em></code> for every association in the
-mapping <code><em>mapping</em></code> with two arguments: the key of the
-association and the value of the association.  The values returned by
-the invocations of <code><em>proc</em></code> are accumulated into a
-list, which is returned.
+Calls <code><em>proc</em></code> for every association in increasing
+order of the keys in the mapping <code><em>mapping</em></code> with
+two arguments: the key of the association and the value of the
+association.  The values returned by the invocations
+of <code><em>proc</em></code> are accumulated into a list, which is
+returned.
 </p>
 
-<p>If <code>mapping-map-&gt;list</code> is imported from <code>(srfi 146)</code>, the associations are mapped in order:  They are ordered
-  according to the natural ordering of the keys.
+<p>If <code>hashmap-&gt;list</code> is imported from <code>(srfi 146
+    hash)</code>, the associations are processed in arbitrary order.
 </p>
 
 <p><code>(mapping-filter <em>predicate</em> <em>mapping</em>)</code></p>
@@ -934,13 +936,14 @@ mapping <code><em>mapping</em></code>, and using the same comparator.
 
 <p>
   Returns a newly allocated association list containing the
-  associations of the <code><em>mapping</em></code> in unspecified order (but see below).
+  associations of the <code><em>mapping</em></code> in increasing
+  order of the keys.
   Each association in the list is a pair whose car is the key and
   whose cdr is the associated value.
 </p>
 
-<p>If <code>mapping-&gt;alist</code> is imported from <code>(srfi 146)</code>, the association list is in order:  It is ordered
-  according to the natural ordering of the keys.
+<p>If <code>hashmap-&gt;alist</code> is imported from <code>(srfi
+    146 hash)</code>, the association list is in arbitrary order.
 </p>
 
 <p><code>(alist-&gt;mapping <em>comparator</em> <em>alist</em>)</code></p>
@@ -962,17 +965,6 @@ and <code><em>alist</em></code>.  Associations in the mapping and those
 earlier in the list take precedence over those that come later.
 </p>
 
-<p><code>(alist-&gt;mapping/ordered <em>comparator</em> <em>alist</em>)</code></p>
-
-<p><code>(alist-&gt;mapping/ordered! <em>mapping</em> <em>alist</em>)</code></p>
-
-<p>
-  These are the same as <code>alist-&gt;mapping/ordered</code>
-  and <code>alist-&gt;mapping/ordered!</code>, except that it is an error if they
-  are imported from <code>(srfi 146)</code> and the keys are not in
-  order, and they may be more efficient.
-</p>
-
 <h2 id="Submappings">Submappings</h2>
 
 <p>Note: The following three predicates do not obey the trichotomy law
@@ -992,6 +984,11 @@ and therefore do not constitute a total order on mappings.
 
 <p>Returns <code>#t</code> if each mapping <code><em>mapping</em></code>
 contains the same associations, and <code>#f</code> otherwise.
+</p>
+
+<p>Furthermore, it is explicitly not an error
+  if <code>mapping=?</code> is invoked on mappings that do not share
+  the same (key) comparator.  In that case, <code>#f</code> is returned.
 </p>
 
 <p><code>(mapping&lt;? <em>comparator</em> <em>mapping<sub>1</sub></em> <em>mapping<sub>2</sub></em> ...)</code></p>
@@ -1061,6 +1058,26 @@ procedures for mappings with ordered keys</h2>
 
 <p>The following procedures are only exported by the <code>(srfi 146)</code> library
   and not by <code>(srfi 146 hash)</code>:
+</p>
+
+<p><code>(mapping/ordered <em>comparator</em> <em>arg</em> ...)</code></p>
+
+<p><code>(mapping-unfold/ordered <em>stop?</em> <em>mapper</em> <em>successor</em> <em>seed</em> <em>comparator</em>)</code></p>
+
+<p>
+  These are the same as <code>mapping</code>
+  and <code>mapping-unfold</code>, except that it is an error if the
+  keys are not in order, and they may be more efficient.
+</p>
+
+<p><code>(alist-&gt;mapping/ordered <em>comparator</em> <em>alist</em>)</code></p>
+
+<p><code>(alist-&gt;mapping/ordered! <em>mapping</em> <em>alist</em>)</code></p>
+
+<p>
+  These are the same as <code>alist-&gt;mapping</code>
+  and <code>alist-&gt;mapping!</code>, except that it is an error if
+  the keys are not in order, and they may be more efficient.
 </p>
 
 <p><code>(mapping-min-key <em>mapping</em>)</code></p>
@@ -1184,9 +1201,40 @@ respect to the natural ordering of the keys.
 
 <h2 id="Comparators">Comparators</h2>
 
-<p><code>(comparator?)</code></p>
+<p><code>(comparator? <em>obj</em>)</code></p>
 
 <p>Type predicate for comparators as exported by <code>(srfi 128)</code>.</p>
+
+<p><i>Rationale:</i> The reason why <code>comparator?</code> is
+  reexported from <code>(srfi 128)</code> is that it helps to detect
+  if an implementation of the R7RS module system is broken in the
+  sense that it does not allow interdependent libraries.  If a
+  program's imports are <code>(import (srfi 128) (srfi 146))</code>,
+  it would be an error (principally detectable at expansion time) if
+  the Scheme system loaded <code>(srfi 128)</code> twice, once for
+  importing into the program, and once for importing into <code>(srfi
+  146)</code>.  Namely, in that case the main program would
+  import <code>comparator?</code> with two different bindings, and it
+  would be impossible to invoke any procedure of <code>(srfi
+    146)</code> with a comparator created in the top-level program.
+</p>
+
+<p>
+  If <code>(srfi 146)</code> didn't export <code>comparator?</code>,
+  multiple loadings of <code>(srfi 128)</code> would not be detected
+  early; only when a <code>(srfi 146)</code> procedure is invoked with
+  a comparator created in the top-level program.
+</p>
+
+<p>
+  One may view exporting <code>comparator?</code> as a hack only
+  necessary because the R7RS library system fails to say anything
+  about interdependent libraries (although it is usually assumed that
+  interdependent libraries are possible); one can, however, also make
+  independently sense out of it: By
+  exporting <code>comparator?</code>, this specification declares or
+  announces the actual type of comparators, on which its procedures depend.
+</p>
 
 <p><code>(make-mapping-comparator <em>comparator</em>)</code></p>
 
@@ -1194,22 +1242,30 @@ respect to the natural ordering of the keys.
   Returns a comparator for mappings that is compatible with the equality
   predicate
   <code>(mapping=? <em>comparator</em> <em>mapping<sub>1</sub></em> <em>mapping<sub>2</sub></em>)</code>.
-  The comparator is obliged to provide ordering procedures when
-  the implementation of this SRFI requires comparators to provide a
-  comparison function, and is obliged to provide hash functions when
-  the implementation of this SRFI requires comparators to provide a
-  hash function. This allows mappings whose keys are mappings themselves, and
-  it allows to compare mappings whose values are mappings.
+  If <code>make-mapping-comparator</code> is imported from <code>(srfi
+  146)</code>, it provides a (partial) ordering predicate that is
+  applicable to pairs of mappings with the same (key) comparator.
+  If <code>(make-hashmap-comparator)</code> is imported
+  from <code>(srfi 146 hash)</code>, it provides an
+  implementation-dependent hash function.
 </p>
 
 <p>If <code>make-mapping-comparator</code> is imported from <code>(srfi
     146)</code>, the lexicographic ordering with respect to
     the keys (and, in case a tiebreak is neccessary, with respect to
-    the ordering of the values) is used.
+    the ordering of the values) is used for mappings sharing a comparator.
 </p>
 
+<p>The existence of comparators returned
+  by <code>make-mapping-comparator</code> allows mappings whose keys
+  are mappings themselves, and it allows to compare mappings whose
+  values are mappings.
+</p>
+
+<p>
 The following comparator is used to compare mappings when <code>(make-default-comparator)</code> 
 from SRFI 128 is invoked:
+</p>
 
 <p><code>mapping-comparator</code></p>
 
