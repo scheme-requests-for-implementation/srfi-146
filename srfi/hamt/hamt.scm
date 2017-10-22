@@ -287,14 +287,6 @@ and corresponding datum."
 (define (fragment->mask fragment)
   (unsigned-integer->bit-string hamt-bucket-size (-1+ (expt 2 fragment))))
 
-(define-test-group (hash-array-mapped-trie fragment->mask)
-  (lambda (input expected)
-    (assert (bit-string=? expected (fragment->mask input))))
-  '(0 #*00000000000000000000000000000000)
-  '(1 #*00000000000000000000000000000001)
-  '(2 #*00000000000000000000000000000011)
-  '(3 #*00000000000000000000000000000111))
-
 (define (bit-string-zero? bit-string)
   (not (bit-substring-find-next-set-bit
 	bit-string
@@ -321,13 +313,6 @@ and corresponding datum."
 	    (if found
 		(next-bit-set (1+ count) (1+ found))
 		count))))))
-
-(define-test-group (population-count)
-  (lambda (expected bit-string)
-    (assert (= expected (population-count bit-string))))
-  '(3 #*10101)
-  '(5 #*11111)
-  '(0 #*00000))
 
 (define (mutate hamt n shift dp h k)
   (cond ((collision? n) (modify-collision hamt n shift dp h k))
@@ -881,30 +866,6 @@ not present.  If `hamt' stores no payloads, return the symbol
 				 accumulator)))
 		   hamt)
     accumulator))
-
-(define (hamt-max-depth hamt)
-  "Return maximum depth of `hamt'.  For testing."
-  (let descend ((n (hamt/root hamt)))
-    (cond ((collision? n) 1)
-	  ((narrow? n)
-	   (let* ((array (narrow/array n))
-		  (stride (leaf-stride (hamt/payload? hamt)))
-		  (start (* stride (population-count (narrow/leaves n))))
-		  (end (vector-length array)))
-	     (do ((i start (1+ i))
-		  (high 0 (max high (descend (vector-ref array i)))))
-		 ((= i end) (1+ high)))))
-	  ((wide? n)
-	   (let ((array (wide/array n))
-		 (c (wide/children n)))
-	     (let next-child ((high 0)
-			      (i 0))
-	       (cond ((bit-substring-find-next-set-bit c i hamt-bucket-size)
-		      => (lambda (j)
-			   (next-child (max high (descend (vector-ref array j)))
-				       (1+ j))))
-		     (else (1+ high))))))
-	  (else (error "Invalid type of node." n)))))
 
 ;;; Debugging
 
