@@ -68,7 +68,18 @@
 
 ;; <> Import SRFI 151 (Bitwise Operations).
 
-;; <> Replace uses of assert with (when <test> (error <message>)).
+;; <> Import this into all HAMT source files.
+
+(define-syntax assert
+  (syntax-rules ()
+    ((_ (operator argument ...))
+     (unless (operator argument ...)
+       (error "Assertion failed:"
+	      '(operator argument ...)
+	      (list 'operator argument ...))))
+    ((_ expression)
+     (unless expression
+       (error "Assertion failed:" 'expression)))))
 
 (define hamt-hash-slice-size 5)
 (define hamt-hash-size
