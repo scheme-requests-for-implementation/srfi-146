@@ -66,12 +66,13 @@
 ;; when hash functions are good, but work well when they're not, as in
 ;; the case of MIT Scheme's `string-hash'.
 
-;; <> Replace bit-string operations with integer operations if you
-;; can't get your compiler to do that automatically.
+;; <> Import SRFI 151 (Bitwise Operations).
+
+;; <> Replace uses of assert with (when <test> (error <message>)).
 
 (define hamt-hash-slice-size 5)
 (define hamt-hash-size
-  (let ((word-size 64))
+  (let ((word-size fx-width))
     (- word-size
        (remainder word-size hamt-hash-slice-size))))
 (define hamt-hash-modulus (expt 2 hamt-hash-size))
@@ -97,8 +98,6 @@
   (entries collision/entries)
   (hash  collision/hash))
 
-;; <> Once SRFI 136 is implemented, make `narrow' and `wide' share
-;; fields since they differ only in type.
 (define-record-type narrow
     (make-narrow array children leaves)
     narrow?
@@ -110,8 +109,8 @@
     (make-wide array children leaves)
     wide?
   (array    wide/array)
-  (children wide/children)
-  (leaves   wide/leaves))
+  (children wide/children set-wide/children!)
+  (leaves   wide/leaves   set-wide/leaves!))
 
 (define (hamt/empty? hamt)
   (zero? (hamt/count hamt)))
@@ -181,9 +180,7 @@ since the change to mutable happened.)"
   (hamt/replace! hamt key (lambda (x) datum)))
 
 (define (make-empty-narrow)
-  (make-narrow (vector)
-	       (make-bit-string hamt-bucket-size #f)
-	       (make-bit-string hamt-bucket-size #f)))
+  (make-narrow (vector) 0 0))
 
 (define (hamt-null? n)
   (eq? n hamt-null))
@@ -194,40 +191,37 @@ since the change to mutable happened.)"
 	 (null? (cdr elements)))))
 
 (define (narrow-single-leaf? n)
-  (and (bit-string-zero? (narrow/children n))
-       (= 1 (population-count (narrow/leaves n)))))
+  (and (zero? (narrow/children n))
+       (= 1 (bit-count (narrow/leaves n)))))
 
 (define (wide-single-leaf? n)
-  (and (bit-string-zero? (wide/children n))
-       (= 1 (population-count (wide/leaves n)))))
+  (and (zero? (wide/children n))
+       (= 1 (bit-count (wide/leaves n)))))
 
 (define (hash-bits hp key)
-  (unsigned-integer->bit-string hamt-hash-size
-				(remainder (hp key) hamt-hash-modulus)))
+  (remainder (hp key) hamt-hash-modulus))
 
-(define (bit-string-alter bit-string index boolean)
-  (let ((result (bit-string-copy bit-string)))
-    (if boolean
-	(bit-string-set! result index)
-	(bit-string-clear! result index))
-    result))
+(define (next-set-bit i start end)
+  (let ((index (first-set-bit (bit-field i start end))))
+    (and (not (= index -1))
+	 (+ index start))))
 
 (define (narrow->wide n payload?)
-  (let* ((c (bit-string-copy (narrow/children n)))
-	 (l (bit-string-copy (narrow/leaves n)))
+  (let* ((c (narrow/children n))
+	 (l (narrow/leaves n))
 	 (stride (leaf-stride payload?))
 	 (a-in (narrow/array n))
 	 (a-out (make-vector (* stride hamt-bucket-size))))
     (let next-leaf ((start 0) (count 0))
-      (let ((i (bit-substring-find-next-set-bit l start hamt-bucket-size)))
+      (let ((i (next-set-bit l start hamt-bucket-size)))
 	(when i
 	  (let ((j (* stride i)))
 	    (vector-set! a-out j (vector-ref a-in count))
 	    (when payload?
 	      (vector-set! a-out (1+ j) (vector-ref a-in (1+ count)))))
 	  (next-leaf (1+ i) (+ stride count)))))
-    (let next-child ((start 0) (offset (* stride (population-count l))))
-      (let ((i (bit-substring-find-next-set-bit c start hamt-bucket-size)))
+    (let next-child ((start 0) (offset (* stride (bit-count l))))
+      (let ((i (next-set-bit c start hamt-bucket-size)))
 	(when i
 	  (vector-set! a-out (* stride i) (vector-ref a-in offset))
 	  (next-child (1+ i) (1+ offset)))))
@@ -242,17 +236,17 @@ and corresponding datum."
   (cond ((collision? n) n)
 	((narrow? n) n)
 	((wide? n)
-	 (let* ((c (bit-string-copy (wide/children n)))
-		(l (bit-string-copy (wide/leaves n)))
+	 (let* ((c (wide/children n))
+		(l (wide/leaves n))
 		(stride (leaf-stride payload?))
-		(l-count (population-count l))
+		(l-count (bit-count l))
 		(a-in (wide/array n))
 		(a-out (make-vector
-			(+ (* stride l-count) (population-count c)))))
+			(+ (* stride l-count) (bit-count c)))))
 	   (let next-leaf ((start 0) (count 0))
-	     (let ((i (bit-substring-find-next-set-bit l
-						       start
-						       hamt-bucket-size)))
+	     (let ((i (next-set-bit l
+				    start
+				    hamt-bucket-size)))
 	       (when i
 		 (let* ((j (* stride i))
 			(key (vector-ref a-in j)))
@@ -265,9 +259,9 @@ and corresponding datum."
 				   (vector-ref a-in (1+ j))))))
 		 (next-leaf (1+ i) (+ stride count)))))
 	   (let next-child ((start 0) (offset (* stride l-count)))
-	     (let ((i (bit-substring-find-next-set-bit c
-						       start
-						       hamt-bucket-size)))
+	     (let ((i (next-set-bit c
+				    start
+				    hamt-bucket-size)))
 	       (when i
 		 (vector-set! a-out
 			      offset
@@ -279,40 +273,10 @@ and corresponding datum."
 	(else (error "Unexpected type of node."))))
 
 (define (hash-fragment shift hash)
-  (bit-string->unsigned-integer
-   (bit-substring hash
-		  shift
-		  (+ shift hamt-hash-slice-size))))
+  (bit-field hash shift (+ shift hamt-hash-slice-size)))
 
 (define (fragment->mask fragment)
-  (unsigned-integer->bit-string hamt-bucket-size (-1+ (expt 2 fragment))))
-
-(define (bit-string-zero? bit-string)
-  (not (bit-substring-find-next-set-bit
-	bit-string
-	0
-	(bit-string-length bit-string))))
-
-(define (bit-string-one? bit-string)
-  (and (bit-string-ref bit-string 0)
-       (not (bit-substring-find-next-set-bit
-	     bit-string
-	     1
-	     (bit-string-length bit-string)))))
-
-;; <> Rewrite this to use a population count instruction.
-(define (population-count bit-string)
-  (let ((size (bit-string-length bit-string)))
-    (let next-bit-set ((count 0)
-		       (position 0))
-      (if (= position size)
-	  count
-	  (let ((found (bit-substring-find-next-set-bit bit-string
-							position
-							size)))
-	    (if found
-		(next-bit-set (1+ count) (1+ found))
-		count))))))
+  (-1+ (expt 2 fragment)))
 
 (define (mutate hamt n shift dp h k)
   (cond ((collision? n) (modify-collision hamt n shift dp h k))
@@ -328,9 +292,9 @@ and corresponding datum."
 
 (define (modify-wide hamt n shift dp h k)
   (let ((fragment (hash-fragment shift h)))
-    (cond ((bit-string-ref (wide/children n) fragment)
+    (cond ((bit-set? fragment (wide/children n))
 	   (modify-wide-child hamt n shift dp h k))
-	  ((bit-string-ref (wide/leaves n) fragment)
+	  ((bit-set? fragment (wide/leaves n))
 	   (modify-wide-leaf hamt n shift dp h k))
 	  (else
 	   (let ((d (dp hamt-null)))
@@ -340,8 +304,6 @@ and corresponding datum."
 
 (define (modify-wide-child hamt n shift dp h k)
   (let*-values (((fragment) (hash-fragment shift h))
-		((c) (wide/children n))
-		((l) (wide/leaves n))
 		((array) (wide/array n))
 		((payload?) (hamt/payload? hamt))
 		((stride) (leaf-stride payload?))
@@ -358,8 +320,8 @@ and corresponding datum."
       (vector-set! array i key)
       (when payload?
 	(vector-set! array (1+ i) datum))
-      (bit-string-clear! c fragment)
-      (bit-string-set! l fragment)
+      (set-wide/children! n (copy-bit fragment (wide/children n) #f))
+      (set-wide/leaves! n (copy-bit fragment (wide/leaves n) #t))
       (values change n))
     (define (replace)
       (vector-set! array i new-child)
@@ -377,10 +339,9 @@ and corresponding datum."
 	  ((wide? new-child)
 	   (if (wide-single-leaf? new-child)
 	       (let ((a (wide/array new-child))
-		     (j (* stride (bit-substring-find-next-set-bit
-				   (wide/leaves new-child)
-				   0
-				   hamt-bucket-size))))
+		     (j (* stride (next-set-bit (wide/leaves new-child)
+						0
+						hamt-bucket-size))))
 		 (coalesce (vector-ref a j)
 			   (and payload? (vector-ref a (1+ j)))))
 	       (replace)))
@@ -390,7 +351,6 @@ and corresponding datum."
 
 (define (modify-wide-leaf hamt n shift dp h k)
   (let* ((fragment (hash-fragment shift h))
-	 (l (wide/leaves n))
 	 (array (wide/array n))
 	 (payload? (hamt/payload? hamt))
 	 (stride (leaf-stride payload?))
@@ -402,7 +362,7 @@ and corresponding datum."
 	  (cond ((hamt-null? d)
 		 (vector-set! array i #f)
 		 (when payload? (vector-set! array (1+ i) #f))
-		 (bit-string-clear! l fragment)
+		 (set-wide/leaves! n (copy-bit fragment (wide/leaves n) #f))
 		 (values -1 n))
 		(else
 		 (when payload? (vector-set! array (1+ i) d))
@@ -417,8 +377,6 @@ and corresponding datum."
   (define make-entry
     (if payload? cons (lambda (k d) k)))
   (let* ((fragment (hash-fragment shift h))
-	 (c (wide/children n))
-	 (l (wide/leaves n))
 	 (array (wide/array n))
 	 (stride (leaf-stride payload?))
 	 (i (* stride fragment))
@@ -427,7 +385,7 @@ and corresponding datum."
 	 (datum (and payload? (vector-ref array (1+ i)))))
     (vector-set! array
 		 i
-		 (if (bit-string=? h hash)
+		 (if (= h hash)
 		     (make-collision (list (make-entry k d)
 					   (make-entry key datum))
 				     h)
@@ -442,13 +400,12 @@ and corresponding datum."
 		      datum)))
     (when payload?
       (vector-set! array (1+ i) #f))
-    (bit-string-set! c fragment)
-    (bit-string-clear! l fragment)
+    (set-wide/children! n (copy-bit fragment (wide/children n) #t))
+    (set-wide/leaves! n (copy-bit fragment (wide/leaves n) #f))
     (values 1 n)))
 
 (define (modify-wide-new hamt n shift d h k)
   (let* ((fragment (hash-fragment shift h))
-	 (l (wide/leaves n))
 	 (array (wide/array n))
 	 (payload? (hamt/payload? hamt))
 	 (stride (leaf-stride payload?))
@@ -456,7 +413,7 @@ and corresponding datum."
     (vector-set! array i k)
     (when payload?
       (vector-set! array (1+ i) d))
-    (bit-string-set! l fragment)
+    (set-wide/leaves! n (copy-bit fragment (wide/leaves n) #t))
     (values 1 n)))
 
 (define (make-narrow-with-two-keys payload? shift h1 k1 d1 h2 k2 d2)
@@ -465,12 +422,9 @@ and corresponding datum."
      (if payload?
 	 (vector k1 d1 k2 d2)
 	 (vector k1 k2))
-     (make-bit-string hamt-bucket-size #f)
-     (let ((leaves (make-bit-string hamt-bucket-size #f)))
-       (bit-string-set! leaves f1)
-       (bit-string-set! leaves f2)
-       leaves)))
-  (assert (not (bit-string=? h1 h2)))
+     0
+     (copy-bit f2 (copy-bit f1 0 #t) #t)))
+  (assert (not (= h1 h2)))
   (let ((f1 (hash-fragment shift h1))
 	(f2 (hash-fragment shift h2)))
     (cond ((= f1 f2)
@@ -483,10 +437,8 @@ and corresponding datum."
 					       h2
 					       k2
 					       d2))
-	    (let ((children (make-bit-string hamt-bucket-size #f)))
-	      (bit-string-set! children f1)
-	      children)
-	    (make-bit-string hamt-bucket-size #f)))
+	    (copy-bit f1 0 #t)
+	    0))
 	  ((< f1 f2)
 	   (two-leaves f1 k1 d1 f2 k2 d2))
 	  (else
@@ -518,23 +470,17 @@ differ."
 		 (let ((child (descend (+ shift hamt-hash-slice-size))))
 		   (make-narrow
 		    (vector child)
-		    (let ((children (make-bit-string hamt-bucket-size #f)))
-		      (bit-string-set! children collision-fragment)
-		      children)
-		    (make-bit-string hamt-bucket-size #f)))
+		    (copy-bit collision-fragment 0 #t)
+		    0))
 		 (make-narrow
 		  (if (hamt/payload? hamt)
 		      (vector k d n)
 		      (vector k n))
-		  (let ((children (make-bit-string hamt-bucket-size #f)))
-		    (bit-string-set! children collision-fragment)
-		    children)
-		  (let ((leaves (make-bit-string hamt-bucket-size #f)))
-		    (bit-string-set! leaves leaf-fragment)
-		    leaves)))))))))
+		  (copy-bit collision-fragment 0 #t)
+		  (copy-bit leaf-fragment 0 #t)))))))))
 
 (define (modify-collision hamt n shift dp h k)
-  (if (bit-string=? h (collision/hash n))
+  (if (= h (collision/hash n))
       (let ((payload? (hamt/payload? hamt)))
 	(let next ((entries (collision/entries n))
 		   (checked '()))
@@ -571,17 +517,17 @@ differ."
   (if payload? 2 1))
 
 (define (narrow-child-index l c mask payload?)
-  (+ (* (leaf-stride payload?) (population-count l))
-     (population-count (bit-string-and c mask))))
+  (+ (* (leaf-stride payload?) (bit-count l))
+     (bit-count (bitwise-and c mask))))
 
 (define (narrow-leaf-index l mask payload?)
-  (* (leaf-stride payload?) (population-count (bit-string-and l mask))))
+  (* (leaf-stride payload?) (bit-count (bitwise-and l mask))))
 
 (define (modify-narrow hamt n shift dp h k)
   (let ((fragment (hash-fragment shift h)))
-    (cond ((bit-string-ref (narrow/children n) fragment)
+    (cond ((bit-set? fragment (narrow/children n))
 	   (modify-narrow-child hamt n shift dp h k))
-	  ((bit-string-ref (narrow/leaves n) fragment)
+	  ((bit-set? fragment (narrow/leaves n))
 	   (modify-narrow-leaf hamt n shift dp h k))
 	  (else
 	   (let ((d (dp hamt-null)))
@@ -617,8 +563,8 @@ differ."
 				 (vector-edit array
 					      (add leaf-index key)
 					      (drop child-index 1)))
-			     (bit-string-alter c fragment #f)
-			     (bit-string-alter l fragment #t)))))
+			     (copy-bit fragment c #f)
+			     (copy-bit fragment l #t)))))
     (define (replace)
       (values change
 	      (make-narrow (vector-replace-one array child-index new-child)
@@ -665,7 +611,7 @@ differ."
 						      leaf-index
 						      (+ leaf-index stride))
 				      c
-				      (bit-string-alter l fragment #f))))
+				      (copy-bit fragment l #f))))
 		(payload?
 		 (values
 		  0
@@ -695,7 +641,7 @@ differ."
 	 (hash (hash-bits (hamt/hash hamt) key))
 	 (datum (and payload? (vector-ref array (1+ leaf-index)))))
     (values 1
-	    (make-narrow (if (bit-string=? h hash)
+	    (make-narrow (if (= h hash)
 			     (vector-edit
 			      array
 			      (drop leaf-index stride)
@@ -716,8 +662,8 @@ differ."
 				    hash
 				    key
 				    datum))))
-			 (bit-string-alter c fragment #t)
-			 (bit-string-alter l fragment #f)))))
+			 (copy-bit fragment c #t)
+			 (copy-bit fragment l #f)))))
 
 (define (modify-narrow-new hamt n shift d h k)
   (let* ((fragment (hash-fragment shift h))
@@ -736,7 +682,7 @@ differ."
 			     (vector-edit array
 					  (add leaf-index k)))
 			 c
-			 (bit-string-alter l fragment #t)))))
+			 (copy-bit fragment l #t)))))
 
 (define (hamt-fetch hamt key)
   "Fetch datum from `hamt' at `key'.  Return `hamt-null' if the key is
@@ -761,7 +707,7 @@ not present.  If `hamt' stores no payloads, return the symbol
 		   (c (narrow/children n))
 		   (l (narrow/leaves n))
 		   (fragment (hash-fragment shift h)))
-	       (cond ((bit-string-ref c fragment)
+	       (cond ((bit-set? fragment c)
 		      (let* ((mask (fragment->mask fragment))
 			     (child-index (narrow-child-index
 					   l
@@ -770,7 +716,7 @@ not present.  If `hamt' stores no payloads, return the symbol
 					   (hamt/payload? hamt))))
 			(descend (vector-ref array child-index)
 				 (+ shift hamt-hash-slice-size))))
-		     ((bit-string-ref l fragment)
+		     ((bit-set? fragment l)
 		      (let* ((mask (fragment->mask fragment))
 			     (leaf-index
 			      (narrow-leaf-index l mask (hamt/payload? hamt)))
@@ -787,10 +733,10 @@ not present.  If `hamt' stores no payloads, return the symbol
 		   (c (wide/children n))
 		   (l (wide/leaves n))
 		   (i (hash-fragment shift h)))
-	       (cond ((bit-string-ref c i)
+	       (cond ((bit-set? i c)
 		      (descend (vector-ref array (* stride i))
 			       (+ shift hamt-hash-slice-size)))
-		     ((bit-string-ref l i)
+		     ((bit-set? i l)
 		      (let* ((j (* stride i))
 			     (k (vector-ref array j)))
 			(if ((hamt/= hamt) k key)
@@ -815,7 +761,7 @@ not present.  If `hamt' stores no payloads, return the symbol
 	(l (narrow/leaves node)))
     (let next-leaf ((count 0)
 		    (start 0))
-      (let ((i (bit-substring-find-next-set-bit l start hamt-bucket-size)))
+      (let ((i (next-set-bit l start hamt-bucket-size)))
 	(if i
 	    (let* ((j (* stride count))
 		   (k (vector-ref array j))
@@ -824,9 +770,7 @@ not present.  If `hamt' stores no payloads, return the symbol
 	      (next-leaf (1+ count) (1+ i)))
 	    (let next-child ((start 0)
 			     (offset (* stride count)))
-	      (let ((i (bit-substring-find-next-set-bit c
-							start
-							hamt-bucket-size)))
+	      (let ((i (next-set-bit c start hamt-bucket-size)))
 		(when i
 		  (let ((child (vector-ref array offset)))
 		    (hamt-node/for-each child payload? procedure)
@@ -839,11 +783,11 @@ not present.  If `hamt' stores no payloads, return the symbol
 	(l (wide/leaves node)))
     (do-times (i hamt-bucket-size)
       (let ((j (* stride i)))
-	(cond ((bit-string-ref l i)
+	(cond ((bit-set? i l)
 	       (let ((k (vector-ref array j))
 		     (d (and payload? (vector-ref array (1+ j)))))
 		 (procedure k d)))
-	      ((bit-string-ref c i)
+	      ((bit-set? i c)
 	       (let ((child (vector-ref array j)))
 		 (hamt-node/for-each child payload? procedure))))))))
 
@@ -869,21 +813,6 @@ not present.  If `hamt' stores no payloads, return the symbol
 
 ;;; Debugging
 
-(define (show-hash-fragments hash)
-  "Show hash fragments in reverse order."
-  (let ((b (unsigned-integer->bit-string hamt-hash-size hash)))
-    (do ((shift 0 (+ shift hamt-hash-slice-size)))
-	((> shift hamt-hash-size))
-      (let ((fragment (bit-substring b
-				     shift
-				     (min (+ shift hamt-hash-slice-size)
-					  hamt-hash-size))))
-	(format #t
-		"~A: ~A (~A)~%"
-		shift
-		fragment
-		(bit-string->unsigned-integer fragment))))))
-
 (define (assert-collision-valid node hp payload?)
   "Do sanity checks on a collision.  Return the list of all keys
 present."
@@ -891,7 +820,7 @@ present."
 	(hash (collision/hash node))
 	(extract (if payload? car (lambda (x) x))))
     (do-list (a entries)
-      (assert (bit-string=? hash (hash-bits hp (extract a)))))
+      (assert (= hash (hash-bits hp (extract a)))))
     (if payload?
 	(map car entries)
 	entries)))
@@ -903,12 +832,12 @@ of all keys present."
 	(stride (leaf-stride payload?))
 	(c (narrow/children node))
 	(l (narrow/leaves node)))
-    (assert (bit-string-zero? (bit-string-and c l)))
+    (assert (zero? (bitwise-and c l)))
     (let next-leaf ((count 0)
 		    (i 0)
 		    (keys '()))
       (if (< i hamt-bucket-size)
-	  (cond ((bit-string-ref l i)
+	  (cond ((bit-set? i l)
 		 (let ((k (vector-ref array (* stride count))))
 		   (assert (= i (hash-fragment shift (hash-bits hp k))))
 		   (next-leaf (1+ count) (1+ i) (cons k keys))))
@@ -918,7 +847,7 @@ of all keys present."
 			   (offset (* stride count)))
 	    (if (= i hamt-bucket-size)
 		(apply append key-groups)
-		(cond ((bit-string-ref c i)
+		(cond ((bit-set? i c)
 		       (let* ((child (vector-ref array offset))
 			      (child-keys (assert-hamt-node-valid
 					   child
@@ -940,17 +869,17 @@ of all keys present."
 	(stride (leaf-stride payload?))
 	(c (wide/children node))
 	(l (wide/leaves node)))
-    (assert (bit-string-zero? (bit-string-and c l)))
+    (assert (zero? (bitwise-and c l)))
     (let next-fragment ((i 0)
 			(key-groups '()))
       (if (= i hamt-bucket-size)
 	  (apply append key-groups)
 	  (let ((j (* stride i)))
-	    (cond ((bit-string-ref l i)
+	    (cond ((bit-set? i l)
 		   (let ((k (vector-ref array j)))
 		     (assert (= i (hash-fragment shift (hash-bits hp k))))
 		     (next-fragment (1+ i) (cons (list k) key-groups))))
-		  ((bit-string-ref c i)
+		  ((bit-set? i c)
 		   (let* ((child (vector-ref array j))
 			  (child-keys (assert-hamt-node-valid
 				       child

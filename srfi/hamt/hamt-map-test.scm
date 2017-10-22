@@ -318,7 +318,7 @@ correctly."
 	    ((narrow? n)
 	     (let* ((array (narrow/array n))
 		    (stride (leaf-stride (hamt/payload? hamt)))
-		    (start (* stride (population-count (narrow/leaves n))))
+		    (start (* stride (bit-count (narrow/leaves n))))
 		    (end (vector-length array)))
 	       (do ((i start (1+ i))
 		    (high 0 (max high (descend (vector-ref array i)))))
@@ -328,7 +328,7 @@ correctly."
 		   (c (wide/children n)))
 	       (let next-child ((high 0)
 				(i 0))
-		 (cond ((bit-substring-find-next-set-bit c i hamt-bucket-size)
+		 (cond ((next-set-bit c i hamt-bucket-size)
 			=> (lambda (j)
 			     (next-child (max high
 					      (descend (vector-ref array j)))
