@@ -22,17 +22,15 @@
 ;; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ;; DEALINGS IN THE SOFTWARE.
 
-(define-test-group (hash-array-mapped-trie fragment->mask)
-  (lambda (input expected)
-    (assert (bit-string=? expected (fragment->mask input))))
-  '(0 #*00000000000000000000000000000000)
-  '(1 #*00000000000000000000000000000001)
-  '(2 #*00000000000000000000000000000011)
-  '(3 #*00000000000000000000000000000111))
+;;; HAMT Core Tests
 
-(define-test-group (population-count)
-  (lambda (expected bit-string)
-    (assert (= expected (population-count bit-string))))
-  '(3 #*10101)
-  '(5 #*11111)
-  '(0 #*00000))
+(define (run-hamt-core-tests)
+  (test-begin "hamt-core")
+
+  (test-group "(hash-array-mapped-trie fragment->mask)"
+    (test-equal = 0 (fragment->mask 0))
+    (test-equal = 1 (fragment->mask 1))
+    (test-equal = 3 (fragment->mask 2))
+    (test-equal = 7 (fragment->mask 3)))
+
+  (test-end))
