@@ -66,10 +66,6 @@
 ;; when hash functions are good, but work well when they're not, as in
 ;; the case of MIT Scheme's `string-hash'.
 
-;; <> Import SRFI 151 (Bitwise Operations).
-
-;; <> Import this into all HAMT source files.
-
 (define-syntax assert
   (syntax-rules ()
     ((_ (operator argument ...))
