@@ -126,15 +126,15 @@
 (define (hamt/empty? hamt)
   (zero? (hamt/count hamt)))
 
-(define (hamt/immutable hamt #!optional replace)
+(define (hamt/immutable-inner hamt replace)
   "Return a HAMT equivalent to `hamt', but that is immutable.  Even if
 `hamt' is mutable, no change to it will affect the returned HAMT.  If
-`replace' is provided and `hamt' has payloads, replace each datum in a
-wide node with what `replace' returns when passed the key and
-corresponding datum.  This is useful for converting HAMT sets stored
-as values in a HAMT map back to immutable ones when the containing map
-is made immutable.  (Only data in wide nodes will have been modified
-since the change to mutable happened.)"
+`hamt' has payloads, replace each datum in a wide node with what
+`replace' returns when passed the key and corresponding datum.  This
+is useful for converting HAMT sets stored as values in a HAMT map back
+to immutable ones when the containing map is made immutable.  (Only
+data in wide nodes will have been modified since the change to mutable
+happened.)"
   (if (hamt/mutable? hamt)
       (let ((payload? (hamt/payload? hamt)))
 	(%make-hamt (hamt/= hamt)
@@ -142,12 +142,13 @@ since the change to mutable happened.)"
 		    (hamt/hash hamt)
 		    #f
 		    payload?
-		    (->immutable (hamt/root hamt)
-				 payload?
-				 (if (default-object? replace)
-				     (lambda (k d) d)
-				     replace))))
+		    (->immutable (hamt/root hamt) payload? replace)))
       hamt))
+
+(define hamt/immutable
+  (case-lambda
+   ((hamt) (hamt/immutable-inner hamt (lambda (k d) d)))
+   ((hamt replace) (hamt/immutable-inner hamt replace))))
 
 (define (hamt/mutable hamt)
   (if (hamt/mutable? hamt)

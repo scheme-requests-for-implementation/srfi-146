@@ -43,7 +43,8 @@
 
 ;;   Return true iff `phm' is empty.
 
-;; (phm/immutable phm #!optional replace)
+;; (phm/immutable phm)
+;; (phm/immutable phm replace)
 
 ;;   Return a PHM equivalent to `phm', but that is immutable.  Even if
 ;;   `phm' is mutable, no change to it will affect the returned one.
@@ -138,13 +139,18 @@
   (and (hash-array-mapped-trie? datum)
        (hamt/payload? datum)))
 
-(define (make-phm hash = #!optional alist)
+(define (make-phm-inner hash = alist)
   (let ((phm (make-hamt = hash #t)))
-    (if (default-object? alist)
+    (if (null? alist)
 	phm
 	(let ((phm-1 (phm/mutable phm)))
 	  (phm/add-alist! phm-1 alist)
 	  (phm/immutable phm-1)))))
+
+(define make-phm
+  (case-lambda
+   ((hash =) (make-phm-inner hash = '()))
+   ((hash = alist) (make-phm-inner hash = alist))))
 
 (define (phm/count phm)
   (assert (phm? phm))
@@ -154,9 +160,14 @@
   (assert (phm? phm))
   (hamt/empty? phm))
 
-(define (phm/immutable phm #!optional replace)
-  (assert (phm? phm))
-  (hamt/immutable phm replace))
+(define phm/immutable
+  (case-lambda
+   ((phm)
+    (assert (phm? phm))
+    (hamt/immutable phm))
+   ((phm replace)
+    (assert (phm? phm))
+    (hamt/immutable phm replace))))
 
 (define (phm/mutable phm)
   (assert (phm? phm))
@@ -182,13 +193,17 @@
   (assert (phm? phm))
   (hamt/replace! phm key replace))
 
-(define (phm/get phm key #!optional default)
+(define (phm/get-inner phm key default)
   (assert (phm? phm))
-  (let* ((default (and (not (default-object? default)) default))
-	 (result (hamt-fetch phm key)))
+  (let ((result (hamt-fetch phm key)))
     (if (hamt-null? result)
 	default
 	result)))
+
+(define phm/get
+  (case-lambda
+   ((phm key) (phm/get-inner phm key #f))
+   ((phm key default) (phm/get-inner phm key default))))
 
 (define (phm/contains? phm key)
   (assert (phm? phm))
