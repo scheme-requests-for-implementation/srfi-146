@@ -54,7 +54,7 @@
 	  (max-key-length 5)
 	  (operations 100))
       (define (random-key)
-	(let ((size (1+ (random max-key-length))))
+	(let ((size (+ (random max-key-length) 1)))
 	  (with-output-to-string
 	    (lambda ()
 	      (do-times (i size)
@@ -67,13 +67,13 @@
 		 (let ((key (nth (random size) (hash-table/key-list contents))))
 		   (set/add! deleted-keys key)
 		   (hash-table/remove! contents key)
-		   (fill-phm (-1+ i)
+		   (fill-phm (- i 1)
 			     (remove phm key))))
 		(else (let* ((key (random-key))
 			     (datum (random 1000)))
 			(set/remove! deleted-keys key)
 			(hash-table/put! contents key datum)
-			(fill-phm (-1+ i)
+			(fill-phm (- i 1)
 				  (put phm key datum)))))))
       (let ((phm (fill-phm operations
 			   (transform (make-phm string-hash string=?)))))
@@ -108,7 +108,7 @@
 			  datum)))
 		     (let ((count 0))
 		       (lambda (phm key)
-			 (set! count (remainder (1+ count) 3))
+			 (set! count (remainder (+ count 1) 3))
 			 (let ((mutate? (zero? count)))
 			   ((if mutate? phm/remove! phm/remove)
 			    (flip mutate? phm)
@@ -292,7 +292,7 @@ correctly."
 	   (phm-1 (phm/mutable (make-phm string-hash string=? alist-1))))
       (phm/put! phm-1 "b" 4)
       (let ((phm-2 (phm/immutable phm-1
-				  (lambda (k d) (if (string=? k "b") (1+ d) d)))))
+				  (lambda (k d) (if (string=? k "b") (+ d 1) d)))))
 	(test-assert (equal? alist-2 (sort-alist (phm->alist phm-2)))))))
 
   (test-group "(persistent-hash-map phm/mutable?)"
@@ -320,9 +320,9 @@ correctly."
 		    (stride (leaf-stride (hamt/payload? hamt)))
 		    (start (* stride (bit-count (narrow/leaves n))))
 		    (end (vector-length array)))
-	       (do ((i start (1+ i))
+	       (do ((i start (+ i 1))
 		    (high 0 (max high (descend (vector-ref array i)))))
-		   ((= i end) (1+ high)))))
+		   ((= i end) (+ high 1)))))
 	    ((wide? n)
 	     (let ((array (wide/array n))
 		   (c (wide/children n)))
@@ -332,8 +332,8 @@ correctly."
 			=> (lambda (j)
 			     (next-child (max high
 					      (descend (vector-ref array j)))
-					 (1+ j))))
-		       (else (1+ high))))))
+					 (+ j 1))))
+		       (else (+ high 1))))))
 	    (else (error "Invalid type of node." n)))))
 
   (test-group "(persistent-hash-map lower-collision)"

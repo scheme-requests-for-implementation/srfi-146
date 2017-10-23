@@ -230,13 +230,13 @@ happened.)"
 	  (let ((j (* stride i)))
 	    (vector-set! a-out j (vector-ref a-in count))
 	    (when payload?
-	      (vector-set! a-out (1+ j) (vector-ref a-in (1+ count)))))
-	  (next-leaf (1+ i) (+ stride count)))))
+	      (vector-set! a-out (+ j 1) (vector-ref a-in (+ count 1)))))
+	  (next-leaf (+ i 1) (+ stride count)))))
     (let next-child ((start 0) (offset (* stride (bit-count l))))
       (let ((i (next-set-bit c start hamt-bucket-size)))
 	(when i
 	  (vector-set! a-out (* stride i) (vector-ref a-in offset))
-	  (next-child (1+ i) (1+ offset)))))
+	  (next-child (+ i 1) (+ offset 1)))))
     (make-wide a-out c l)))
 
 (define (->immutable n payload? replace)
@@ -265,11 +265,11 @@ and corresponding datum."
 		   (vector-set! a-out count key)
 		   (when payload?
 		     (vector-set! a-out
-				  (1+ count)
+				  (+ count 1)
 				  (replace
 				   key
-				   (vector-ref a-in (1+ j))))))
-		 (next-leaf (1+ i) (+ stride count)))))
+				   (vector-ref a-in (+ j 1))))))
+		 (next-leaf (+ i 1) (+ stride count)))))
 	   (let next-child ((start 0) (offset (* stride l-count)))
 	     (let ((i (next-set-bit c
 				    start
@@ -278,9 +278,9 @@ and corresponding datum."
 		 (vector-set! a-out
 			      offset
 			      (->immutable (vector-ref a-in (* stride i))
-					   payload?
-					   replace))
-		 (next-child (1+ i) (1+ offset)))))
+					  payload?
+					  replace))
+		 (next-child (+ i 1) (+ offset 1)))))
 	   (make-narrow a-out c l)))
 	(else (error "Unexpected type of node."))))
 
@@ -288,7 +288,7 @@ and corresponding datum."
   (bit-field hash shift (+ shift hamt-hash-slice-size)))
 
 (define (fragment->mask fragment)
-  (-1+ (expt 2 fragment)))
+  (- (expt 2 fragment) 1))
 
 (define (mutate hamt n shift dp h k)
   (cond ((collision? n) (modify-collision hamt n shift dp h k))
@@ -331,7 +331,7 @@ and corresponding datum."
     (define (coalesce key datum)
       (vector-set! array i key)
       (when payload?
-	(vector-set! array (1+ i) datum))
+	(vector-set! array (+ i 1) datum))
       (set-wide/children! n (copy-bit fragment (wide/children n) #f))
       (set-wide/leaves! n (copy-bit fragment (wide/leaves n) #t))
       (values change n))
@@ -355,7 +355,7 @@ and corresponding datum."
 						0
 						hamt-bucket-size))))
 		 (coalesce (vector-ref a j)
-			   (and payload? (vector-ref a (1+ j)))))
+			   (and payload? (vector-ref a (+ j 1)))))
 	       (replace)))
 	  ((narrow? new-child)
 	   (replace))
@@ -369,15 +369,15 @@ and corresponding datum."
 	 (i (* stride fragment))
 	 (key (vector-ref array i)))
     (if ((hamt/= hamt) k key)
-	(let* ((existing (if payload? (vector-ref array (1+ i)) hamt-null))
+	(let* ((existing (if payload? (vector-ref array (+ i 1)) hamt-null))
 	       (d (dp existing)))
 	  (cond ((hamt-null? d)
 		 (vector-set! array i #f)
-		 (when payload? (vector-set! array (1+ i) #f))
+		 (when payload? (vector-set! array (+ i 1) #f))
 		 (set-wide/leaves! n (copy-bit fragment (wide/leaves n) #f))
 		 (values -1 n))
 		(else
-		 (when payload? (vector-set! array (1+ i) d))
+		 (when payload? (vector-set! array (+ i 1) d))
 		 (values 0 n))))
 	(let ((d (dp hamt-null)))
 	  (if (hamt-null? d)
@@ -394,7 +394,7 @@ and corresponding datum."
 	 (i (* stride fragment))
 	 (key (vector-ref array i))
 	 (hash (hash-bits (hamt/hash hamt) key))
-	 (datum (and payload? (vector-ref array (1+ i)))))
+	 (datum (and payload? (vector-ref array (+ i 1)))))
     (vector-set! array
 		 i
 		 (if (= h hash)
@@ -411,7 +411,7 @@ and corresponding datum."
 		      key
 		      datum)))
     (when payload?
-      (vector-set! array (1+ i) #f))
+      (vector-set! array (+ i 1) #f))
     (set-wide/children! n (copy-bit fragment (wide/children n) #t))
     (set-wide/leaves! n (copy-bit fragment (wide/leaves n) #f))
     (values 1 n)))
@@ -424,7 +424,7 @@ and corresponding datum."
 	 (i (* stride fragment)))
     (vector-set! array i k)
     (when payload?
-      (vector-set! array (1+ i) d))
+      (vector-set! array (+ i 1) d))
     (set-wide/leaves! n (copy-bit fragment (wide/leaves n) #t))
     (values 1 n)))
 
@@ -614,7 +614,7 @@ differ."
 	 (key (vector-ref array leaf-index)))
     (if ((hamt/= hamt) k key)
 	(let* ((existing (if payload?
-			     (vector-ref array (1+ leaf-index))
+			     (vector-ref array (+ leaf-index 1))
 			     hamt-null))
 	       (d (dp existing)))
 	  (cond ((hamt-null? d)
@@ -627,7 +627,7 @@ differ."
 		(payload?
 		 (values
 		  0
-		  (make-narrow (vector-replace-one array (1+ leaf-index) d)
+		  (make-narrow (vector-replace-one array (+ leaf-index 1) d)
 			       c
 			       l)))
 		(else (values 0 n))))
@@ -651,7 +651,7 @@ differ."
 	 (key (vector-ref array leaf-index))
 	 (child-index (narrow-child-index l c mask payload?))
 	 (hash (hash-bits (hamt/hash hamt) key))
-	 (datum (and payload? (vector-ref array (1+ leaf-index)))))
+	 (datum (and payload? (vector-ref array (+ leaf-index 1)))))
     (values 1
 	    (make-narrow (if (= h hash)
 			     (vector-edit
@@ -735,7 +735,7 @@ not present.  If `hamt' stores no payloads, return the symbol
 			     (k (vector-ref array leaf-index)))
 			(if ((hamt/= hamt) k key)
 			    (if payload?
-				(vector-ref array (1+ leaf-index))
+				(vector-ref array (+ leaf-index 1))
 				'present)
 			    hamt-null)))
 		     (else hamt-null))))
@@ -753,7 +753,7 @@ not present.  If `hamt' stores no payloads, return the symbol
 			     (k (vector-ref array j)))
 			(if ((hamt/= hamt) k key)
 			    (if payload?
-				(vector-ref array (1+ j))
+				(vector-ref array (+ j 1))
 				'present)
 			    hamt-null)))
 		     (else hamt-null))))
@@ -777,16 +777,16 @@ not present.  If `hamt' stores no payloads, return the symbol
 	(if i
 	    (let* ((j (* stride count))
 		   (k (vector-ref array j))
-		   (d (and payload? (vector-ref array (1+ j)))))
+		   (d (and payload? (vector-ref array (+ j 1)))))
 	      (procedure k d)
-	      (next-leaf (1+ count) (1+ i)))
+	      (next-leaf (+ count 1) (+ i 1)))
 	    (let next-child ((start 0)
 			     (offset (* stride count)))
 	      (let ((i (next-set-bit c start hamt-bucket-size)))
 		(when i
 		  (let ((child (vector-ref array offset)))
 		    (hamt-node/for-each child payload? procedure)
-		    (next-child (1+ i) (1+ offset)))))))))))
+		    (next-child (+ i 1) (+ offset 1)))))))))))
 
 (define (wide/for-each procedure node payload?)
   (let ((array (wide/array node))
@@ -797,7 +797,7 @@ not present.  If `hamt' stores no payloads, return the symbol
       (let ((j (* stride i)))
 	(cond ((bit-set? i l)
 	       (let ((k (vector-ref array j))
-		     (d (and payload? (vector-ref array (1+ j)))))
+		     (d (and payload? (vector-ref array (+ j 1)))))
 		 (procedure k d)))
 	      ((bit-set? i c)
 	       (let ((child (vector-ref array j)))
@@ -852,8 +852,8 @@ of all keys present."
 	  (cond ((bit-set? i l)
 		 (let ((k (vector-ref array (* stride count))))
 		   (assert (= i (hash-fragment shift (hash-bits hp k))))
-		   (next-leaf (1+ count) (1+ i) (cons k keys))))
-		(else (next-leaf count (1+ i) keys)))
+		   (next-leaf (+ count 1) (+ i 1) (cons k keys))))
+		(else (next-leaf count (+ i 1) keys)))
 	  (let next-child ((i 0)
 			   (key-groups (list keys))
 			   (offset (* stride count)))
@@ -869,10 +869,10 @@ of all keys present."
 			 (do-list (k child-keys)
 			   (assert (= i
 				      (hash-fragment shift (hash-bits hp k)))))
-			 (next-child (1+ i)
+			 (next-child (+ i 1)
 				     (cons child-keys key-groups)
-				     (1+ offset))))
-		      (else (next-child (1+ i) key-groups offset)))))))))
+				     (+ offset 1))))
+		      (else (next-child (+ i 1) key-groups offset)))))))))
 
 (define (assert-wide-valid node hp payload? shift)
   "Do sanity checks on a wide and all its children.  Return the list
@@ -890,7 +890,7 @@ of all keys present."
 	    (cond ((bit-set? i l)
 		   (let ((k (vector-ref array j)))
 		     (assert (= i (hash-fragment shift (hash-bits hp k))))
-		     (next-fragment (1+ i) (cons (list k) key-groups))))
+		     (next-fragment (+ i 1) (cons (list k) key-groups))))
 		  ((bit-set? i c)
 		   (let* ((child (vector-ref array j))
 			  (child-keys (assert-hamt-node-valid
@@ -901,13 +901,13 @@ of all keys present."
 		     (do-list (k child-keys)
 		       (assert (= i
 				  (hash-fragment shift (hash-bits hp k)))))
-		     (next-fragment (1+ i)
+		     (next-fragment (+ i 1)
 				    (cons child-keys key-groups))))
 		  (else
 		   (assert (not (vector-ref array j)))
 		   (when payload?
-		     (assert (not (vector-ref array (1+ j)))))
-		   (next-fragment (1+ i) key-groups))))))))
+		     (assert (not (vector-ref array (+ j 1)))))
+		   (next-fragment (+ i 1) key-groups))))))))
 
 (define (assert-hamt-node-valid node hp payload? shift)
   "Do sanity checks on a HAMT node and all its children.  Return the
