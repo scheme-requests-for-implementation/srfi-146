@@ -1,5 +1,5 @@
 (define-library (hamt-map)
-  (import (scheme base) (srfi 16) (hamt))
+  (import (scheme base) (srfi 16) (hamt) (hamt-misc))
   (export make-phm phm?
 	  phm->alist
 	  phm/add-alist phm/add-alist!

@@ -3,9 +3,9 @@
 	  (srfi 16)
 	  (only (srfi 143) fx-width)
 	  (srfi 151)
+	  (hamt-misc)
 	  (vector-edit))
-  (export assert
-	  fragment->mask
+  (export fragment->mask
 	  hamt->list
 	  hamt-fetch
 	  hamt-null

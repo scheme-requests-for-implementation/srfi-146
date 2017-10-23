@@ -66,17 +66,6 @@
 ;; when hash functions are good, but work well when they're not, as in
 ;; the case of MIT Scheme's `string-hash'.
 
-(define-syntax assert
-  (syntax-rules ()
-    ((_ (operator argument ...))
-     (unless (operator argument ...)
-       (error "Assertion failed:"
-	      '(operator argument ...)
-	      (list 'operator argument ...))))
-    ((_ expression)
-     (unless expression
-       (error "Assertion failed:" 'expression)))))
-
 (define hamt-hash-slice-size 5)
 (define hamt-hash-size
   (let ((word-size fx-width))
