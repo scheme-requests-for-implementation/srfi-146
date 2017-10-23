@@ -220,7 +220,7 @@
 
 (define (phm/add-alist phm alist)
   (assert (phm? phm))
-  (fold-left (lambda (phm a) (phm/put phm (car a) (cdr a))) phm alist))
+  (fold (lambda (a phm) (phm/put phm (car a) (cdr a))) phm alist))
 
 (define (phm/add-alist! phm alist)
   (assert (phm? phm))

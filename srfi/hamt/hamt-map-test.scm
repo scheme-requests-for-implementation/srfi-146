@@ -157,10 +157,9 @@
 	    (else 2)))
     (let* ((alist '(("foo" . 1) ("bar" . 2) ("baz" . 3) ("bat" . 4)
 		    ("quux" . 5)))
-	   (phm-1 (fold-left
-		   (lambda (phm a) (put phm (car a) (cdr a)))
-		   (transform (make-phm terrible-hash string=?))
-		   alist))
+	   (phm-1 (fold (lambda (a phm) (put phm (car a) (cdr a)))
+			(transform (make-phm terrible-hash string=?))
+			alist))
 	   (phm (put phm-1 "baz" 3)))
       (assert-phm= phm alist)
       (let ((phm-alist (phm->alist phm)))
