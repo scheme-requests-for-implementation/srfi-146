@@ -693,9 +693,8 @@ not present.  If `hamt' stores no payloads, return the symbol
 	     (let ((entries (collision/entries n))
 		   (key= (hamt/= hamt)))
 	       (if payload?
-		   (let ((assoc= (association-procedure key= car)))
-		     (cond ((assoc= key entries) => cdr)
-			   (else hamt-null)))
+		   (cond ((assoc key entries key=) => cdr)
+			 (else hamt-null))
 		   (if (find-tail (lambda (e) (key= key e)) entries)
 		       'present
 		       hamt-null))))
