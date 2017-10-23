@@ -57,7 +57,8 @@
 	(let ((size (+ (random max-key-length) 1)))
 	  (with-output-to-string
 	    (lambda ()
-	      (do-times (i size)
+	      (do ((i 0 (+ i 1)))
+		  ((= i size))
 		(write-char (make-char (+ 97 (random 26)) 0)))))))
       (define (fill-phm i phm)
 	(let ((size (hash-table/count contents)))
