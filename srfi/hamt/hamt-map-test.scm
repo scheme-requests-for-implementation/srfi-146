@@ -110,12 +110,12 @@
       (let ((phm-alist (phm->alist phm)))
 	(test-assert (equal? (sort-alist alist)
 			     (sort-alist phm-alist))))
-      (let ((alist-minus-baz (del-assoc "baz" alist))
+      (let ((alist-minus-baz (alist-delete "baz" alist string=?))
 	    (phm-minus-baz (remove (transform phm) "baz")))
 	(assert-phm= phm-minus-baz alist-minus-baz)
 	(let ((phm-minus-nonexistent (remove phm-minus-baz "not-present")))
 	  (test-equal = (phm/count phm-minus-nonexistent) (- (length alist) 1))
-	  (let ((alist-minus-bat (del-assoc "bat" alist-minus-baz))
+	  (let ((alist-minus-bat (alist-delete "bat" alist-minus-baz string=?))
 		(phm-minus-bat (remove phm-minus-nonexistent "bat")))
 	    (assert-phm= phm-minus-bat alist-minus-bat))))))
 
@@ -244,7 +244,7 @@
 	   (phm (phm/add-alist (make-phm same-first-fragment string=?) alist)))
       (assert-phm= phm alist)
       (let ((phm-minus-baz (phm/remove phm "baz")))
-	(assert-phm= phm-minus-baz (del-assoc "baz" alist)))
+	(assert-phm= phm-minus-baz (alist-delete "baz" alist string=?)))
       (let ((phm-minus-nonexistent (phm/remove phm "not-present")))
 	(test-assert (= (phm/count phm-minus-nonexistent) (length alist))))))
 
@@ -252,7 +252,7 @@
     "Test that mutating and pure operations interact with each other
 correctly."
     (define (alist-replace alist key datum)
-      (cons (cons key datum) (del-assoc key alist)))
+      (cons (cons key datum) (alist-delete key alist string=?)))
     (let* ((m0 (make-phm string-hash string=?))
 	   (a1 '(("foo" . 1) ("bar" . 2) ("baz" . 3)))
 	   (m1 (phm/add-alist m0 a1))
@@ -278,7 +278,7 @@ correctly."
       (assert-phm= m6 a7)
       (assert-phm= m7 a7)
       (assert-phm= m8 a7)
-      (let ((a (del-assoc "foo" a1))
+      (let ((a (alist-delete "foo" a1 string=?))
 	    (m9 (phm/remove! m4 "foo")))
 	(assert-phm= m4 a)
 	(assert-phm= m9 a))))

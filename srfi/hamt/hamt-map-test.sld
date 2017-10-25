@@ -4,7 +4,7 @@
 	  (hamt)
 	  (hamt-map)
 	  (hamt-misc)
-	  (only (srfi 1) fold)
+	  (only (srfi 1) alist-delete fold)
 	  (only (srfi 27) random-integer)
 	  (only (srfi 113)
 		set-adjoin!
