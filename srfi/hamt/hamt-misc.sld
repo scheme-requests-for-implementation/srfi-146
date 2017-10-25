@@ -1,4 +1,6 @@
 (define-library (hamt-misc)
-  (import (scheme base))
-  (export assert do-list with-output-to-string)
+  (import (scheme base)
+	  (only (srfi 125) make-hash-table string-hash)
+	  (only (srfi 128) make-comparator))
+  (export assert do-list make-string-hash-table with-output-to-string)
   (include "hamt-misc.scm"))

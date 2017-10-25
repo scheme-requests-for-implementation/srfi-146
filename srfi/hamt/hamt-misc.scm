@@ -47,6 +47,12 @@
        (let ((element-variable (car remaining)))
 	 body ...)))))
 
+(define string-comparator
+  (make-comparator string? string=? #f string-hash))
+
+(define (make-string-hash-table)
+  (make-hash-table string-comparator))
+
 (define (with-output-to-string thunk)
   (parameterize ((current-output-port (open-output-string)))
     (thunk)
