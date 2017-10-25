@@ -6,6 +6,10 @@
 	  (hamt-misc)
 	  (only (srfi 1) fold)
 	  (only (srfi 27) random-integer)
+	  (only (srfi 113)
+		set-adjoin!
+		set-delete!
+		set-for-each)
 	  (only (srfi 125)
 		hash-table->alist
 		hash-table-keys

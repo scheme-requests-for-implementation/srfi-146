@@ -53,6 +53,9 @@
 (define (make-string-hash-table)
   (make-hash-table string-comparator))
 
+(define (make-string-set)
+  (set string-comparator))
+
 (define (with-output-to-string thunk)
   (parameterize ((current-output-port (open-output-string)))
     (thunk)
