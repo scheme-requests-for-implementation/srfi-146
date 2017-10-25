@@ -18,6 +18,7 @@
 		hash-table-set!
 		hash-table-size
 		string-hash)
+	  (only (srfi 132) list-sort)
 	  (only (srfi 151) bit-count))
   (export run-hamt-map-tests)
   (include "hamt-map-test.scm"))

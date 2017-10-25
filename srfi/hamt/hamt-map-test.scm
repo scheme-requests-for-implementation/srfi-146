@@ -32,7 +32,7 @@
 
   (define (phm-random-test put remove transform)
     (define (sort-alist alist)
-      (sort alist (lambda (a1 a2) (string<? (car a1) (car a2)))))
+      (list-sort (lambda (a1 a2) (string<? (car a1) (car a2))) alist))
     (let ((contents (make-string-hash-table))
 	  (deleted-keys (make-string-set))
 	  (deletion-odds 5)
@@ -95,7 +95,7 @@
 
   (define (phm-collision-test put remove transform)
     (define (sort-alist alist)
-      (sort alist (lambda (a1 a2) (string<? (car a1) (car a2)))))
+      (list-sort (lambda (a1 a2) (string<? (car a1) (car a2))) alist))
     (define (terrible-hash string)
       (cond ((string=? string "foo") 0)
 	    ((string=? string "bar") 1)
@@ -121,7 +121,7 @@
 
   (define (persistent-hash-map replace transform)
     (define (sort-alist alist)
-      (sort alist (lambda (a1 a2) (string<? (car a1) (car a2)))))
+      (list-sort (lambda (a1 a2) (string<? (car a1) (car a2))) alist))
     (let* ((alist-1 '(("a" . 1) ("b" . 2) ("c" . 3)))
 	   (alist-2 '(("a" . 1) ("b" . 4) ("c" . 3)))
 	   (alist-3 '(("a" . 1) ("b" . 4)))
@@ -287,17 +287,17 @@ correctly."
     (let* ((alist '(("a" . 1) ("b" . 2) ("c" . 3)))
 	   (data (phm/data (make-phm string-hash string=? alist))))
       (test-assert (equal? (map cdr alist)
-			   (sort data <)))))
+			   (list-sort < data)))))
 
   (test-group "(persistent-hash-map phm/keys)"
     (let* ((alist '(("a" . 1) ("b" . 2) ("c" . 3)))
 	   (keys (phm/keys (make-phm string-hash string=? alist))))
       (test-assert (equal? (map car alist)
-			   (sort keys string<?)))))
+			   (list-sort string<? keys)))))
 
   (test-group "(persistent-hash-map phm/for-each)"
     (define (sort-alist alist)
-      (sort alist (lambda (a1 a2) (string<? (car a1) (car a2)))))
+      (list-sort (lambda (a1 a2) (string<? (car a1) (car a2))) alist))
     (let* ((alist '(("a" . 1) ("b" . 2) ("c" . 3)))
 	   (phm (make-phm string-hash string=? alist))
 	   (accumulator '()))
@@ -314,7 +314,7 @@ correctly."
 
   (test-group "(persistent-hash-map immutable-replace)"
     (define (sort-alist alist)
-      (sort alist (lambda (a1 a2) (string<? (car a1) (car a2)))))
+      (list-sort (lambda (a1 a2) (string<? (car a1) (car a2))) alist))
     (let* ((alist-1 '(("a" . 1) ("b" . 2) ("c" . 3)))
 	   (alist-2 '(("a" . 1) ("b" . 5) ("c" . 3)))
 	   (phm-1 (phm/mutable (make-phm string-hash string=? alist-1))))
