@@ -59,7 +59,7 @@
 	    (lambda ()
 	      (do ((i 0 (+ i 1)))
 		  ((= i size))
-		(write-char (make-char (+ 97 (random-integer 26)) 0)))))))
+		(write-char (integer->char (+ 97 (random-integer 26)))))))))
       (define (fill-phm i phm)
 	(let ((size (hash-table/count contents)))
 	  (cond ((zero? i) phm)
