@@ -1,4 +1,5 @@
-# Copyright (C) Marc Nieper-Wißkirchen (2016). All Rights Reserved.
+# Copyright (C) Marc Nieper-Wißkirchen (2016, 2018). All Rights
+# Reserved.
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -29,4 +30,4 @@ SCHEME = chibi-scheme $(SCHEME_FLAGS)
 
 check:
 	rm -rf *.log
-	$(SCHEME) tests.scm
+	CHIBI_MODULE_PATH="" $(SCHEME) -A . -I srfi/hamt tests.scm
