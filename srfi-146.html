@@ -13,9 +13,9 @@
 
 Mappings
 
-<h1>Author</h1>
+<h1>Authors</h1>
 
-Marc Nieper-Wi&szlig;kirchen
+Arthur Gleckler, Marc Nieper-Wi&szlig;kirchen
 
 <h1>Status</h1>
 
@@ -211,11 +211,11 @@ example, <code>mapping-copy</code> could be a no-op.</p>
 <h2>Comparator restrictions</h2>
 
 <p>The library <code>(srfi 146)</code> described in this SRFI requires
-  comparators to provide a comparison function.  Any
+  comparators to provide an ordering predicate.  Any
   implementation shall also provide the library <code>(srfi 146
   hash)</code> which implements essentially the same interface (see
   below) as <code>(srfi 146)</code> but requires comparators to
-  provide a hash function instead of a comparison function, unless the
+  provide a hash function instead of an ordering predicate, unless the
   equality predicate of the comparator
   is <code>eq?</code>, <code>eqv?</code>, <code>equal?</code>, <code>string=?</code>,
   or <code>string-ci=?</code>.
@@ -225,8 +225,8 @@ example, <code>mapping-copy</code> could be a no-op.</p>
   The library <code>(srfi 146 hash)</code> exports exactly the same
   identifiers (up to a simple prefix-replacing textual substitution as
   described in the next paragraph), except for
-  those bound to locations which make no sense when a comparison
-  function is absent (e.g. <code>mapping-split</code>).
+  those bound to locations which make no sense when an ordering
+  predicate is absent (e.g. <code>mapping-split</code>).
   Should <code>(srfi 146)</code> once become known as <code>(scheme
   mapping)</code>, it is recommanded that the library
   <code>(srfi 146 hash)</code> receives the alternative
@@ -290,7 +290,7 @@ example, <code>mapping-copy</code> could be a no-op.</p>
       <code>mapping-entries</code>
     </p>
   </li>
-  
+
   <li><p><a href="#Mappingandfolding">Mapping and folding</a>:
       <code>mapping-map</code>,
       <code>mapping-map-&gt;list</code>,
@@ -301,7 +301,7 @@ example, <code>mapping-copy</code> could be a no-op.</p>
       <code>mapping-remove!</code>,
       <code>mapping-partition</code>, <code>mapping-partition!</code></p>
   </li>
-  
+
   <li><p><a href="#Copyingandconversion">Copying and conversion</a>:
       <code>mapping-copy</code>,
       <code>mapping-&gt;alist</code>,
@@ -353,12 +353,12 @@ example, <code>mapping-copy</code> could be a no-op.</p>
       <code>mapping-fold/reverse</code>
       </p>
   </li>
-  
+
   <li>
     <p><a href="#Comparators">Comparators</a>:
       <code>comparator?</code>,
       <code>mapping-comparator</code>,
-      <code>make-mapping-comparator</code>      
+      <code>make-mapping-comparator</code>
   </li>
 </ul>
 
@@ -804,7 +804,7 @@ order of the keys.
 
 <p><code>(mapping-map <em>proc</em> <em>comparator</em> <em>mapping</em>)</code></p>
 
-<p>Applies <code><em>proc</em></code> on two arguments, the key and value of each association of 
+<p>Applies <code><em>proc</em></code> on two arguments, the key and value of each association of
   <code><em>mapping</em></code> in increasing order of the keys, which returns two
   values, and returns a newly allocated mapping that uses the
   comparator <code><em>comparator</em></code>, and which contains
@@ -1264,7 +1264,7 @@ respect to the natural ordering of the keys.
 </p>
 
 <p>
-The following comparator is used to compare mappings when <code>(make-default-comparator)</code> 
+The following comparator is used to compare mappings when <code>(make-default-comparator)</code>
 from SRFI 128 is invoked:
 </p>
 

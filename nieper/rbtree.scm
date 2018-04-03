@@ -1,4 +1,4 @@
-;; Copyright (C) Marc Nieper-Wißkirchen (2016).  All Rights Reserved. 
+;; Copyright (C) Marc Nieper-Wißkirchen (2016).  All Rights Reserved.
 
 ;; Permission is hereby granted, free of charge, to any person
 ;; obtaining a copy of this software and associated documentation
@@ -65,7 +65,7 @@
 		return))
 	    ...
 	    (error "tree does not match any pattern" tree)))))
-    
+
     ((compile-patterns e tree clauses* (pattern . pattern*))
      (compile-pattern tree pattern
 		      (add-pattern e tree clauses* pattern*)))))
@@ -120,7 +120,7 @@
      (k ... ((x tree))))))
 
 (define-syntax compile-and-pattern
-  (syntax-rules ()    
+  (syntax-rules ()
     ((compile-and-pattern tree t (k ...) clauses)
      (k ... ((t tree) . clauses)))))
 
@@ -144,7 +144,7 @@
 
 (define-syntax compile-subpatterns
   (syntax-rules ()
-    
+
     ((compile-subpatterns clauses () (k ...))
      (k ... clauses))
 
@@ -155,7 +155,7 @@
   (syntax-rules ()
     ((add-subpattern (clause ...) rest k* clauses)
      (compile-subpatterns (clause ... . clauses) rest k*))))
-    
+
 ;;; Tree recolouring procedures
 
 (define (blacken tree)
@@ -220,7 +220,7 @@
 (define (tree-search comparator tree obj failure success)
   (receive (tree ret op)
       (let search ((tree (redden tree)))
-	(tree-match tree	  
+	(tree-match tree
 	  ((black)
 	   (failure
 	    ;; insert
@@ -231,14 +231,14 @@
 	    ;; ignore
 	    (lambda (ret)
 	      (values (black) ret identity))))
-	  
+
 	  ((and t (node c a x b))
 	   (let ((key (item-key x)))
 	     (comparator-if<=> comparator obj key
-	       
+
 	       (receive (a ret op) (search a)
 		 (values (op (node c a x b)) ret op))
-	       
+
 	       (success
 		key
 		(item-value x)
@@ -262,10 +262,10 @@
 			(rotate (node c a x b)))))
 		   ret
 		   rotate)))
-	       
+
 	       (receive (b ret op) (search b)
 		 (values (op (node c a x b)) ret op)))))))
-      
+
     (values (blacken tree) ret)))
 
 (define (tree-key-successor comparator tree obj failure)
@@ -417,7 +417,7 @@
     ((white (red a x (red b y c)) z d)
      (black (black a x b) y (black c z d)))
     ((white a x (red (red b y c) z d))
-     (black (black a x b) y (black c z d)))   
+     (black (black a x b) y (black c z d)))
     (t t)))
 
 (define (rotate tree)

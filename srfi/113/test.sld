@@ -53,7 +53,7 @@
 	  (srfi 128)
 	  (srfi 113))
   (begin
-    (define number-comparator (make-default-comparator))
+    (define number-comparator (make-comparator number? = < default-hash))
     (define char-comparator (make-default-comparator))
     (define eq-comparator (make-default-comparator))
     (define eqv-comparator (make-default-comparator))
@@ -65,13 +65,13 @@
       (syntax-rules ()
 	((test test-name ... expected test-expr)
 	 (test-assert test-name ... ((current-test-comparator) expected test-expr)))))
-    
+
     (define (run-tests)
       (test-begin "SRFI 113")
 
       (test-group "sets"
 		  (define (big x) (> x 5))
-	
+
 		  (test-group "sets"
 			      (test-group "sets/simple"
 					  (define total 0)
@@ -664,6 +664,6 @@
 			      )		; end comparators
 		  )
 
-	
+
 
       (test-end))))
