@@ -1,6 +1,6 @@
 * SRFI 146: Mappings
 
-** by Marc Nieper-Wißkirchen
+** by Arthur A. Gleckler, Marc Nieper-Wißkirchen
 
 This repository hosts [[https://srfi.schemers.org/srfi-146/][SRFI 146]]: Mappings, a [[https://srfi.schemers.org/][Scheme Request for Implementation]].
 
