@@ -1159,6 +1159,14 @@ equal to <code><em>obj</em></code>.
   may be more efficient.
 </p>
 
+<p><code>(mapping-split! <em>mapping</em> <em>obj</em>)</code></p>
+
+<p>The <code>mapping-split!</code> procedure is the same
+as <code>mapping-split</code>, except that it is permitted to mutate
+and return the <code><em>mapping</em></code> rather than allocating a
+new mapping.
+</p>
+
 <p><code>(mapping-catenate <em>comparator</em> <em>mapping</em><sub>1</sub> <em>key</em> <em>value</em>
     <em>mapping</em></sub>2</sub>)</code></p>
 
