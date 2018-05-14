@@ -749,16 +749,19 @@ Returns the number of associations in <em>mapping</em> as an exact integer.
 <p><code>(mapping-count <em>predicate</em> <em>mapping</em>)</code></p>
 
 <p>
-Returns the number of associations of the mapping <em>mapping</em> that
-satisfy <code><em>predicate</em></code> (in the sense
-of <code>mapping-find</code>) as an exact integer.
+Returns the number of associations of the mapping <em>mapping</em>
+that satisfy <code><em>predicate</em></code> (in the sense
+of <code>mapping-find</code>) as an exact integer.  There are no
+guarantees how many times and with which keys and values
+<code><em>predicate</em></code> is invoked.</p>
 
-</p><p><code>(mapping-any? <em>predicate</em> <em>mapping</em>)</code></p>
+<p><code>(mapping-any? <em>predicate</em> <em>mapping</em>)</code></p>
 
 <p>
 Returns <code>#t</code> if any association of the mapping <code><em>mapping</em></code>
 satisfies <code><em>predicate</em></code> (in the sense
-of <code>mapping-find</code>), or <code>#f</code> otherwise.
+of <code>mapping-find</code>), or <code>#f</code> otherwise.  There are no guarantees how many times and with which keys and values
+  <code><em>predicate</em></code> is invoked.
 </p>
 
 <p><code>(mapping-every? <em>predicate</em> <em>mapping</em>)</code></p>
@@ -767,7 +770,8 @@ of <code>mapping-find</code>), or <code>#f</code> otherwise.
 Returns <code>#t</code> if every association of the
 mapping <code><em>mapping</em></code>
 satisfies <code><em>predicate</em></code> (in the sense
-of <code>mapping-find</code>), or <code>#f</code> otherwise.
+of <code>mapping-find</code>), or <code>#f</code> otherwise.  There are no guarantees how many times and with which keys and values
+<code><em>predicate</em></code> is invoked.
 </p>
 
 <p><code>(mapping-keys <em>mapping</em>)</code></p>
