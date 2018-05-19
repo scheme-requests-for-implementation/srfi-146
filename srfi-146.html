@@ -1305,12 +1305,19 @@ on <code>(make-default-comparator)</code>.
 <h1>Implementation</h1>
 
 <p>
-The sample implementation uses a purely functional data structure and
-is based on red-black trees.  The sample
+The sample implementation for <code>(srfi 146)</code> uses a purely
+functional data structure and is based on red-black trees.  This sample
 R7RS implementation is based on SRFI 1, SRFI 2, SRFI 8, SRFI 121, SRFI
 128, and SRFI 145 for which the sample implementations are included in
 the repository.  (Except for SRFI 128, to which the interface proposed
 in this SRFI is intimately tied, the dependencies are trivial.)
+</p>
+
+<p>
+  The sample implementation for <code>(srfi 146 hash)</code> is a thin
+  layer on top of Arthur Gleckler's Hash Array Mapped Trie
+  implementation.  This implementation and its tests depend on the
+  SRFIs 1, 16, 27, 113, 125, 128, 132, 143, 151.
 </p>
 
 <a href="https://srfi.schemers.org/srfi-146/srfi-146.tgz">Source for the reference implementation.</a>
