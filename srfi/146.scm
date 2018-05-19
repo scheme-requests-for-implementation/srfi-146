@@ -143,7 +143,7 @@
     (if (null? args)
 	mapping
 	(receive (mapping)
-	    (mapping-update mapping (car args) (lambda (value) (cadr args)) (lambda () #f))	
+	    (mapping-update mapping (car args) (lambda (value) (cadr args)) (lambda () #f))
 	  (loop (cddr args)
 		mapping)))))
 
@@ -200,7 +200,7 @@
 
 (define mapping-intern! mapping-intern)
 
-(define mapping-update 
+(define mapping-update
   (case-lambda
    ((mapping key updater)
     (mapping-update mapping key updater (lambda ()
@@ -472,7 +472,7 @@
   (let ((less? (comparator-ordering-predicate (mapping-key-comparator mapping1)))
 	(equality-predicate (comparator-equality-predicate comparator))
 	(gen1 (tree-generator (mapping-tree mapping1)))
-	(gen2 (tree-generator (mapping-tree mapping2))))    
+	(gen2 (tree-generator (mapping-tree mapping2))))
     (let loop ((item1 (gen1))
 	       (item2 (gen2)))
       (cond
@@ -703,6 +703,24 @@
 			   #f mapping)
      (error "mapping-max-value: empty map"))))
 
+(define (mapping-min-entry mapping)
+  (assume (mapping? mapping))
+  (call/cc
+   (lambda (return)
+     (mapping-fold (lambda (key value acc)
+		     (return key value))
+		   #f mapping)
+     (error "mapping-min-key: empty map"))))
+
+(define (mapping-max-entry mapping)
+  (assume (mapping? mapping))
+  (call/cc
+   (lambda (return)
+     (mapping-fold/reverse (lambda (key value acc)
+			     (return key value))
+			   #f mapping)
+     (error "mapping-max-key: empty map"))))
+
 (define (mapping-key-predecessor mapping obj failure)
   (assume (mapping? mapping))
   (assume (procedure? failure))
@@ -765,6 +783,8 @@
 	      (%make-mapping comparator tree=)
 	      (%make-mapping comparator tree>=)
 	      (%make-mapping comparator tree>)))))
+
+(define mapping-split! mapping-split)
 
 (define (mapping-catenate comparator mapping1 pivot-key pivot-value mapping2)
   (assume (comparator? comparator))
