@@ -30,4 +30,4 @@ SCHEME = chibi-scheme $(SCHEME_FLAGS)
 
 check:
 	rm -rf *.log
-	CHIBI_MODULE_PATH="" $(SCHEME) -A . -I srfi/hamt tests.scm
+	CHIBI_MODULE_PATH="" $(SCHEME) -I . -I srfi/hamt tests.scm
