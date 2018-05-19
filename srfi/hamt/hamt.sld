@@ -1,5 +1,6 @@
 (define-library (hamt)
   (import (scheme base)
+	  (scheme case-lambda)
 	  (only (srfi 1) find-tail)
 	  (srfi 16)
 	  (only (srfi 143) fx-width)

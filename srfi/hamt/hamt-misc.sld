@@ -1,5 +1,6 @@
 (define-library (hamt-misc)
   (import (scheme base)
+	  (scheme case-lambda)
 	  (only (srfi 113) set)
 	  (only (srfi 125) make-hash-table string-hash)
 	  (only (srfi 128) make-comparator))

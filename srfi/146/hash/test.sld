@@ -159,11 +159,12 @@
 	  'empty
 	  (hashmap-pop hashmap0 (lambda () 'empty)))
 
-	(test-equal "hashmap-pop: non-empty hashmap"
-	  (list 2 'a 1)
-	  (receive (hashmap key value)
-	      (hashmap-pop hashmap1)
-	    (list (hashmap-size hashmap) key value))))
+	(test-assert "hashmap-pop: non-empty hashmap"
+	  (member
+	   (receive (hashmap key value)
+	       (hashmap-pop hashmap1)
+	       (list (hashmap-size hashmap) key value))
+	   '((2 a 1) (2 b 2) (2 c 3)))))
 
       (test-group "The whole hashmap"
 	(define hashmap0 (hashmap comparator))

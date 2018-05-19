@@ -234,7 +234,7 @@ example, <code>mapping-copy</code> could be a no-op.</p>
   those bound to locations which make no sense when an ordering
   predicate is absent (e.g. <code>mapping-split</code>).
   Should <code>(srfi 146)</code> once become known as <code>(scheme
-  mapping)</code>, it is recommanded that the library
+  mapping)</code>, it is recommended that the library
   <code>(srfi 146 hash)</code> receives the alternative
   name <code>(scheme hashmap)</code>.
 </p>
@@ -435,7 +435,7 @@ The following three procedures, given a key, return the corresponding value.
   in the mapping <code><em>mapping</em></code>, invokes the
   procedure <code><em>success</em></code> in tail context on it, and returns its result;
   if <code><em>success</em></code> is not provided, then the value
-  itself is return.  If <code><em>key</em></code> is not contained
+  itself is returned.  If <code><em>key</em></code> is not contained
   in <code><em>mapping</em></code> and <code><em>failure</em></code> is
   supplied, then <code><em>failure</em></code> is invoked in tail context on no
   arguments and its values are returned.  Otherwise, it is an error.
@@ -465,9 +465,10 @@ Semantically equivalent to, but may be more efficient than, the following code:
   right. The <code><em>arg</em></code>s alternate between keys and
   values.  Whenever there is a previous association for a key, the
   previous association prevails and the new association is skipped.
-  It is an error to add an element to <code><em>mapping</em></code>
-  that does not return <code>#t</code> when passed to the type test
-  procedure of the comparator.
+  It is an error to add an association
+  to <code><em>mapping</em></code> whose key that does not
+  return <code>#t</code> when passed to the type test procedure of the
+  comparator.
 </p>
 
 <p><code>(mapping-adjoin! <em>mapping</em> <em>arg</em> ...)</code></p>
@@ -480,15 +481,17 @@ Semantically equivalent to, but may be more efficient than, the following code:
 
 <p><code>(mapping-set <em>mapping</em> <em>arg</em> ...)</code></p>
 
-<p>The <code>mapping-set</code> procedure returns a newly allocated mapping
-  that uses the same comparator as the mapping <code><em>mapping</em></code> and
-  contains all the associations of <code><em>mapping</em></code>, and in
-  addition new associations by processing the arguments from left to
+<p>The <code>mapping-set</code> procedure returns a newly allocated
+  mapping that uses the same comparator as the
+  mapping <code><em>mapping</em></code> and contains all the
+  associations of <code><em>mapping</em></code>, and in addition new
+  associations by processing the arguments from left to
   right. The <code><em>arg</em></code>s alternate between keys and
   values.  Whenever there is a previous association for a key, it is
-  deleted.  It is an error to add an element
-  to <code><em>mapping</em></code> that does not return <code>#t</code>
-  when passed to the type test procedure of the comparator.
+  deleted.  It is an error to add an association
+  to <code><em>mapping</em></code> whose key that does not
+  return <code>#t</code> when passed to the type test procedure of the
+  comparator.
 </p>
 
 <p><code>(mapping-set! <em>mapping</em> <em>arg</em> ...)</code></p>
@@ -506,7 +509,7 @@ Semantically equivalent to, but may be more efficient than, the following code:
   that uses the same comparator as the mapping <em>mapping</em> and contains all the
   associations of <em>mapping</em> except as follows: If <code><em>key</em></code> is equal
   (in the sense of <code><em>mapping</em></code>'s comparator) to an existing key
-  of <code><em>set</em></code>, then the association for that key is omitted and replaced
+  of <code><em>mapping</em></code>, then the association for that key is omitted and replaced
   the association defined by the pair <code><em>key</em></code> and <code><em>value</em></code>.
   If there is no such key in <code><em>mapping</em></code>,
   then <code><em>mapping</em></code> is returned unchanged.
@@ -631,7 +634,7 @@ Semantically equivalent to, but may be more efficient than, the following code
 </p>
 
 <p>The <code>hashmap-pop</code> procedure exported by <code>(srfi
-    146 hash)</code> returns an arbitrary association.
+    146 hash)</code> is similar but chooses an arbitrary association.
 </p>
 
 <p><code>(mapping-pop! <em>mapping</em> <em>failure</em>)</code></p>
@@ -739,7 +742,7 @@ Returns the number of associations in <em>mapping</em> as an exact integer.
   value when invoked with key and value as arguments, or the result of
   tail-calling <code><em>failure</em></code> with no arguments if there is
   none.  There are no guarantees how many times and with which keys and values
-  <code><em>predicate</em></code> is invoked, but see below:
+  <code><em>predicate</em></code> is invoked.
 </p>
 
 <p>The <code>hashmap-find</code> procedure exported by <code>(srfi 146
@@ -749,16 +752,19 @@ Returns the number of associations in <em>mapping</em> as an exact integer.
 <p><code>(mapping-count <em>predicate</em> <em>mapping</em>)</code></p>
 
 <p>
-Returns the number of associations of the mapping <em>mapping</em> that
-satisfy <code><em>predicate</em></code> (in the sense
-of <code>mapping-find</code>) as an exact integer.
+Returns the number of associations of the mapping <em>mapping</em>
+that satisfy <code><em>predicate</em></code> (in the sense
+of <code>mapping-find</code>) as an exact integer.  There are no
+guarantees how many times and with which keys and values
+<code><em>predicate</em></code> is invoked.</p>
 
-</p><p><code>(mapping-any? <em>predicate</em> <em>mapping</em>)</code></p>
+<p><code>(mapping-any? <em>predicate</em> <em>mapping</em>)</code></p>
 
 <p>
 Returns <code>#t</code> if any association of the mapping <code><em>mapping</em></code>
 satisfies <code><em>predicate</em></code> (in the sense
-of <code>mapping-find</code>), or <code>#f</code> otherwise.
+of <code>mapping-find</code>), or <code>#f</code> otherwise.  There are no guarantees how many times and with which keys and values
+  <code><em>predicate</em></code> is invoked.
 </p>
 
 <p><code>(mapping-every? <em>predicate</em> <em>mapping</em>)</code></p>
@@ -767,7 +773,8 @@ of <code>mapping-find</code>), or <code>#f</code> otherwise.
 Returns <code>#t</code> if every association of the
 mapping <code><em>mapping</em></code>
 satisfies <code><em>predicate</em></code> (in the sense
-of <code>mapping-find</code>), or <code>#f</code> otherwise.
+of <code>mapping-find</code>), or <code>#f</code> otherwise.  There are no guarantees how many times and with which keys and values
+<code><em>predicate</em></code> is invoked.
 </p>
 
 <p><code>(mapping-keys <em>mapping</em>)</code></p>
@@ -810,9 +817,9 @@ order of the keys.
 
 <p><code>(mapping-map <em>proc</em> <em>comparator</em> <em>mapping</em>)</code></p>
 
-<p>Applies <code><em>proc</em></code> on two arguments, the key and value of each association of
-  <code><em>mapping</em></code> in increasing order of the keys, which returns two
-  values, and returns a newly allocated mapping that uses the
+<p>Applies <code><em>proc</em></code>, which returns two
+  values, on two arguments, the key and value of each association of
+  <code><em>mapping</em></code> in increasing order of the keys and returns a newly allocated mapping that uses the
   comparator <code><em>comparator</em></code>, and which contains
   the results of the applications inserted as keys and values. Note
   that this is more akin to <code>set-mapping</code> from SRFI 113 than
@@ -829,9 +836,9 @@ order of the keys.
 
 <p>Note that, when <code><em>proc</em></code> defines a mapping that
 is not 1:1 between the keys, some of the mapped objects may be
-equivalent in the sense of the <code><em>mapping</em></code>'s
-comparator's equality predicate, and in this case duplicate elements
-are omitted as in the mapping constructor.  It is unpredictable which one
+equivalent in the sense of the <code><em>comparator</em></code>'s
+equality predicate, and in this case duplicate associations are
+omitted as in the mapping constructor.  It is unpredictable which one
 will be preserved in the result.
 </p>
 
@@ -854,12 +861,12 @@ the value of the association.  Returns an unspecified value.
 <p><code>(mapping-fold <em>proc</em> <em>nil</em> <em>mapping</em>)</code></p>
 
 <p>Invokes <code><em>proc</em></code> for each association of the
-mapping <code><em>mapping</em></code> in increasing order of the keys with
-three arguments: the key of the association, the value of the
-association, and an accumulated result of the previous
-invocation.  For the first invocation, <code><em>nil</em></code> is
-used as the second argument.  Returns the result of the last
-invocation, or <code><em>nil</em></code> if there was no invocation.
+mapping <code><em>mapping</em></code> in increasing order of the keys
+with three arguments: the key of the association, the value of the
+association, and an accumulated result of the previous invocation.
+For the first invocation, <code><em>nil</em></code> is used as the
+third argument.  Returns the result of the last invocation,
+or <code><em>nil</em></code> if there was no invocation.
 </p>
 
 <p>If <code>hashmap-fold</code> is imported from <code>(srfi
@@ -899,7 +906,7 @@ associations of <code><em>mapping</em></code> that satisfy <code><em>predicate</
 <p><code>(mapping-remove <em>predicate</em> <em>mapping</em>)</code></p>
 
 <p>Returns a newly allocated mapping with the same comparator as the
-  mapping <code><em>mapping</em></code>, containing just the elements
+  mapping <code><em>mapping</em></code>, containing just the associations
   of <code><em>mapping</em></code> that do not satisfy <em>predicate</em> (in the
   sense of <code>mapping-find</code>).
 </p>
@@ -935,7 +942,7 @@ satisfy <code><em>predicate</em></code>.</p>
 <p><code>(mapping-copy <em>mapping</em>)</code></p>
 
 <p>
-Returns a newly allocated mapping containing the elements of the
+Returns a newly allocated mapping containing the associations of the
 mapping <code><em>mapping</em></code>, and using the same comparator.
 </p>
 
@@ -981,10 +988,10 @@ and therefore do not constitute a total order on mappings.
 <p>
   All predicates in this subsection take a <code><em>comparator</em></code> argument, which
   is a comparator used to compare the values of the associations
-  stored in the mappings.  Entries in the mappings are equal if their
+  stored in the mappings.  Associations in the mappings are equal if their
   keys are equal with mappings' key comparator and their values are
-  equal with the given comparator.  Two associations are equal if and
-  only if their entries are equal, respectively.
+  equal with the given comparator.  Two mappings are equal if and
+  only if their associations are equal, respectively.
 </p>
 
 <p><code>(mapping=? <em>comparator</em> <em>mapping<sub>1</sub></em> <em>mapping<sub>2</sub></em> ...)</code></p>
@@ -1033,14 +1040,16 @@ of the following <em>mapping</em>, and <code>#f</code> otherwise.</p>
 <p><code>(mapping-xor <em>mapping<sub>1</sub> mapping<sub>2</sub></em>)</code></p>
 
 <p>
-Return a newly allocated mapping whose set of associations is the union,
-intersection, asymmetric difference, or symmetric difference of the
-sets of associations of the mappings <code><em>mapping</em></code>s.
-Asymmetric difference is extended to more than two mappings by taking the
-difference between the first mapping and the union of the others.
-Symmetric difference is not extended beyond two mappings.  In case of
-duplicate keys (in the sense of the equality predicate), associations
-in the result mapping are drawn from the first mapping in which they appear.
+Return a newly allocated mapping whose set of associations is the
+union, intersection, asymmetric difference, or symmetric difference of
+the sets of associations of the
+mappings <code><em>mapping</em></code>s.  Asymmetric difference is
+extended to more than two mappings by taking the difference between
+the first mapping and the union of the others.  Symmetric difference
+is not extended beyond two mappings.  When comparing associations,
+only the keys are compared.  In case of duplicate keys (in the sense of
+the <code><em>mapping</em></code>s comparators), associations in the
+result mapping are drawn from the first mapping in which they appear.
 </p>
 
 <p><code>(mapping-union! <em>mapping<sub>1</sub> mapping<sub>2</sub></em> ...)</code></p>
@@ -1051,14 +1060,10 @@ in the result mapping are drawn from the first mapping in which they appear.
 
 <p><code>(mapping-xor! <em>mapping<sub>1</sub> mapping<sub>2</sub></em>)</code></p>
 
-<p>Linear update procedures returning a mapping that is the union,
-intersection, asymmetric difference, or symmetric difference of
-the <code><em>mapping</em></code>s.  Asymmetric difference is extended to more than two
-mappings by taking the difference between the first mapping and the union of
-the others.  Symmetric difference is not extended beyond two mappings.
-In case of duplicate keys (in the sense of the equality predicate), associations
-in the result mapping are drawn from the first mapping in which they appear.
-</p>
+<p>
+  These procedures are the linear update analogs of the corresponding
+  pure functional procedures above.
+/p>
 
 <h2 id="Additionalproceduresformappingswithorderedkeys">Additional
 procedures for mappings with ordered keys</h2>
@@ -1105,6 +1110,14 @@ procedures for mappings with ordered keys</h2>
 contained in <code><em>mapping</em></code> because the values have no specified
 order.</i></p>
 
+<p><code>(mapping-min-entry <em>mapping</em>)</code></p>
+<p><code>(mapping-max-entry <em>mapping</em>)</code></p>
+
+<p>Returns the entry associated with the least/greatest key contained
+  in the mapping <code><em>mapping</em></code> as two values, the key
+  and its associated value.  It is an error
+  for <code><em>mapping</em></code> to be empty.</p>
+
 <p><code>(mapping-key-predecessor <em>mapping</em> <em>obj</em> <em>failure</em>)</code></p>
 <p><code>(mapping-key-successor <em>mapping</em> <em>obj</em> <em>failure</em>)</code></p>
 <p>Returns the key contained in the mapping <code><em>mapping</em></code> that
@@ -1127,7 +1140,7 @@ than, greater than, less than or equal to, or greater than or equal
 </p>
 
 <p><i>Note: Note that since keys in mappings are
-unique, <code>mapping-range=</code> returns a map with at most one
+unique, <code>mapping-range=</code> returns a mapping with at most one
 association.</i></p>
 
 <p><code>(mapping-range=! <em>mapping</em> <em>obj</em>)</code></p>
@@ -1153,6 +1166,14 @@ equal to <code><em>obj</em></code>.
   and
   <code>(mapping-range&gt; <em>mapping</em> <em>obj</em>)</code>, but
   may be more efficient.
+</p>
+
+<p><code>(mapping-split! <em>mapping</em> <em>obj</em>)</code></p>
+
+<p>The <code>mapping-split!</code> procedure is the same
+as <code>mapping-split</code>, except that it is permitted to mutate
+and return the <code><em>mapping</em></code> rather than allocating a
+new mapping.
 </p>
 
 <p><code>(mapping-catenate <em>comparator</em> <em>mapping</em><sub>1</sub> <em>key</em> <em>value</em>
@@ -1284,12 +1305,19 @@ on <code>(make-default-comparator)</code>.
 <h1>Implementation</h1>
 
 <p>
-The sample implementation uses a purely functional data structure and
-is based on red-black trees.  The sample
+The sample implementation for <code>(srfi 146)</code> uses a purely
+functional data structure and is based on red-black trees.  This sample
 R7RS implementation is based on SRFI 1, SRFI 2, SRFI 8, SRFI 121, SRFI
 128, and SRFI 145 for which the sample implementations are included in
 the repository.  (Except for SRFI 128, to which the interface proposed
 in this SRFI is intimately tied, the dependencies are trivial.)
+</p>
+
+<p>
+  The sample implementation for <code>(srfi 146 hash)</code> is a thin
+  layer on top of Arthur Gleckler's Hash Array Mapped Trie
+  implementation.  This implementation and its tests depend on the
+  SRFIs 1, 16, 27, 113, 125, 128, 132, 143, 151.
 </p>
 
 <a href="https://srfi.schemers.org/srfi-146/srfi-146.tgz">Source for the reference implementation.</a>
