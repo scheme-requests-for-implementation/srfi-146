@@ -60,7 +60,7 @@ There are currently no known issues.
 Like sets and bags, mappings represent a fundamental data type.
 Currently, a Scheme programmer has quite a few means to implement this
 data type: The base library has some support for association lists,
-which are light-weight data structures that can function as mappings.
+which are lightweight data structures that can function as mappings.
 More efficient data structures are supported by SRFI 125, namely hash
 tables.  Finally, the set data structure of SRFI 113 using suitable
 comparators can be used to model mappings.  However, all three means have
@@ -155,7 +155,7 @@ explicitly deal with sets of associations.
 
 <h2>Linear update</h2>
 
-<p>The procedures of this SRFI like those of SRFI 113, by default, are
+<p>The procedures of this SRFI, like those of SRFI 113, by default, are
 "pure functional" &mdash; they do not alter their parameters.
 However, this SRFI also defines "linear-update" procedures, all of
 whose names end in <code>!</code>.  They have hybrid
@@ -665,7 +665,7 @@ them.
 </p>
 
 <p>The <code>hashmap-search</code> procedure exported by <code>(srfi
-    146 hash)</code> searches in an arbitrary order,
+    146 hash)</code> searches in an arbitrary order.
 </p>
 
 <p>
@@ -1065,7 +1065,7 @@ result mapping are drawn from the first mapping in which they appear.
 <p>
   These procedures are the linear update analogs of the corresponding
   pure functional procedures above.
-/p>
+</p>
 
 <h2 id="Additionalproceduresformappingswithorderedkeys">Additional
 procedures for mappings with ordered keys</h2>
@@ -1261,7 +1261,7 @@ respect to the natural ordering of the keys.
   necessary because the R7RS library system fails to say anything
   about interdependent libraries (although it is usually assumed that
   interdependent libraries are possible); one can, however, also make
-  independently sense out of it: By
+  independent sense out of it: By
   exporting <code>comparator?</code>, this specification declares or
   announces the actual type of comparators, on which its procedures depend.
 </p>
