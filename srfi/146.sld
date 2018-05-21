@@ -1,4 +1,4 @@
-;; Copyright (C) Marc Nieper-Wißkirchen (2016).  All Rights Reserved. 
+;; Copyright (C) Marc Nieper-Wißkirchen (2016).  All Rights Reserved.
 
 ;; Permission is hereby granted, free of charge, to any person
 ;; obtaining a copy of this software and associated documentation
@@ -60,7 +60,7 @@
 	  (scheme case-lambda)
 	  (srfi 1)
 	  (srfi 8)
-      	  (srfi 128)
+	  (srfi 128)
 	  (srfi 145)
 	  (nieper rbtree))
   (include "146.scm"))
