@@ -1,12 +1,12 @@
-(define-library (hamt)
+(define-library (gleckler hamt)
   (import (scheme base)
 	  (scheme case-lambda)
 	  (only (srfi 1) find-tail)
 	  (srfi 16)
 	  (only (srfi 143) fx-width)
 	  (srfi 151)
-	  (hamt-misc)
-	  (vector-edit))
+	  (gleckler hamt-misc)
+	  (gleckler vector-edit))
   (export fragment->mask
 	  hamt->list
 	  hamt-fetch

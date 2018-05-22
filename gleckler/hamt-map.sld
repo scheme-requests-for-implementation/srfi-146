@@ -1,9 +1,9 @@
-(define-library (hamt-map)
+(define-library (gleckler hamt-map)
   (import (scheme base)
 	  (only (srfi 1) fold)
 	  (srfi 16)
-	  (hamt)
-	  (hamt-misc))
+	  (gleckler hamt)
+	  (gleckler hamt-misc))
   (export make-phm phm?
 	  phm->alist
 	  phm/add-alist phm/add-alist!

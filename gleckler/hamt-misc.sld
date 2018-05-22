@@ -1,4 +1,4 @@
-(define-library (hamt-misc)
+(define-library (gleckler hamt-misc)
   (import (scheme base)
 	  (scheme case-lambda)
 	  (only (srfi 113) set)
