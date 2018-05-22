@@ -52,5 +52,5 @@
 	  (srfi 121)
 	  (srfi 128)
 	  (srfi 145)
-	  (hamt-map))
+	  (gleckler hamt-map))
   (include "hash.scm"))
