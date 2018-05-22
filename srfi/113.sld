@@ -61,5 +61,5 @@
 	  (srfi 121)
 	  (srfi 128)
 	  (srfi 145)
-	  (srfi 146))
+	  (srfi 146 hash))
   (include "113.scm"))

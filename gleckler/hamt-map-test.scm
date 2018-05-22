@@ -22,6 +22,10 @@
 ;; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ;; DEALINGS IN THE SOFTWARE.
 
+(define (make-string-set)
+  (set (make-comparator string? string=? string<? string-hash)))
+
+
 (define (run-hamt-map-tests)
 
   (define (assert-phm= phm alist)
