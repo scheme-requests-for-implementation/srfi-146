@@ -23,8 +23,18 @@
 
 (import (rename (srfi 146 test) (run-tests run-srfi-146-tests))
 	(rename (srfi 146 hash test) (run-tests run-srfi-146-hash-tests))
-	(rename (srfi 113 test) (run-tests run-srfi-113-tests)))
+	(rename (srfi 113 test) (run-tests run-srfi-113-tests))
+	(gleckler hamt-test)
+	(gleckler hamt-misc-test)
+	(gleckler hamt-map-test)
+	(gleckler vector-edit-test))
 
 (run-srfi-146-tests)
 (run-srfi-146-hash-tests)
 (run-srfi-113-tests)
+
+(run-hamt-core-tests)
+(run-hamt-misc-tests)
+(run-hamt-map-tests)
+
+(run-vector-edit-tests)
