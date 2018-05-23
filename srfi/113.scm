@@ -267,7 +267,7 @@
   (assume (set? set))
   (assume (procedure? failure))
   ((call/cc
-    (lambda (return-thunk) 
+    (lambda (return-thunk)
       (receive (element count)
 	  (hashmap-find (lambda (element count)
 			  (predicate element))
@@ -280,7 +280,7 @@
   (assume (bag? bag))
   (assume (procedure? failure))
   ((call/cc
-    (lambda (return-thunk) 
+    (lambda (return-thunk)
       (receive (element count)
 	  (hashmap-find (lambda (element count)
 			  (predicate element))
@@ -637,7 +637,7 @@
 
 (define (set-xor set1 set2)
   (assume (set? set1))
-  (assume (set? set2))  
+  (assume (set? set2))
   (make-set (hashmap-xor (set-hashmap set1) (set-hashmap set2))))
 
 (define set-union! set-union)
