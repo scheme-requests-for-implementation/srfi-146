@@ -809,11 +809,24 @@
 (define (bag-ordering bag1 bag2)
   (hashmap-ordering (bag-hashmap bag1) (bag-hashmap bag2)))
 
+(define (hashmap-hash m)
+  (let ((hash (comparator-hash-function (hashmap-key-comparator m))))
+    (hashmap-fold (lambda (element count accumulator)
+		    (+ (hash element) accumulator))
+		  0
+		  m)))
+
 (define set-comparator
-  (make-comparator set? set=? set-ordering #f))
+  (make-comparator set?
+		   set=?
+		   set-ordering
+		   (lambda (s) (hashmap-hash (set-hashmap s)))))
 
 (define bag-comparator
-  (make-comparator bag? bag=? bag-ordering #f))
+  (make-comparator bag?
+		   bag=?
+		   bag-ordering
+		   (lambda (b) (hashmap-hash (bag-hashmap b)))))
 
 (comparator-register-default! set-comparator)
 (comparator-register-default! bag-comparator)
