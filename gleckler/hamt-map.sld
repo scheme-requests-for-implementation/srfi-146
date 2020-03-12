@@ -1,5 +1,6 @@
 (define-library (gleckler hamt-map)
   (import (scheme base)
+	  (scheme case-lambda)
 	  (only (srfi 1) fold)
 	  (srfi 16)
 	  (gleckler hamt)
