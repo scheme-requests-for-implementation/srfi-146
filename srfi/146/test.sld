@@ -349,7 +349,7 @@
 	  (define mapping6 (mapping (make-comparator (comparator-type-test-predicate comparator)
 						     (comparator-equality-predicate comparator)
 						     (comparator-ordering-predicate comparator)
-						     (comparator-hash-function comparator))
+						     (lambda (obj) 42))
 				    'a 1 'b 2 'c 3))
 
 
