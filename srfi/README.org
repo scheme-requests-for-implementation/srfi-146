@@ -5,9 +5,9 @@ The sample implementation of this SRFI depends on these SRFIs:
   - 8 ([[https://srfi.schemers.org/srfi-8][home]], [[https://srfi.schemers.org/srfi-8/srfi-8.html][document]], [[https://github.com/scheme-requests-for-implementation/srfi-8][Github]])
   - 64 ([[https://srfi.schemers.org/srfi-64][home]], [[https://srfi.schemers.org/srfi-64/srfi-64.html][document]], [[https://github.com/scheme-requests-for-implementation/srfi-64][Github]])
   - 113 ([[https://srfi.schemers.org/srfi-113][home]], [[https://srfi.schemers.org/srfi-113/srfi-113.html][document]], [[https://github.com/scheme-requests-for-implementation/srfi-113][Github]])
-  - 121 ([[https://srfi.schemers.org/srfi-121][home]], [[https://srfi.schemers.org/srfi-121/srfi-121.html][document]], [[https://github.com/scheme-requests-for-implementation/srfi-121][Github]])
   - 128 ([[https://srfi.schemers.org/srfi-128][home]], [[https://srfi.schemers.org/srfi-128/srfi-128.html][document]], [[https://github.com/scheme-requests-for-implementation/srfi-128][Github]])
   - 145 ([[https://srfi.schemers.org/srfi-145][home]], [[https://srfi.schemers.org/srfi-145/srfi-145.html][document]], [[https://github.com/scheme-requests-for-implementation/srfi-145][Github]])
+  - 158 ([[https://srfi.schemers.org/srfi-158][home]], [[https://srfi.schemers.org/srfi-158/srfi-158.html][document]], [[https://github.com/scheme-requests-for-implementation/srfi-158][Github]])
 
 You can find the sample implementations of those SRFIs in their Github
 repos (linked above) or in the archive file [[https://srfi.schemers.org/srfi.tgz][srfi.tgz]], which contains
