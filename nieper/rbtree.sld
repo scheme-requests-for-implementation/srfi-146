@@ -28,6 +28,6 @@
 	  (scheme case-lambda)
 	  (srfi 2)
 	  (srfi 8)
-	  (srfi 121)
+	  (srfi 158)
 	  (srfi 128))
   (include "rbtree.scm"))
