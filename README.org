@@ -10,6 +10,8 @@ This repository hosts [[https://srfi.schemers.org/srfi-146/][SRFI 146]]: Mapping
 
 This SRFI is in /final/ status.
 
+See also [[https://srfi.schemers.org/srfi-224/][SRFI 224: Integer Mappings]].
+
 The full documentation for this SRFI can be found in the [[https://srfi.schemers.org/srfi-146/srfi-146.html][SRFI Document]].
 
 If you'd like to participate in the discussion of this SRFI, or report issues with it, please [[https://srfi.schemers.org/srfi-146/][join the SRFI-146 mailing list]] and send your message there.
