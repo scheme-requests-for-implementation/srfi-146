@@ -40,7 +40,10 @@ Arthur A. Gleckler, Marc Nieper-Wi&szlig;kirchen
   <li>Revised to fix errata:<ul>
     <li>2018-07-03 (Fixed wording error, a simple miscount.)</li>
     <li>2018-07-03 (Fixed previous fix.)</li></ul></li>
-</ul>
+  <li id="pfn1"><b>Post-finalization note added on 2021-06-08</b>: At
+    the request of Marc Nieper-Wißkirchen, <a href="#pfn1-change">the
+    description of <code>mapping-comparator</code> below</a> has been
+    updated.</li></ul>
 
 <h1>Abstract</h1>
 
@@ -1294,9 +1297,13 @@ respect to the natural ordering of the keys.
   values are mappings.
 </p>
 
-<p>
-The following comparator is used to compare mappings when <code>(make-default-comparator)</code>
-from SRFI 128 is invoked:
+<p id="pfn1-change">
+  <del>The following comparator is used to compare mappings when
+  <code>(make-default-comparator)</code> from SRFI 128 is
+  invoked</del>The user may register the following comparator to
+  compare mappings when <code>(make-default-comparator)</code> from
+  SRFI 128 is invoked.  (See <a href="#pfn1">post-finalization note</a>
+  above.)
 </p>
 
 <p><code>mapping-comparator</code></p>
