@@ -175,9 +175,10 @@ guaranteed to work:</p>
 
 <pre>
   (let* ((mapping1
-         (mapping (make-default-comparator) 'a 1 'b 2 'c 3)) ; mapping1 = {a&map;1,b&map;2,c&map;3}.
-    (mapping2 (mapping-set! mapping1 'd 4))) ; mapping2 = {a&map;1,b&map;2,c&map;3,d&map;4}
-  mapping1) ; mapping1 = {a&map;1,b&map;2,c&map;3} or mapping1 = {a&map;1,b&map;2,c&map;3;d&map;4} ???
+          (mapping (make-default-comparator) 'a 1 'b 2 'c 3)) ; mapping1 = {a&map;1,b&map;2,c&map;3}.
+         (mapping2
+          (mapping-set! mapping1 'd 4))) ; mapping2 = {a&map;1,b&map;2,c&map;3,d&map;4}
+    mapping1) ; mapping1 = {a&map;1,b&map;2,c&map;3} or mapping1 = {a&map;1,b&map;2,c&map;3;d&map;4} ???
 </pre>
 
 <p>However, this is well-defined:</p>
