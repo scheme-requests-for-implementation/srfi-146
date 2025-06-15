@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2020 Arthur A. Gleckler
+# SPDX-License-Identifier: MIT
 The sample implementation of this SRFI depends on these SRFIs:
 
   - 1 ([[https://srfi.schemers.org/srfi-1][home]], [[https://srfi.schemers.org/srfi-1/srfi-1.html][document]], [[https://github.com/scheme-requests-for-implementation/srfi-1][Github]])

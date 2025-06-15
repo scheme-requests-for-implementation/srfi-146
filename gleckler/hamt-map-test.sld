@@ -1,3 +1,6 @@
+;;; SPDX-FileCopyrightText: 2021 Arthur A. Gleckler
+;;; SPDX-License-Identifier: MIT
+
 (define-library (gleckler hamt-map-test)
   (import (scheme base)
 	  (chibi test)
