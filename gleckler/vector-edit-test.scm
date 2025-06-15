@@ -1,6 +1,7 @@
 ;;;; `vector-edit' tests
 
-;;; Copyright MMIV-MMXV Arthur A. Gleckler.  All rights reserved.
+;;; SPDX-FileCopyrightText: 2004 Arthur A. Gleckler
+;;; SPDX-License-Identifier: MIT
 
 ;; Permission is hereby granted, free of charge, to any person
 ;; obtaining a copy of this software and associated documentation
