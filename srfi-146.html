@@ -39,7 +39,8 @@ Arthur A. Gleckler, Marc Nieper-Wi&szlig;kirchen
   <li>Finalized: 2018-05-24</li>
   <li>Revised to fix errata:<ul>
     <li>2018-07-03 (Fixed wording error, a simple miscount.)</li>
-    <li>2018-07-03 (Fixed previous fix.)</li></ul></li>
+    <li>2018-07-03 (<a href="#errata-2">Fixed previous fix</a>.)</li>
+    <li>2025-06-15 (Fixed <a href="#errata-3">example of <code>mapping-map</code></a>.)</li></ul></li>
   <li id="pfn1"><b>Post-finalization note added on 2021-06-08</b>: At
     the request of Marc Nieper-Wißkirchen, <a href="#pfn1-change">the
     description of <code>mapping-comparator</code> below</a> has been
@@ -831,8 +832,8 @@ order of the keys.
   to <code>hash-table-mapping</code> from SRFI 125. For example:
 </p>
 
-<pre>
-  (mapping-map (proc (key value)
+<pre id="errata-3">
+  (mapping-map (lambda (key value)
              (values (symbol-&gt;string key) value))
            (make-default-comparator)
            (mapping (make-default-comparator) 'foo 1 'bar 2 'baz 3))
@@ -995,7 +996,7 @@ earlier in the list take precedence over those that come later.
   only if their associations are equal, respectively.
 </p>
 
-<p>
+<p id="errata-2">
   Note: None of these five predicates produces a total order on
   mappings.  In particular, <code>mapping=?</code>,
   <code>mapping&lt;?</code>, and <code>mapping&gt;?</code> do not obey
