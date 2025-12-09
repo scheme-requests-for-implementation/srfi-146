@@ -456,7 +456,7 @@ and corresponding datum."
 		     (make-collision (list (make-entry k d)
 					   (make-entry key datum))
 				     h)
-		     (make-narrow-with-two-keys
+		     (make-wide-with-two-keys
 		      payload?
 		      (+ shift hamt-hash-slice-size)
 		      h
@@ -510,6 +510,35 @@ and corresponding datum."
 	   (two-leaves f1 k1 d1 f2 k2 d2))
 	  (else
 	   (two-leaves f2 k2 d2 f1 k1 d1)))))
+
+(define (make-wide-with-two-keys payload? shift h1 k1 d1 h2 k2 d2)
+  (assert (not (= h1 h2)))
+  (let* ((stride (leaf-stride payload?))
+	 (f1 (hash-fragment shift h1))
+	 (f2 (hash-fragment shift h2))
+	 (array (make-vector (* stride hamt-bucket-size))))
+    (cond ((= f1 f2)
+	   (vector-set! array
+			(* stride f1)
+			(make-wide-with-two-keys payload?
+						 (+ shift hamt-hash-slice-size)
+						 h1
+						 k1
+						 d1
+						 h2
+						 k2
+						 d2))
+	   (make-wide array (copy-bit f1 0 #true) 0))
+	  (else (let* ((i1 (* stride f1))
+		       (i2 (* stride f2)))
+		  (vector-set! array i1 k1)
+		  (vector-set! array i2 k2)
+		  (when payload?
+		    (vector-set! array (+ i1 1) d1)
+		    (vector-set! array (+ i2 1) d2))
+		  (make-wide array
+			     0
+			     (copy-bit f2 (copy-bit f1 0 #true) #true)))))))
 
 (define (modify-pure hamt n shift dp h k)
   (cond ((collision? n) (modify-collision hamt n shift dp h k))
