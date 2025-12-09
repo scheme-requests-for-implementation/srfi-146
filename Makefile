@@ -1,5 +1,5 @@
-;;; SPDX-FileCopyrightText: 2021 Marc Nieper-Wißkirchen
-;;; SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2021 Marc Nieper-Wißkirchen
+# SPDX-License-Identifier: MIT
 
 # Copyright (C) Marc Nieper-Wißkirchen (2016, 2018). All Rights
 # Reserved.
