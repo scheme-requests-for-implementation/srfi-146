@@ -23,6 +23,75 @@
 ;; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ;; DEALINGS IN THE SOFTWARE.
 
+;;; This file, "hamt.scm", implements the core of a persistent Hash Array Mapped
+;;; Tries implementation.
+
+;;; It uses the standard persistent HAMT representation except that, like
+;;; Clojure's implementation, it can quickly switch between mutable and
+;;; immutable modes.  In other words, one can start with an immutable HAMT, make
+;;; changes to it in a purely functional manner, and convert it into a mutable
+;;; HAMT.  Updates to the mutable copy will not affect the immutable HAMT from
+;;; which it was derived.  However, such updates may be faster than their pure
+;;; counterparts.  The mutable copy can then be converted quickly into an
+;;; immutable copy, which will not be affected by any future changes to the
+;;; mutable one.  From the immutable version, one gets a HAMT that is easy to
+;;; reason about.  From the mutable version, one gets speed.
+
+;;; The hash-array-mapped-trie record type is the fundamental data structure.
+;;; It records:
+
+;;; - the key comparison procedure
+;;; - the key hashing procedure
+;;; - a count of the number of keys
+;;; - a Boolean representing whether the instance is a mutable variant
+;;; - a Boolean representing whether there is payload, i.e. whether there is a
+;;;   datum associated with each key (If there isn't, the HAMT represents a
+;;;   set of keys, not a map.)
+;;; - the root node of the trie
+
+;;; There are three types of node:
+
+;;; - narrow, which is used to represent the immutable form of the data
+;;;   structure, but may be present in the mutable form when that part of the
+;;;   trie has not yet been mutated
+;;; - collision, which is used to hold keys and data when more than one key has
+;;;   the same hash
+;;; - wide, which is used to represent parts of the trie that have been mutated
+
+;;; Narrow nodes are stored in a compact representation.  Leaves and associated
+;;; values appear first in its array, followed by children.  There are no empty
+;;; positions in the array.  This requires less memory, and is faster to copy.
+
+;;; Wide nodes are stored in an expanded representation that leaves space for
+;;; updates.  Children (i.e. collision and wide nodes), keys, and values appear
+;;; in the array at the positions dictated by their hash fragments.  Any
+;;; position for which there is no child, key, or value is considered empty, and
+;;; contains #false.  Such positions can be filled without copying the node.
+;;; This is the source of the speed advantage of mutable HAMTs.
+
+;;; When an immutable HAMT is converted into a mutable one M, the `mutable?'
+;;; field in M is true.  None of the narrow children C is converted into a wide
+;;; node until some key in or below C has been mutated.  No narrow node ever has
+;;; a wide child.
+
+;;; When a mutable HAMT is converted into an immutable one I, the `mutable?'
+;;; field in I is false.  All wide children are converted into narrow nodes, so
+;;; the trie under I contains only narrow nodes, as well as collision nodes if
+;;; necessary.
+
+;;; Collision nodes are not pushed to the bottom.  They are placed at the
+;;; highest level where the hashes of all the keys in the collision are equal.
+
+;;; This file, "hamt.scm", is not useful on its own.  The public persistent HAMT
+;;; data structures are built on top of it:
+
+;;; - The file "hamt-map.scm" implements persistent HAMT maps.
+
+;;; The author has also implemented persistent HAMT sets; persistent HAMT
+;;; multi-maps, i.e. maps where each key has a set of associated values; and
+;;; persistent HAMT ordered lists.  None of these has been ported from their
+;;; original implementations in MIT Scheme.  Contact him if you'd like access.
+
 ;;; Naming conventions:
 
 ;;    =: procedure that compares keys
